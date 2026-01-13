@@ -4,18 +4,23 @@ namespace SistemaWeb.Models
 {
     public class Actividad
     {
-        public int Id { get; set; }
+        [Key]
+        [Required(ErrorMessage = "El código es obligatorio")]
+        public string? Codigo { get; set; } // Esta es la clave que faltaba
 
-        [Required(ErrorMessage = "El título es obligatorio")]
-        public string? Titulo { get; set; } // <--- ¡Mira el signo ?!
-
-        [Required(ErrorMessage = "La descripción es obligatoria")]
-        public string? Descripcion { get; set; }
+        [Required(ErrorMessage = "El nombre es obligatorio")]
+        public string? Nombre { get; set; }
 
         [Required(ErrorMessage = "La fecha es obligatoria")]
-        public DateTime Fecha { get; set; }
+        public DateTime FechaRealizacion { get; set; }
 
-        [Required(ErrorMessage = "El lugar es obligatorio")]
-        public string? Lugar { get; set; }
+        public string? TipoDiscapacidad { get; set; }
+
+        [Required(ErrorMessage = "El cupo es obligatorio")]
+        public int Cupo { get; set; }
+
+        public string? Responsable { get; set; }
+
+        public string? Estado { get; set; }
     }
 }

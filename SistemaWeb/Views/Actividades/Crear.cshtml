@@ -1,79 +1,71 @@
 ﻿@model SistemaWeb.Models.Actividad
 
-
 @{
-    ViewData["Title"] = "Registrar Actividad";
+    ViewData["Title"] = "Crear Actividad";
 }
 
-<div class="container mt-4">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h3 class="mb-0">Registrar Nueva Actividad</h3>
-        </div>
-        <div class="card-body">
+<h1>Crear Actividad</h1>
 
-            @using (Html.BeginForm())
-            {
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Código del Evento</label>
-                        @Html.TextBoxFor(m => m.Codigo, new { @class = "form-control", placeholder = "Ej: ACT-001" })
-                    </div>
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Crear">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                    <div class="col-md-8 mb-3">
-                        <label class="form-label">Nombre de la Actividad</label>
-                        @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control", placeholder = "Ej: Taller de Lengua de Señas" })
-                    </div>
+            <div class="form-group mb-3">
+                <label asp-for="Codigo" class="control-label">Código</label>
+                <input asp-for="Codigo" class="form-control" />
+                <span asp-validation-for="Codigo" class="text-danger"></span>
+            </div>
 
-                    <div class="col-12 mb-3">
-                        <label class="form-label">Descripción</label>
-                        @Html.TextAreaFor(m => m.Descripcion, new { @class = "form-control", rows = "3" })
-                    </div>
+            <div class="form-group mb-3">
+                <label asp-for="Nombre" class="control-label">Nombre</label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Fecha del Evento</label>
-                        @Html.TextBoxFor(m => m.FechaRealizacion, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
-                    </div>
+            <div class="form-group mb-3">
+                <label asp-for="FechaRealizacion" class="control-label">Fecha Realización</label>
+                <input asp-for="FechaRealizacion" type="date" class="form-control" />
+                <span asp-validation-for="FechaRealizacion" class="text-danger"></span>
+            </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Lugar</label>
-                        @Html.TextBoxFor(m => m.Lugar, new { @class = "form-control", placeholder = "Ej: Auditorio 1" })
-                    </div>
+            <div class="form-group mb-3">
+                <label asp-for="TipoDiscapacidad" class="control-label">Tipo Discapacidad</label>
+                <input asp-for="TipoDiscapacidad" class="form-control" />
+                <span asp-validation-for="TipoDiscapacidad" class="text-danger"></span>
+            </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Enfoque de Inclusión</label>
-                        @Html.TextBoxFor(m => m.TipoDiscapacidad, new { @class = "form-control", placeholder = "Ej: Auditiva, Visual, Motriz" })
-                    </div>
+            <div class="form-group mb-3">
+                <label asp-for="Cupo" class="control-label">Cupo</label>
+                <input asp-for="Cupo" type="number" class="form-control" />
+                <span asp-validation-for="Cupo" class="text-danger"></span>
+            </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Cupo Máximo</label>
-                        @Html.TextBoxFor(m => m.Cupo, new { @class = "form-control", type = "number" })
-                    </div>
+            <div class="form-group mb-3">
+                <label asp-for="Responsable" class="control-label">Responsable</label>
+                <input asp-for="Responsable" class="form-control" />
+                <span asp-validation-for="Responsable" class="text-danger"></span>
+            </div>
 
-                    <div class="col-md-8 mb-3">
-                        <label class="form-label">Responsable / Organizador</label>
-                        @Html.TextBoxFor(m => m.Responsable, new { @class = "form-control" })
-                    </div>
+            <div class="form-group mb-3">
+                <label asp-for="Estado" class="control-label">Estado</label>
+                <select asp-for="Estado" class="form-control">
+                    <option value="Activo">Activo</option>
+                    <option value="Inactivo">Inactivo</option>
+                </select>
+                <span asp-validation-for="Estado" class="text-danger"></span>
+            </div>
 
-                    <div class="col-12 mb-3">
-                        <div class="form-check">
-                            @Html.CheckBoxFor(m => m.Estado, new { @class = "form-check-input" })
-                            <label class="form-check-label">La actividad está activa</label>
-                        </div>
-                    </div>
-                </div>
-
-                <hr />
-
-                <div class="d-grid gap-2 d-md-block">
-                    <button type="submit" class="btn btn-success btn-lg">
-                        Guardar Actividad
-                    </button>
-                    <a href="/Actividades/Index" class="btn btn-secondary btn-lg">
-                        Cancelar
-                    </a>
-                </div>
-            }
-        </div>
+            <div class="form-group">
+                <input type="submit" value="Crear" class="btn btn-success" />
+                <a asp-action="Index" class="btn btn-secondary">Volver</a>
+            </div>
+        </form>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
