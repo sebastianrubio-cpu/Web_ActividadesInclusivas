@@ -1,0 +1,79 @@
+﻿@model SistemaWeb.Models.Actividad
+
+
+@{
+    ViewData["Title"] = "Registrar Actividad";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Registrar Nueva Actividad</h3>
+        </div>
+        <div class="card-body">
+
+            @using (Html.BeginForm())
+            {
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Código del Evento</label>
+                        @Html.TextBoxFor(m => m.Codigo, new { @class = "form-control", placeholder = "Ej: ACT-001" })
+                    </div>
+
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label">Nombre de la Actividad</label>
+                        @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control", placeholder = "Ej: Taller de Lengua de Señas" })
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <label class="form-label">Descripción</label>
+                        @Html.TextAreaFor(m => m.Descripcion, new { @class = "form-control", rows = "3" })
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Fecha del Evento</label>
+                        @Html.TextBoxFor(m => m.FechaRealizacion, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Lugar</label>
+                        @Html.TextBoxFor(m => m.Lugar, new { @class = "form-control", placeholder = "Ej: Auditorio 1" })
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Enfoque de Inclusión</label>
+                        @Html.TextBoxFor(m => m.TipoDiscapacidad, new { @class = "form-control", placeholder = "Ej: Auditiva, Visual, Motriz" })
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Cupo Máximo</label>
+                        @Html.TextBoxFor(m => m.Cupo, new { @class = "form-control", type = "number" })
+                    </div>
+
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label">Responsable / Organizador</label>
+                        @Html.TextBoxFor(m => m.Responsable, new { @class = "form-control" })
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <div class="form-check">
+                            @Html.CheckBoxFor(m => m.Estado, new { @class = "form-check-input" })
+                            <label class="form-check-label">La actividad está activa</label>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="d-grid gap-2 d-md-block">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        Guardar Actividad
+                    </button>
+                    <a href="/Actividades/Index" class="btn btn-secondary btn-lg">
+                        Cancelar
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

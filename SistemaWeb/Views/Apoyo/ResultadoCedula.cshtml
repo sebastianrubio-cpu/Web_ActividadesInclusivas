@@ -1,0 +1,27 @@
+﻿@model SistemaWeb.Models.ValidacionCedulaResult
+
+<div class="container mt-5 text-center">
+    <div class="card shadow p-4" style="max-width: 600px; margin: auto;">
+
+        @if (Model.EsEstudiante)
+        {
+            <h1 class="display-1">✅</h1>
+            <h2 class="text-success">Estudiante Verificado</h2>
+        }
+        else
+        {
+            <h1 class="display-1">❌</h1>
+            <h2 class="text-danger">No Encontrado</h2>
+        }
+
+        <hr />
+
+        <div class="text-start ps-4">
+            <p><strong>Cédula:</strong> @Model.Cedula</p>
+            <p><strong>Nombre:</strong> @(Model.Nombre ?? "---")</p>
+            <p><strong>Mensaje del Sistema:</strong> @Model.Mensaje</p>
+        </div>
+
+        <a href="/Apoyo/ValidarCedula" class="btn btn-primary mt-3">Nueva Consulta</a>
+    </div>
+</div>

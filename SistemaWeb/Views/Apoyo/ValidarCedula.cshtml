@@ -1,0 +1,28 @@
+﻿@{
+    ViewData["Title"] = "Consulta Externa";
+}
+
+<div class="container mt-5">
+    <div class="card shadow" style="max-width: 500px; margin: auto;">
+        <div class="card-header bg-primary text-white">
+            <h3>🔍 Consulta Institucional</h3>
+        </div>
+        <div class="card-body">
+            <p>Ingrese la cédula para validar si es estudiante activo en el sistema central.</p>
+
+            <form method="post" action="ValidarCedula">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Número de Cédula:</label>
+                    <input type="text" name="cedula" class="form-control form-control-lg" placeholder="Ej: 1720011122" required />
+                </div>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger">@ViewBag.Error</div>
+                }
+
+                <button type="submit" class="btn btn-success w-100 btn-lg">Consultar API</button>
+            </form>
+        </div>
+    </div>
+</div>
