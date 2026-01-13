@@ -1,22 +1,172 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+/* CONFIGURACIÓN GLOBAL JET BLACK */
+:root {
+    color-scheme: dark; /* Truco mágico: pone los controles del navegador (fechas, scroll) en modo oscuro */
 }
 
 body {
-  margin-bottom: 60px;
+    background-color: #000000; /* Jet Black puro */
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
+
+/* CONTENEDOR CENTRAL */
+/* Esto asegura que el contenido se expanda y centre verticalmente si es necesario */
+.container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+}
+
+/* LINKS */
+a {
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+    a:hover {
+        text-decoration: none;
+        opacity: 0.8;
+    }
+
+/* --- TABLA TIPO EXCEL (Rediseñada para Jet Black) --- */
+.excel-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #0a0a0a; /* Un gris casi negro para separar del fondo */
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.05); /* Sutil resplandor verde */
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 20px;
+    font-size: 15px;
+}
+
+    .excel-table thead tr {
+        background: linear-gradient(180deg, #107c41 0%, #0c5e31 100%); /* Degradado Excel */
+        color: white;
+    }
+
+    .excel-table th {
+        padding: 15px;
+        font-weight: 600;
+        border-bottom: 1px solid #333;
+    }
+
+    .excel-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #1a1a1a;
+        color: #cfcfcf;
+    }
+
+    .excel-table tbody tr:hover {
+        background-color: #111;
+    }
+
+/* --- TARJETA DE EDICIÓN FLOTANTE --- */
+.minimal-card {
+    background-color: #050505; /* Apenas más claro que el negro puro */
+    padding: 50px;
+    border-radius: 20px;
+    border: 1px solid #1a1a1a;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8); /* Sombra profunda */
+    width: 100%;
+    max-width: 550px;
+    margin: 40px auto; /* Centrado horizontal automático */
+}
+
+.minimal-title {
+    text-align: center;
+    color: #fff;
+    font-weight: 200; /* Letra fina elegante */
+    margin-bottom: 40px;
+    font-size: 2rem;
+    letter-spacing: 1px;
+}
+
+/* INPUTS ESTILIZADOS */
+.form-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.control-label {
+    font-size: 0.85rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.form-control {
+    background-color: #0f0f0f;
+    border: 1px solid #222;
+    color: white;
+    border-radius: 8px;
+    padding: 12px 15px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+    .form-control:focus {
+        background-color: #151515;
+        border-color: #107c41;
+        box-shadow: 0 0 15px rgba(16, 124, 65, 0.3); /* Resplandor verde al escribir */
+        outline: none;
+    }
+
+/* INPUT FECHA DIDÁCTICO */
+input[type="date"] {
+    cursor: pointer;
+    position: relative;
+}
+    /* Icono de calendario blanco y grande */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        background-color: #222;
+        padding: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        filter: invert(1); /* Lo vuelve blanco */
+    }
+
+/* BOTONES LINDOS (Premium) */
+.btn-excel {
+    background: linear-gradient(135deg, #107c41 0%, #0a4d29 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px; /* Redondeado moderno */
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(16, 124, 65, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    width: 100%; /* Botón ancho en móviles */
+    display: inline-block;
+    text-align: center;
+}
+
+    .btn-excel:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 124, 65, 0.6);
+        color: white;
+    }
+
+.btn-secondary-min {
+    background: transparent;
+    border: 1px solid #333;
+    color: #888;
+    padding: 12px 30px;
+    border-radius: 50px;
+    transition: all 0.3s;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+    .btn-secondary-min:hover {
+        border-color: #cc3333;
+        color: #cc3333;
+        background: rgba(204, 51, 51, 0.1);
+    }
