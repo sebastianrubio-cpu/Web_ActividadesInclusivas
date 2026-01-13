@@ -1,115 +1,66 @@
-﻿using System.Data;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
+﻿using System.Text.Json;
 
 namespace SistemaWeb.Models
 {
     public class ActividadRepository
     {
-        private readonly string? _connectionString;
+        private readonly string _filePath;
 
-        public ActividadRepository(IConfiguration configuration)
+        public ActividadRepository()
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            // El archivo se guardará en la carpeta raíz de la app
+            _filePath = Path.Combine(Directory.GetCurrentDirectory(), "actividades.json");
+
+            // Si no existe, creamos uno vacío para que no de error
+            if (!File.Exists(_filePath))
+            {
+                File.WriteAllText(_filePath, "[]");
+            }
         }
+
+        // --- MÉTODOS AUXILIARES ---
+        private List<Actividad> LeerDatos()
+        {
+            var json = File.ReadAllText(_filePath);
+            if (string.IsNullOrWhiteSpace(json)) return new List<Actividad>();
+            return JsonSerializer.Deserialize<List<Actividad>>(json) ?? new List<Actividad>();
+        }
+
+        private void GuardarDatos(List<Actividad> actividades)
+        {
+            var json = JsonSerializer.Serialize(actividades, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(_filePath, json);
+        }
+
+        // --- CRUD COMPLETO ---
 
         public List<Actividad> ObtenerTodas()
         {
-            var actividades = new List<Actividad>();
-
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                connection.Open();
-                // OJO: Asegúrate que tu tabla SQL tenga estos nombres de columna
-                using (var command = new SqlCommand("SELECT Codigo, Nombre, FechaRealizacion, TipoDiscapacidad, Cupo, Responsable, Estado FROM Actividades", connection))
-                {
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            actividades.Add(new Actividad
-                            {
-                                Codigo = reader["Codigo"].ToString(),
-                                Nombre = reader["Nombre"].ToString(),
-                                FechaRealizacion = (DateTime)reader["FechaRealizacion"],
-                                TipoDiscapacidad = reader["TipoDiscapacidad"].ToString(),
-                                Cupo = (int)reader["Cupo"],
-                                Responsable = reader["Responsable"].ToString(),
-                                Estado = reader["Estado"].ToString()
-                            });
-                        }
-                    }
-                }
-            }
-            return actividades;
-        }
-
-        public void Agregar(Actividad actividad)
-        {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                connection.Open();
-                using (var command = new SqlCommand("INSERT INTO Actividades (Codigo, Nombre, FechaRealizacion, TipoDiscapacidad, Cupo, Responsable, Estado) VALUES (@Codigo, @Nombre, @FechaRealizacion, @TipoDiscapacidad, @Cupo, @Responsable, @Estado)", connection))
-                {
-                    command.Parameters.AddWithValue("@Codigo", actividad.Codigo);
-                    command.Parameters.AddWithValue("@Nombre", actividad.Nombre);
-                    command.Parameters.AddWithValue("@FechaRealizacion", actividad.FechaRealizacion);
-                    command.Parameters.AddWithValue("@TipoDiscapacidad", actividad.TipoDiscapacidad ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@Cupo", actividad.Cupo);
-                    command.Parameters.AddWithValue("@Responsable", actividad.Responsable ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@Estado", actividad.Estado ?? "Activo");
-                    command.ExecuteNonQuery();
-                }
-            }
+            return LeerDatos();
         }
 
         public Actividad ObtenerPorId(string id)
         {
-            Actividad actividad = null;
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                connection.Open();
-                using (var command = new SqlCommand("SELECT * FROM Actividades WHERE Codigo = @Codigo", connection))
-                {
-                    command.Parameters.AddWithValue("@Codigo", id);
-                    using (var reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            actividad = new Actividad
-                            {
-                                Codigo = reader["Codigo"].ToString(),
-                                Nombre = reader["Nombre"].ToString(),
-                                FechaRealizacion = (DateTime)reader["FechaRealizacion"],
-                                TipoDiscapacidad = reader["TipoDiscapacidad"].ToString(),
-                                Cupo = (int)reader["Cupo"],
-                                Responsable = reader["Responsable"].ToString(),
-                                Estado = reader["Estado"].ToString()
-                            };
-                        }
-                    }
-                }
-            }
-            return actividad;
+            var lista = LeerDatos();
+            return lista.FirstOrDefault(a => a.Codigo == id);
         }
 
-        public void Actualizar(Actividad actividad)
+        public void Agregar(Actividad actividad)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            var lista = LeerDatos();
+            lista.Add(actividad);
+            GuardarDatos(lista);
+        }
+
+        public void Actualizar(Actividad actividadActualizada)
+        {
+            var lista = LeerDatos();
+            var index = lista.FindIndex(a => a.Codigo == actividadActualizada.Codigo);
+
+            if (index != -1)
             {
-                connection.Open();
-                using (var command = new SqlCommand("UPDATE Actividades SET Nombre=@Nombre, FechaRealizacion=@FechaRealizacion, TipoDiscapacidad=@TipoDiscapacidad, Cupo=@Cupo, Responsable=@Responsable, Estado=@Estado WHERE Codigo=@Codigo", connection))
-                {
-                    command.Parameters.AddWithValue("@Codigo", actividad.Codigo);
-                    command.Parameters.AddWithValue("@Nombre", actividad.Nombre);
-                    command.Parameters.AddWithValue("@FechaRealizacion", actividad.FechaRealizacion);
-                    command.Parameters.AddWithValue("@TipoDiscapacidad", actividad.TipoDiscapacidad ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@Cupo", actividad.Cupo);
-                    command.Parameters.AddWithValue("@Responsable", actividad.Responsable ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@Estado", actividad.Estado ?? "Activo");
-                    command.ExecuteNonQuery();
-                }
+                lista[index] = actividadActualizada;
+                GuardarDatos(lista);
             }
         }
     }

@@ -1,6 +1,8 @@
+using SistemaWeb.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 // Registrar el Repositorio de Actividades
-builder.Services.AddScoped<SistemaWeb.Models.ActividadRepository>();
+builder.Services.AddScoped<ActividadRepository>();
 
 // Registrar el Cliente HTTP para la API de estudiantes
 builder.Services.AddHttpClient<SistemaWeb.Services.EstudiantesClient>();

@@ -1,0 +1,11 @@
+[
+  {
+    "Codigo": "A001",
+    "Nombre": "Taller Docker",
+    "FechaRealizacion": "2026-10-20T00:00:00",
+    "TipoDiscapacidad": "Ninguna",
+    "Cupo": 50,
+    "Responsable": "Jeager",
+    "Estado": "Activo"
+  }
+]

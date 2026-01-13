@@ -1,15 +1,10 @@
-using Microsoft.Data.SqlClient;
-using System.Data;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Agregar servicios básicos
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
 
-// Configurar Swagger (para probar la API)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -18,51 +13,43 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// --- AQUÍ ESTÁ TU MICROSERVICIO ---
+// --- INICIO DE LA LÓGICA DE ENDPOINTS ---
 
-// Obtener la cadena de conexión
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-// Crear el Endpoint: GET /api/estudiantes/{cedula}
 app.MapGet("/api/estudiantes/{cedula}", async (string cedula) =>
 {
-    using (var conn = new SqlConnection(connectionString))
+    // 1. Ruta del archivo JSON
+    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "estudiantes.json");
+
+    if (!File.Exists(filePath))
+        return Results.Problem("El archivo de datos no existe.");
+
+    // 2. Leer JSON
+    var jsonString = await File.ReadAllTextAsync(filePath);
+    var estudiantes = JsonSerializer.Deserialize<List<Estudiante>>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+    // 3. Buscar en la lista (LINQ en memoria)
+    var encontrado = estudiantes?.FirstOrDefault(e => e.Cedula == cedula);
+
+    if (encontrado != null)
     {
-        await conn.OpenAsync();
-
-        // Consulta SQL directa (Como en el PDF)
-        var sql = "SELECT TOP 1 EsEstudiante, Nombre FROM Estudiantes WHERE Cedula = @cedula";
-
-        using (var cmd = new SqlCommand(sql, conn))
+        return Results.Ok(new
         {
-            cmd.Parameters.AddWithValue("@cedula", cedula);
-
-            using (var reader = await cmd.ExecuteReaderAsync())
-            {
-                if (await reader.ReadAsync())
-                {
-                    // Si encontramos la cédula
-                    return Results.Ok(new
-                    {
-                        cedula = cedula,
-                        esEstudiante = reader.GetBoolean(0), // Columna EsEstudiante
-                        nombre = reader.GetString(1),        // Columna Nombre
-                        mensaje = "Pertenece a un estudiante"
-                    });
-                }
-                else
-                {
-                    // Si NO encontramos la cédula
-                    return Results.NotFound(new
-                    {
-                        cedula = cedula,
-                        mensaje = "Cédula no encontrada en UISEK"
-                    });
-                }
-            }
-        }
+            cedula = encontrado.Cedula,
+            esEstudiante = encontrado.EsEstudiante,
+            nombre = encontrado.Nombre,
+            mensaje = "Verificado desde JSON"
+        });
+    }
+    else
+    {
+        return Results.NotFound(new { cedula = cedula, mensaje = "No encontrado en la lista JSON" });
     }
 })
-.WithName("GetEstudiante"); // <--- Aquí terminamos, borramos el .WithOpenApi()
+.WithName("GetEstudiante");
 
 app.Run();
+// --- FIN DE LAS INSTRUCCIONES ---
+
+// --- DEFINICIONES DE TIPOS (SIEMPRE AL FINAL) ---
+// El 'record' debe ir AQUÍ, después de que todo el programa haya corrido
+record Estudiante(string Cedula, string Nombre, bool EsEstudiante);
