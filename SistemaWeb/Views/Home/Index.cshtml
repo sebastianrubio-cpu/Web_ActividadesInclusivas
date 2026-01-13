@@ -1,8 +1,100 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model SistemaWeb.Models.ValidarSistema
+
+@{
+    ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center" style="padding-top: 20px;">
+    <h1 class="display-4" style="color: white; font-weight: 200; margin-bottom: 40px;">Bienvenido al Sistema</h1>
+
+    <div class="system-monitor-card">
+        <div class="monitor-header">
+            ⚡ ESTADO DEL SISTEMA
+        </div>
+
+        <div class="monitor-body">
+            <div class="monitor-row">
+                <span class="monitor-label">🖥️ Servidor:</span>
+                <span class="monitor-value">@Model.SistemaOperativo</span>
+            </div>
+
+            <div class="monitor-row">
+                <span class="monitor-label">📡 API Status:</span>
+                <span class="monitor-value" style="color: @(Model.ApiOnline ? "#ffab00" : "#ff5c5c"); font-weight: bold; text-shadow: @(Model.ApiOnline ? "0 0 10px rgba(255, 171, 0, 0.4)" : "none");">
+                    @Model.EstadoApi
+                </span>
+            </div>
+
+            <div class="monitor-row">
+                <span class="monitor-label">📅 Fecha:</span>
+                <span class="monitor-value">@Model.Fecha</span>
+            </div>
+
+            <div class="monitor-row">
+                <span class="monitor-label">⏰ Hora:</span>
+                <span class="monitor-value">@Model.Hora</span>
+            </div>
+
+            <div class="monitor-row">
+                <span class="monitor-label">📍 Host:</span>
+                <span class="monitor-value" style="font-size: 0.85rem;">@Model.Lugar</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 50px;">
+        <a asp-controller="Actividades" asp-action="Index" class="btn-excel">Gestionar Actividades →</a>
+    </div>
 </div>
+
+<style>
+    /* ESTILOS DEL MONITOR */
+    .system-monitor-card {
+        background-color: #0f0f0f;
+        border: 1px solid #ff6d00;
+        border-radius: 12px;
+        max-width: 500px;
+        margin: 0 auto;
+        box-shadow: 0 0 30px rgba(255, 109, 0, 0.1);
+        overflow: hidden;
+        text-align: left;
+    }
+
+    .monitor-header {
+        background: linear-gradient(135deg, #e65100, #ff8f00);
+        color: white;
+        padding: 12px 20px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        border-bottom: 1px solid #ff6d00;
+    }
+
+    .monitor-body {
+        padding: 20px;
+    }
+
+    .monitor-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px dashed #333;
+    }
+
+        .monitor-row:last-child {
+            border-bottom: none;
+        }
+
+    .monitor-label {
+        color: #ffcc80;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    .monitor-value {
+        color: #e0e0e0;
+        font-family: 'Consolas', monospace;
+    }
+</style>

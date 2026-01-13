@@ -1,15 +1,13 @@
 var builder = WebApplication.CreateBuilder(args);
-// Registrar el Repositorio de Actividades
-builder.Services.AddScoped<SistemaWeb.Models.ActividadRepository>();
-
-// Registrar el Cliente HTTP para la API de estudiantes
-builder.Services.AddHttpClient<SistemaWeb.Services.EstudiantesClient>();
-
-// Habilitar MVC (Controllers con Vistas)
-builder.Services.AddControllersWithViews();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// --- AGREGA ESTA LÍNEA AQUÍ ---
+builder.Services.AddHttpClient<SistemaWeb.Services.EstudiantesClient>(); 
+// ------------------------------
+
+builder.Services.AddScoped<SistemaWeb.Models.ActividadRepository>();
 
 var app = builder.Build();
 

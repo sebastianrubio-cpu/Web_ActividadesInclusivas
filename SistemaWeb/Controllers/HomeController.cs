@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SistemaWeb.Models;
+using SistemaWeb.Services;
 using System.Diagnostics;
 
 namespace SistemaWeb.Controllers
@@ -7,15 +8,19 @@ namespace SistemaWeb.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly EstudiantesClient _estudiantesClient;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, EstudiantesClient estudiantesClient)
         {
             _logger = logger;
+            _estudiantesClient = estudiantesClient;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            // Aquí es donde "encendemos" el monitor antes de mostrar la página
+            var estado = await ValidarSistema.RealizarChequeo(_estudiantesClient);
+            return View(estado);
         }
 
         public IActionResult Privacy()

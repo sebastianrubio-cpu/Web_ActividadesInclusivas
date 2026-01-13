@@ -23,21 +23,22 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model) {
-                <tr>
-                    <td style="font-family: monospace; color: #88c0d0;">@item.Codigo</td>
-                    <td>@item.Nombre</td>
-                    <td>@item.FechaRealizacion.ToShortDateString()</td>
-                    <td>@item.Cupo</td>
-                    <td>
-                        <span style="padding: 4px 8px; border-radius: 4px; background-color: @(item.Estado == "Activo" ? "rgba(16, 124, 65, 0.2)" : "rgba(200, 0, 0, 0.2)"); color: @(item.Estado == "Activo" ? "#4cd964" : "#ff5c5c"); font-size: 0.85rem;">
-                            @item.Estado
-                        </span>
-                    </td>
-                    <td>
-                        <a asp-action="Editar" asp-route-id="@item.Codigo" style="color: #4ea8de; margin-right: 10px;">Editar</a>
-                    </td>
-                </tr>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="font-family: monospace; color: #88c0d0;">@item.Codigo</td>
+                        <td>@item.Nombre</td>
+                        <td>@item.FechaRealizacion.ToShortDateString()</td>
+                        <td>@item.Cupo</td>
+                        <td>
+                            <span style="padding: 4px 8px; border-radius: 4px; background-color: @(item.Estado == "Activo" ? "rgba(16, 124, 65, 0.2)" : "rgba(200, 0, 0, 0.2)"); color: @(item.Estado == "Activo" ? "#4cd964" : "#ff5c5c"); font-size: 0.85rem;">
+                                @item.Estado
+                            </span>
+                        </td>
+                        <td>
+                            <a asp-action="Editar" asp-route-id="@item.Codigo" style="color: #4ea8de; margin-right: 10px;">Editar</a>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>

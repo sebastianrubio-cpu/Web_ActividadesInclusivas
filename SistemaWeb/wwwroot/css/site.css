@@ -1,6 +1,6 @@
 /* CONFIGURACIÓN GLOBAL JET BLACK */
 :root {
-    color-scheme: dark; /* Truco mágico: pone los controles del navegador (fechas, scroll) en modo oscuro */
+    color-scheme: dark;
 }
 
 body {
@@ -13,32 +13,57 @@ body {
 }
 
 /* CONTENEDOR CENTRAL */
-/* Esto asegura que el contenido se expanda y centre verticalmente si es necesario */
 .container {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Centrado vertical */
+    justify-content: center;
 }
 
-/* LINKS */
+/* LINKS GENERALES */
 a {
     text-decoration: none;
     transition: 0.3s;
+    color: #ffca28;
 }
 
     a:hover {
         text-decoration: none;
         opacity: 0.8;
+        color: #ffca28;
     }
 
-/* --- TABLA TIPO EXCEL (Rediseñada para Jet Black) --- */
+/* --- NUEVA BARRA DE NAVEGACIÓN AMBER --- */
+.navbar-amber {
+    background: linear-gradient(90deg, #ff8f00, #ffb300); /* Degradado Naranja del Monitor */
+    box-shadow: 0 4px 20px rgba(255, 143, 0, 0.3); /* Resplandor naranja */
+    border-bottom: 1px solid #ff6f00;
+}
+
+.navbar-brand {
+    font-weight: 700 !important;
+    letter-spacing: 1px;
+    color: #000 !important; /* Texto negro para contraste */
+}
+
+.nav-link {
+    color: #222 !important; /* Texto casi negro */
+    font-weight: 500;
+}
+
+    .nav-link:hover {
+        color: #000 !important;
+        transform: translateY(-1px);
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+
+/* --- TABLA TIPO EXCEL (Ahora en Naranja) --- */
 .excel-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    background-color: #0a0a0a; /* Un gris casi negro para separar del fondo */
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.05); /* Sutil resplandor verde */
+    background-color: #0a0a0a;
+    box-shadow: 0 0 20px rgba(255, 152, 0, 0.05); /* Resplandor ámbar sutil */
     border-radius: 8px;
     overflow: hidden;
     margin-top: 20px;
@@ -46,8 +71,9 @@ a {
 }
 
     .excel-table thead tr {
-        background: linear-gradient(180deg, #107c41 0%, #0c5e31 100%); /* Degradado Excel */
-        color: white;
+        /* Nuevo degradado Naranja para la cabecera */
+        background: linear-gradient(135deg, #ef6c00 0%, #ff9800 100%);
+        color: white; /* Texto blanco en la tabla para leer bien */
     }
 
     .excel-table th {
@@ -66,28 +92,28 @@ a {
         background-color: #111;
     }
 
-/* --- TARJETA DE EDICIÓN FLOTANTE --- */
+/* --- TARJETAS --- */
 .minimal-card {
-    background-color: #050505; /* Apenas más claro que el negro puro */
+    background-color: #050505;
     padding: 50px;
     border-radius: 20px;
-    border: 1px solid #1a1a1a;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8); /* Sombra profunda */
+    border: 1px solid #333;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
     width: 100%;
     max-width: 550px;
-    margin: 40px auto; /* Centrado horizontal automático */
+    margin: 40px auto;
 }
 
 .minimal-title {
     text-align: center;
     color: #fff;
-    font-weight: 200; /* Letra fina elegante */
+    font-weight: 200;
     margin-bottom: 40px;
     font-size: 2rem;
     letter-spacing: 1px;
 }
 
-/* INPUTS ESTILIZADOS */
+/* INPUTS */
 .form-group {
     margin-bottom: 25px;
     position: relative;
@@ -95,9 +121,8 @@ a {
 
 .control-label {
     font-size: 0.85rem;
-    color: #666;
+    color: #888;
     text-transform: uppercase;
-    letter-spacing: 1px;
     margin-bottom: 8px;
     display: block;
 }
@@ -114,49 +139,50 @@ a {
 
     .form-control:focus {
         background-color: #151515;
-        border-color: #107c41;
-        box-shadow: 0 0 15px rgba(16, 124, 65, 0.3); /* Resplandor verde al escribir */
+        border-color: #ff9800; /* Borde naranja al escribir */
+        box-shadow: 0 0 15px rgba(255, 152, 0, 0.2);
         outline: none;
     }
 
-/* INPUT FECHA DIDÁCTICO */
+/* INPUT FECHA */
 input[type="date"] {
     cursor: pointer;
     position: relative;
 }
-    /* Icono de calendario blanco y grande */
+
     input[type="date"]::-webkit-calendar-picker-indicator {
         background-color: #222;
         padding: 5px;
         border-radius: 5px;
         cursor: pointer;
-        filter: invert(1); /* Lo vuelve blanco */
+        filter: invert(1);
     }
 
-/* BOTONES LINDOS (Premium) */
+/* --- BOTONES (Actualizados a Naranja) --- */
 .btn-excel {
-    background: linear-gradient(135deg, #107c41 0%, #0a4d29 100%);
-    color: white;
+    /* Degradado Ámbar/Naranja */
+    background: linear-gradient(135deg, #ff8f00 0%, #ef6c00 100%);
+    color: black; /* Texto negro para mejor contraste con naranja */
     border: none;
     padding: 12px 30px;
-    border-radius: 50px; /* Redondeado moderno */
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(16, 124, 65, 0.4);
+    border-radius: 50px;
+    font-weight: 700; /* Más negrita */
+    box-shadow: 0 4px 15px rgba(255, 143, 0, 0.3);
     transition: transform 0.2s, box-shadow 0.2s;
-    width: 100%; /* Botón ancho en móviles */
+    width: 100%;
     display: inline-block;
     text-align: center;
 }
 
     .btn-excel:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(16, 124, 65, 0.6);
-        color: white;
+        box-shadow: 0 6px 20px rgba(255, 143, 0, 0.5);
+        color: black;
     }
 
 .btn-secondary-min {
     background: transparent;
-    border: 1px solid #333;
+    border: 1px solid #444;
     color: #888;
     padding: 12px 30px;
     border-radius: 50px;
@@ -166,7 +192,7 @@ input[type="date"] {
 }
 
     .btn-secondary-min:hover {
-        border-color: #cc3333;
-        color: #cc3333;
-        background: rgba(204, 51, 51, 0.1);
+        border-color: #ff9800;
+        color: #ff9800;
+        background: rgba(255, 152, 0, 0.05);
     }
