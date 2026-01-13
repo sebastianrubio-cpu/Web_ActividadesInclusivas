@@ -6,7 +6,9 @@ namespace SistemaWeb.Models
     {
         [Key]
         [Required(ErrorMessage = "El código es obligatorio")]
-        public string? Codigo { get; set; } // Esta es la clave que faltaba
+        // --- AQUÍ ESTÁ EL FILTRO MÁGICO ---
+        [RegularExpression(@"^[A-Z][0-9]+$", ErrorMessage = "El código debe iniciar con una Mayúscula seguido de números (Ej: A001).")]
+        public string? Codigo { get; set; }
 
         [Required(ErrorMessage = "El nombre es obligatorio")]
         public string? Nombre { get; set; }
