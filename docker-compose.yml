@@ -1,0 +1,27 @@
+version: '3.4'
+
+services:
+  estudiantes-api:
+    image: estudiantes-api
+    build:
+      context: ./EstudiantesAPI
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=host.docker.internal;Database=SistemaInclusivoDB;User Id=DockerUser;Password=Admin123!;TrustServerCertificate=True;
+
+  sistema-web:
+    image: sistema-web
+    build:
+      context: ./SistemaWeb
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - ApiSettings__BaseUrl=http://estudiantes-api:8080
+      - ConnectionStrings__DefaultConnection=Server=host.docker.internal;Database=SistemaInclusivoDB;User Id=DockerUser;Password=Admin123!;TrustServerCertificate=True;
+    depends_on:
+      - estudiantes-api
