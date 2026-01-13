@@ -25,6 +25,11 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#" onclick="verificarAutorizacion()" style="display: flex; align-items: center; gap: 5px;">
+                                <span style="color: #ffd700;">🔒</span> Admin API
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -45,5 +50,18 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        function verificarAutorizacion() {
+            // Simple contraseña simulada
+            let password = prompt("⚠️ ZONA RESTRINGIDA ⚠️\nPor favor ingrese el código de autorización:");
+
+            // La contraseña es "admin123" (puedes cambiarla)
+            if (password === "admin123") {
+                window.location.href = '@Url.Action("ValidarCedula", "Apoyo")';
+            } else if (password != null) {
+                alert("❌ Código incorrecto. Acceso denegado.");
+            }
+        }
+    </script>
 </body>
 </html>
