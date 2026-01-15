@@ -1,26 +1,26 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SistemaWeb.Models;
+using SistemaWeb.Services;
+
+
 
 namespace SistemaWeb.Controllers
 {
     public class ActividadesController : Controller
     {
-        private readonly ActividadRepository _repository;
+        // Change Repository to Service
+        private readonly ActividadService _service;
 
-        public ActividadesController(ActividadRepository repository)
+        public ActividadesController(ActividadService service)
         {
-            _repository = repository;
+            _service = service;
         }
 
         public IActionResult Index()
         {
-            var actividades = _repository.ObtenerTodas();
+            // Call the service
+            var actividades = _service.ObtenerTodas();
             return View(actividades);
-        }
-
-        public IActionResult Crear()
-        {
-            return View();
         }
 
         [HttpPost]
@@ -28,34 +28,8 @@ namespace SistemaWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                _repository.Agregar(actividad);
-                return RedirectToAction(nameof(Index));
-            }
-            return View(actividad);
-        }
-
-        // CORRECCIÓN: Ahora recibimos un string id (Codigo), no un int
-        public IActionResult Editar(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return NotFound();
-            }
-
-            var actividad = _repository.ObtenerPorId(id);
-            if (actividad == null)
-            {
-                return NotFound();
-            }
-            return View(actividad);
-        }
-
-        [HttpPost]
-        public IActionResult Editar(Actividad actividad)
-        {
-            if (ModelState.IsValid)
-            {
-                _repository.Actualizar(actividad);
+                // The Service handles the 'Cupo' logic now
+                _service.Agregar(actividad);
                 return RedirectToAction(nameof(Index));
             }
             return View(actividad);

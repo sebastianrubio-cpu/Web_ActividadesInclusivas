@@ -1,21 +1,31 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// 1. REGISTRO DE SERVICIOS
+// -----------------------
+
+// Repositorio de Datos (SQL)
+builder.Services.AddScoped<SistemaWeb.Models.ActividadRepository>();
+
+// Cliente API (Microservicio)
+builder.Services.AddHttpClient<SistemaWeb.Services.EstudiantesClient>();
+
+// Servicios de MVC (Controladores y Vistas)
 builder.Services.AddControllersWithViews();
 
-// --- AGREGA ESTA LÍNEA AQUÍ ---
-builder.Services.AddHttpClient<SistemaWeb.Services.EstudiantesClient>(); 
-// ------------------------------
 
-builder.Services.AddScoped<SistemaWeb.Models.ActividadRepository>();
+builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<SistemaWeb.Services.ActividadService>();
+builder.Services.AddSingleton<SistemaWeb.Services.ILogService, SistemaWeb.Services.LogService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// 2. CONFIGURACIÓN DEL PIPELINE HTTP
+// ----------------------------------
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -24,6 +34,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// Ahora esto funcionará porque ya agregamos AddAuthorization() arriba
 app.UseAuthorization();
 
 app.MapControllerRoute(
