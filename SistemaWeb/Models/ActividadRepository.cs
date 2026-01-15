@@ -21,7 +21,6 @@ namespace SistemaWeb.Models
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                // OJO: Asegúrate que tu tabla SQL tenga estos nombres de columna
                 using (var command = new SqlCommand("SELECT Codigo, Nombre, FechaRealizacion, TipoDiscapacidad, Cupo, Responsable, Estado FROM Actividades", connection))
                 {
                     using (var reader = command.ExecuteReader())
