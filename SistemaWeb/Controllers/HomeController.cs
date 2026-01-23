@@ -18,7 +18,6 @@ namespace SistemaWeb.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Aquí es donde "encendemos" el monitor antes de mostrar la página
             var estado = await ValidarSistema.RealizarChequeo(_estudiantesClient);
             return View(estado);
         }

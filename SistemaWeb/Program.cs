@@ -34,7 +34,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Ahora esto funcionará porque ya agregamos AddAuthorization() arriba
 app.UseAuthorization();
 
 app.MapControllerRoute(

@@ -12,7 +12,7 @@
         public LogService()
         {
             // Creates a log file in the app root
-            _filePath = Path.Combine(Directory.GetCurrentDirectory(), "sistema_log.txt");
+            _filePath = Path.Combine(Directory.GetCurrentDirectory(), "LogSistemaActividades.txt");
         }
 
         public void Log(string message)

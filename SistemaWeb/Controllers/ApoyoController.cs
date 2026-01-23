@@ -13,13 +13,12 @@ namespace SistemaWeb.Controllers
             _cliente = cliente;
         }
 
-        // GET: Vista del formulario
         public IActionResult ValidarCedula()
         {
             return View();
         }
 
-        // POST: Enviamos la cédula a la API
+
         [HttpPost]
         public async Task<IActionResult> ValidarCedula(string cedula)
         {
@@ -29,7 +28,7 @@ namespace SistemaWeb.Controllers
                 return View();
             }
 
-            // Llamamos a la API
+
             var resultado = await _cliente.ConsultarPorCedulaAsync(cedula);
 
             return View(resultado);

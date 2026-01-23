@@ -6,7 +6,7 @@ namespace SistemaWeb.Models
     {
         [Key]
         [Required(ErrorMessage = "El código es obligatorio")]
-        // --- AQUÍ ESTÁ EL FILTRO MÁGICO ---
+
         [RegularExpression(@"^[A-Z][0-9]+$", ErrorMessage = "El código debe iniciar con una Mayúscula seguido de números (Ej: A001).")]
         public string? Codigo { get; set; }
 
@@ -24,5 +24,8 @@ namespace SistemaWeb.Models
         public string? Responsable { get; set; }
 
         public string? Estado { get; set; }
+
+        public string? GmailProfesor { get; set; }
+
     }
 }

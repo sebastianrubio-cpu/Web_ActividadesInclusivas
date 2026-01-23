@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,32 +7,38 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SistemaWeb.styles.css" asp-append-version="true" />
+
+    <style>
+        /* Ajuste para que el fondo gris cubra toda la pantalla siempre */
+        html, body {
+            height: 100%;
+            background-color: #f4f6f9;
+        }
+        /* Eliminamos márgenes extra del body para diseño dashboard */
+        main {
+            min-height: 100vh;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light navbar-amber border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
                     🚀 SistemaWeb
                 </a>
-
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Ping</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="verificarAutorizacion()" style="display: flex; align-items: center; gap: 5px;">
-                                <span style="font-size: 1.2rem;">🔒</span>
-                                <span style="font-weight: bold;">Admin API</span>
+                            <a class="nav-link text-danger fw-bold" href="#" onclick="verificarAutorizacion()" style="display: flex; align-items: center; gap: 5px;">
+                                <span>🔒</span> Admin API
                             </a>
                         </li>
                     </ul>
@@ -40,33 +46,29 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+
+    <div class="container-fluid">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - SistemaWeb - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
+
     <script>
         function verificarAutorizacion() {
-            // Simple contraseña simulada
-            let password = prompt("⚠️ ZONA RESTRINGIDA ⚠️\nPor favor ingrese el código de autorización:");
-
-            // La contraseña es "admin123" (puedes cambiarla)
-            if (password === "admin123") {
-                window.location.href = '@Url.Action("ValidarCedula", "Apoyo")';
-            } else if (password != null) {
-                alert("❌ Código incorrecto. Acceso denegado.");
-            }
-        }
+             let password = prompt("⚠️ ZONA RESTRINGIDA ⚠️\nPor favor ingrese el código de autorización:");
+             // Contraseña: admin123
+             if (password === "admin123") {
+                 window.location.href = '@Url.Action("ValidarCedula", "Apoyo")';
+             } else if (password != null) {
+                 alert("❌ Código incorrecto. Acceso denegado.");
+             }
+         }
     </script>
 </body>
 </html>

@@ -21,14 +21,12 @@ namespace SistemaWeb.Services
 
         public void Agregar(Actividad actividad)
         {
-            // BUSINES LOGIC EXAMPLE (Justifies the Service Layer):
-            // If the user forgets to set a status, default to 'Activo'
+
             if (string.IsNullOrEmpty(actividad.Estado))
             {
                 actividad.Estado = "Activo";
             }
 
-            // Logic: If Cupo is 0, force status to 'Lleno'
             if (actividad.Cupo <= 0)
             {
                 actividad.Estado = "Lleno";
@@ -45,7 +43,6 @@ namespace SistemaWeb.Services
 
         public void Actualizar(Actividad actividad)
         {
-            // Logic: Check Cupo again on update
             if (actividad.Cupo <= 0)
             {
                 actividad.Estado = "Lleno";

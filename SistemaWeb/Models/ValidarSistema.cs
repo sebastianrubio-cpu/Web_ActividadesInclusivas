@@ -21,12 +21,12 @@ namespace SistemaWeb.Models
                 SistemaOperativo = RuntimeInformation.OSDescription,
                 Fecha = DateTime.Now.ToString("dd/MM/yyyy"),
                 Hora = DateTime.Now.ToString("HH:mm:ss"),
-                Lugar = Environment.MachineName // Nombre de tu PC
+                Lugar = Environment.MachineName
             };
 
             try
             {
-                // Hacemos un "Ping" a la API buscando algo que no existe
+
                 await clienteApi.ConsultarPorCedulaAsync("TEST_PING");
                 reporte.ApiOnline = true;
                 reporte.EstadoApi = "🟡 API En Línea (Local)";

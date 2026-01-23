@@ -1,42 +1,144 @@
 ﻿@model IEnumerable<SistemaWeb.Models.Actividad>
 
 @{
-    ViewData["Title"] = "Actividades";
+    ViewData["Title"] = "Actividades | Paginación 30";
 }
 
-<div class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 20px;">
-        <h1 style="font-weight: 300; color: white;">Listado de Actividades</h1>
-        <a asp-action="Crear" class="btn-excel">+ Nueva Actividad</a>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    /* Estilo General Dashboard */
+    body {
+        background-color: #f4f6f9;
+    }
+
+    .card-container {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-top: 20px;
+    }
+
+    /* Corrección para que el Buscador sea legible */
+    .dataTables_filter input {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border: 2px solid #ced4da !important;
+        border-radius: 5px;
+        padding: 5px 10px;
+    }
+
+    .dataTables_filter label {
+        color: #333333 !important;
+        font-weight: bold;
+    }
+
+    /* Paginación limpia */
+    .page-item.active .page-link {
+        background-color: #333;
+        border-color: #333;
+        color: white !important;
+    }
+
+    .page-link {
+        color: #333;
+        background-color: white;
+    }
+
+    /* Estilos de tabla y etiquetas */
+    .table-hover tbody tr:hover {
+        background-color: #f1f3f5;
+        transform: scale(1.002);
+        transition: 0.2s;
+    }
+
+    .badge-soft-success {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .badge-soft-danger {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+    .badge-soft-primary {
+        background-color: #cfe2ff;
+        color: #084298;
+    }
+
+    .badge-pill {
+        padding: 6px 12px;
+        border-radius: 20px;
+    }
+</style>
+
+<div class="container card-container">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Gestión de Actividades</h2>
+            <p class="text-muted mb-0">Listado oficial • 30 registros por vista</p>
+        </div>
+        <div>
+            <button onclick="leerTabla()" class="btn btn-outline-primary me-2">
+                <i class="fas fa-volume-up"></i> Voz
+            </button>
+            <button onclick="exportarExcel()" class="btn btn-success me-2">
+                <i class="fas fa-file-excel"></i> Exportar Vista (.xlsx)
+            </button>
+            <a asp-action="Crear" class="btn btn-dark">
+                <i class="fas fa-plus"></i> Nuevo
+            </a>
+        </div>
     </div>
 
     <div class="table-responsive">
-        <table class="excel-table">
-            <thead>
+        <table class="table table-hover align-middle" id="tablaActividades" style="width:100%">
+            <thead class="table-light">
                 <tr>
                     <th>Código</th>
-                    <th>Nombre</th>
+                    <th>Actividad</th>
                     <th>Fecha</th>
-                    <th>Cupo</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
+                    <th class="text-center">Cupo</th>
+                    <th>Responsable</th>
+                    <th class="text-center">Estado</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td style="font-family: monospace; color: #88c0d0;">@item.Codigo</td>
-                        <td>@item.Nombre</td>
-                        <td>@item.FechaRealizacion.ToShortDateString()</td>
-                        <td>@item.Cupo</td>
+                        <td class="fw-bold text-muted">@item.Codigo</td>
                         <td>
-                            <span style="padding: 4px 8px; border-radius: 4px; background-color: @(item.Estado == "Activo" ? "rgba(16, 124, 65, 0.2)" : "rgba(200, 0, 0, 0.2)"); color: @(item.Estado == "Activo" ? "#4cd964" : "#ff5c5c"); font-size: 0.85rem;">
-                                @item.Estado
-                            </span>
+                            <strong class="text-dark">@item.Nombre</strong>
+                            <br><small class="text-muted">@item.TipoDiscapacidad</small>
+                        </td>
+                        <td>@item.FechaRealizacion.ToShortDateString()</td>
+                        <td class="text-center">
+                            <span class="badge badge-soft-primary badge-pill">@item.Cupo</span>
                         </td>
                         <td>
-                            <a asp-action="Editar" asp-route-id="@item.Codigo" style="color: #4ea8de; margin-right: 10px;">Editar</a>
+                            <span>@item.Responsable</span>
+                            <br><small class="text-muted" style="font-size:0.8em">@item.GmailProfesor</small>
+                        </td>
+                        <td class="text-center">
+                            @if (item.Estado == "Activo")
+                            {
+                                <span class="badge badge-soft-success badge-pill">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-soft-danger badge-pill">@item.Estado</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a asp-action="Editar" asp-route-id="@item.Codigo" class="btn btn-sm btn-light rounded-circle">
+                                <i class="fas fa-pen"></i>
+                            </a>
                         </td>
                     </tr>
                 }
@@ -44,3 +146,60 @@
         </table>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+    <script>
+        jQuery(document).ready(function($) {
+            // Inicializar DataTables
+            var table = $('#tablaActividades').DataTable({
+                "pageLength": 30, // Forzar 30 datos
+                "lengthChange": false,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+                },
+                // Configuración visual: Buscador arriba, Paginación abajo
+                "dom": "<'row mb-3'<'col-md-6'f><'col-md-6 text-end'p>>" +
+                       "<'row'<'col-sm-12'tr>>" +
+                       "<'row mt-3'<'col-md-5'i><'col-md-7'p>>"
+            });
+        });
+
+        // ✅ FUNCIÓN EXPORTAR CORREGIDA
+        function exportarExcel() {
+            // 1. Seleccionamos la tabla HTML
+            var tabla = document.getElementById("tablaActividades");
+
+            // 2. Usamos SheetJS para convertir SOLO lo visible en un libro de Excel
+            var wb = XLSX.utils.table_to_book(tabla, {sheet: "Pagina Actual"});
+
+            // 3. Generamos y descargamos el archivo .xlsx
+            XLSX.writeFile(wb, 'Reporte_Actividades_VistaActual.xlsx');
+        }
+
+        // Función de Lectura de Voz
+        function leerTabla() {
+            window.speechSynthesis.cancel();
+            var mensaje = new SpeechSynthesisUtterance();
+            mensaje.lang = 'es-ES';
+            var visibleRows = document.querySelectorAll('#tablaActividades tbody tr');
+            var texto = "Leyendo datos de la página actual. ";
+
+            // Leemos máximo 3 para no cansar
+            for(var i=0; i < Math.min(3, visibleRows.length); i++) {
+                var celdas = visibleRows[i].getElementsByTagName('td');
+                if(celdas.length > 1) {
+                    var nombre = celdas[1].innerText.replace(/(\r\n|\n|\r)/gm, " ");
+                    texto += "Actividad: " + nombre + ". ";
+                }
+            }
+            mensaje.text = texto;
+            window.speechSynthesis.speak(mensaje);
+        }
+    </script>
+}

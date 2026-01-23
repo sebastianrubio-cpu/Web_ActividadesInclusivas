@@ -21,7 +21,8 @@ namespace SistemaWeb.Models
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using (var command = new SqlCommand("SELECT Codigo, Nombre, FechaRealizacion, TipoDiscapacidad, Cupo, Responsable, Estado FROM Actividades", connection))
+
+                using (var command = new SqlCommand("SELECT Codigo, Nombre, FechaRealizacion, TipoDiscapacidad, Cupo, Responsable, Estado, GmailProfesor FROM Actividades", connection))
                 {
                     using (var reader = command.ExecuteReader())
                     {
@@ -35,7 +36,8 @@ namespace SistemaWeb.Models
                                 TipoDiscapacidad = reader["TipoDiscapacidad"].ToString(),
                                 Cupo = (int)reader["Cupo"],
                                 Responsable = reader["Responsable"].ToString(),
-                                Estado = reader["Estado"].ToString()
+                                Estado = reader["Estado"].ToString(),
+                                GmailProfesor = reader["GmailProfesor"] != DBNull.Value ? reader["GmailProfesor"].ToString() : ""
                             });
                         }
                     }
@@ -49,7 +51,8 @@ namespace SistemaWeb.Models
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using (var command = new SqlCommand("INSERT INTO Actividades (Codigo, Nombre, FechaRealizacion, TipoDiscapacidad, Cupo, Responsable, Estado) VALUES (@Codigo, @Nombre, @FechaRealizacion, @TipoDiscapacidad, @Cupo, @Responsable, @Estado)", connection))
+                // Agregamos la columna y el parámetro @GmailProfesor
+                using (var command = new SqlCommand("INSERT INTO Actividades (Codigo, Nombre, FechaRealizacion, TipoDiscapacidad, Cupo, Responsable, Estado, GmailProfesor) VALUES (@Codigo, @Nombre, @FechaRealizacion, @TipoDiscapacidad, @Cupo, @Responsable, @Estado, @GmailProfesor)", connection))
                 {
                     command.Parameters.AddWithValue("@Codigo", actividad.Codigo);
                     command.Parameters.AddWithValue("@Nombre", actividad.Nombre);
@@ -58,6 +61,9 @@ namespace SistemaWeb.Models
                     command.Parameters.AddWithValue("@Cupo", actividad.Cupo);
                     command.Parameters.AddWithValue("@Responsable", actividad.Responsable ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@Estado", actividad.Estado ?? "Activo");
+                    // Guardar Gmail
+                    command.Parameters.AddWithValue("@GmailProfesor", actividad.GmailProfesor ?? (object)DBNull.Value);
+
                     command.ExecuteNonQuery();
                 }
             }
@@ -84,7 +90,9 @@ namespace SistemaWeb.Models
                                 TipoDiscapacidad = reader["TipoDiscapacidad"].ToString(),
                                 Cupo = (int)reader["Cupo"],
                                 Responsable = reader["Responsable"].ToString(),
-                                Estado = reader["Estado"].ToString()
+                                Estado = reader["Estado"].ToString(),
+                                // Mapeamos el Gmail para que aparezca al editar
+                                GmailProfesor = reader["GmailProfesor"] != DBNull.Value ? reader["GmailProfesor"].ToString() : ""
                             };
                         }
                     }
@@ -93,12 +101,14 @@ namespace SistemaWeb.Models
             return actividad;
         }
 
+
         public void Actualizar(Actividad actividad)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using (var command = new SqlCommand("UPDATE Actividades SET Nombre=@Nombre, FechaRealizacion=@FechaRealizacion, TipoDiscapacidad=@TipoDiscapacidad, Cupo=@Cupo, Responsable=@Responsable, Estado=@Estado WHERE Codigo=@Codigo", connection))
+ 
+                using (var command = new SqlCommand("UPDATE Actividades SET Nombre=@Nombre, FechaRealizacion=@FechaRealizacion, TipoDiscapacidad=@TipoDiscapacidad, Cupo=@Cupo, Responsable=@Responsable, Estado=@Estado, GmailProfesor=@GmailProfesor WHERE Codigo=@Codigo", connection))
                 {
                     command.Parameters.AddWithValue("@Codigo", actividad.Codigo);
                     command.Parameters.AddWithValue("@Nombre", actividad.Nombre);
@@ -107,6 +117,9 @@ namespace SistemaWeb.Models
                     command.Parameters.AddWithValue("@Cupo", actividad.Cupo);
                     command.Parameters.AddWithValue("@Responsable", actividad.Responsable ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@Estado", actividad.Estado ?? "Activo");
+                    //Gmail
+                    command.Parameters.AddWithValue("@GmailProfesor", actividad.GmailProfesor ?? (object)DBNull.Value);
+
                     command.ExecuteNonQuery();
                 }
             }
