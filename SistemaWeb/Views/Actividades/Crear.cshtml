@@ -4,63 +4,132 @@
     ViewData["Title"] = "Crear Actividad";
 }
 
-<h1>Crear Actividad</h1>
+<style>
+    body {
+        background-color: #f4f6f9;
+    }
 
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Crear">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    .card-custom {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: none;
+    }
 
-            <div class="form-group mb-3">
-                <label asp-for="Codigo" class="control-label">Código</label>
-                <input asp-for="Codigo" class="form-control" />
-                <span asp-validation-for="Codigo" class="text-danger"></span>
+    .form-label {
+        font-weight: 600;
+        color: #344767;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 10px;
+        border: 1px solid #d2d6da;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #333;
+            box-shadow: 0 0 0 0.2rem rgba(51, 51, 51, 0.1);
+        }
+
+    .btn-dark-custom {
+        background-color: #344767;
+        color: white;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+        .btn-dark-custom:hover {
+            background-color: #233044;
+        }
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card card-custom">
+
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold text-dark">Nueva Actividad</h2>
+                    <p class="text-muted">Ingresa los detalles de la actividad inclusiva</p>
+                </div>
+
+                <form asp-action="Crear">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Codigo" class="form-label">Código</label>
+                            <input asp-for="Codigo" class="form-control" placeholder="Ej: A001" />
+                            <span asp-validation-for="Codigo" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label asp-for="Nombre" class="form-label">Nombre de la Actividad</label>
+                            <input asp-for="Nombre" class="form-control" placeholder="Ej: Taller de Braille" />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FechaRealizacion" class="form-label">Fecha de Realización</label>
+                            <input asp-for="FechaRealizacion" type="date" class="form-control" />
+                            <span asp-validation-for="FechaRealizacion" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Cupo" class="form-label">Cupo Disponible</label>
+                            <input asp-for="Cupo" type="number" class="form-control" placeholder="0" />
+                            <span asp-validation-for="Cupo" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TipoDiscapacidad" class="form-label">Tipo de Discapacidad</label>
+                            <select asp-for="TipoDiscapacidad" class="form-select">
+                                <option value="">-- Seleccione --</option>
+                                <option value="Motriz">Motriz</option>
+                                <option value="Visual">Visual</option>
+                                <option value="Auditiva">Auditiva</option>
+                                <option value="Intelectual">Intelectual</option>
+                                <option value="Ninguna">Ninguna</option>
+                            </select>
+                            <span asp-validation-for="TipoDiscapacidad" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Estado" class="form-label">Estado</label>
+                            <select asp-for="Estado" class="form-select">
+                                <option value="Activo">Activo</option>
+                                <option value="Inactivo">Inactivo</option>
+                                <option value="Finalizado">Finalizado</option>
+                            </select>
+                            <span asp-validation-for="Estado" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Responsable" class="form-label">Profesor Responsable</label>
+                            <input asp-for="Responsable" class="form-control" placeholder="Nombre del docente" />
+                            <span asp-validation-for="Responsable" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="GmailProfesor" class="form-label">Correo Institucional</label>
+                            <input asp-for="GmailProfesor" type="email" class="form-control" placeholder="profe@uisek.edu.ec" />
+                            <span asp-validation-for="GmailProfesor" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <input type="submit" value="Guardar Actividad" class="btn btn-dark-custom" />
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar y Volver</a>
+                    </div>
+                </form>
             </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Nombre" class="control-label">Nombre</label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="FechaRealizacion" class="control-label">Fecha Realización</label>
-                <input asp-for="FechaRealizacion" type="date" class="form-control" />
-                <span asp-validation-for="FechaRealizacion" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="TipoDiscapacidad" class="control-label">Tipo Discapacidad</label>
-                <input asp-for="TipoDiscapacidad" class="form-control" />
-                <span asp-validation-for="TipoDiscapacidad" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Cupo" class="control-label">Cupo</label>
-                <input asp-for="Cupo" type="number" class="form-control" />
-                <span asp-validation-for="Cupo" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Responsable" class="control-label">Responsable</label>
-                <input asp-for="Responsable" class="form-control" />
-                <span asp-validation-for="Responsable" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Estado" class="control-label">Estado</label>
-                <select asp-for="Estado" class="form-control">
-                    <option value="Activo">Activo</option>
-                    <option value="Inactivo">Inactivo</option>
-                </select>
-                <span asp-validation-for="Estado" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Crear" class="btn btn-success" />
-                <a asp-action="Index" class="btn btn-secondary">Volver</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
