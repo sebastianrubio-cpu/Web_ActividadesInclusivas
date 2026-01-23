@@ -3,6 +3,37 @@
 @{
     ViewData["Title"] = "Editar Actividad";
 }
+<div class="container mt-5">
+    <div class="minimal-card">
+        <h2 class="minimal-title">✏️ Editar Actividad</h2>
+
+        <form asp-action="Editar" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="Codigo" class="control-label"></label>
+                <input asp-for="Codigo" class="form-control" readonly />
+            </div>
+            <div class="d-flex justify-content-between mt-4">
+                <a asp-action="Index" class="btn btn-secondary-min">Cancelar</a>
+                <button type="submit" class="btn-excel" style="width: auto;">Guardar Cambios</button>
+            </div>
+        </form>
+
+        <hr class="my-4" style="border-color: #333;" />
+
+        <div class="text-center">
+            <p class="text-muted small">¿Deseas eliminar permanentemente esta actividad?</p>
+            <form asp-action="Eliminar" method="post" onsubmit="return confirm('⚠️ ¿Estás SEGURO de eliminar esta actividad? Esta acción no se puede deshacer.');">
+                <input type="hidden" name="codigo" value="@Model.Codigo" />
+                <button type="submit" class="btn btn-outline-danger btn-sm px-4">
+                    🗑️ Eliminar Actividad
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
 
 <div class="minimal-card">
     <h2 class="minimal-title">Editar Actividad</h2>

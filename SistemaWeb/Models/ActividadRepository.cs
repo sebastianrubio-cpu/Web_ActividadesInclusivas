@@ -21,7 +21,7 @@ namespace SistemaWeb.Models
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-
+                // NOTA: Asegúrate de tener la columna GmailProfesor en tu BD o quítala de aquí si falla
                 using (var command = new SqlCommand("SELECT Codigo, Nombre, FechaRealizacion, TipoDiscapacidad, Cupo, Responsable, Estado, GmailProfesor FROM Actividades", connection))
                 {
                     using (var reader = command.ExecuteReader())
@@ -51,7 +51,6 @@ namespace SistemaWeb.Models
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                // Agregamos la columna y el parámetro @GmailProfesor
                 using (var command = new SqlCommand("INSERT INTO Actividades (Codigo, Nombre, FechaRealizacion, TipoDiscapacidad, Cupo, Responsable, Estado, GmailProfesor) VALUES (@Codigo, @Nombre, @FechaRealizacion, @TipoDiscapacidad, @Cupo, @Responsable, @Estado, @GmailProfesor)", connection))
                 {
                     command.Parameters.AddWithValue("@Codigo", actividad.Codigo);
@@ -61,9 +60,7 @@ namespace SistemaWeb.Models
                     command.Parameters.AddWithValue("@Cupo", actividad.Cupo);
                     command.Parameters.AddWithValue("@Responsable", actividad.Responsable ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@Estado", actividad.Estado ?? "Activo");
-                    // Guardar Gmail
                     command.Parameters.AddWithValue("@GmailProfesor", actividad.GmailProfesor ?? (object)DBNull.Value);
-
                     command.ExecuteNonQuery();
                 }
             }
@@ -91,7 +88,6 @@ namespace SistemaWeb.Models
                                 Cupo = (int)reader["Cupo"],
                                 Responsable = reader["Responsable"].ToString(),
                                 Estado = reader["Estado"].ToString(),
-                                // Mapeamos el Gmail para que aparezca al editar
                                 GmailProfesor = reader["GmailProfesor"] != DBNull.Value ? reader["GmailProfesor"].ToString() : ""
                             };
                         }
@@ -101,13 +97,11 @@ namespace SistemaWeb.Models
             return actividad;
         }
 
-
         public void Actualizar(Actividad actividad)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
- 
                 using (var command = new SqlCommand("UPDATE Actividades SET Nombre=@Nombre, FechaRealizacion=@FechaRealizacion, TipoDiscapacidad=@TipoDiscapacidad, Cupo=@Cupo, Responsable=@Responsable, Estado=@Estado, GmailProfesor=@GmailProfesor WHERE Codigo=@Codigo", connection))
                 {
                     command.Parameters.AddWithValue("@Codigo", actividad.Codigo);
@@ -117,9 +111,21 @@ namespace SistemaWeb.Models
                     command.Parameters.AddWithValue("@Cupo", actividad.Cupo);
                     command.Parameters.AddWithValue("@Responsable", actividad.Responsable ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@Estado", actividad.Estado ?? "Activo");
-                    //Gmail
                     command.Parameters.AddWithValue("@GmailProfesor", actividad.GmailProfesor ?? (object)DBNull.Value);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
 
+        // 👇 ESTE ES EL MÉTODO QUE TE FALTABA 👇
+        public void Eliminar(string codigo)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using (var command = new SqlCommand("DELETE FROM Actividades WHERE Codigo = @Codigo", connection))
+                {
+                    command.Parameters.AddWithValue("@Codigo", codigo);
                     command.ExecuteNonQuery();
                 }
             }

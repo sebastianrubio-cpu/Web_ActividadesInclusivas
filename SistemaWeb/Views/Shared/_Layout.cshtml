@@ -6,18 +6,26 @@
     <title>@ViewData["Title"] - SistemaWeb</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/SistemaWeb.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* Ajuste para que el fondo gris cubra toda la pantalla siempre */
         html, body {
             height: 100%;
             background-color: #f4f6f9;
         }
-        /* Eliminamos márgenes extra del body para diseño dashboard */
+
         main {
             min-height: 100vh;
         }
+
+        .nav-link {
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+            .nav-link:hover {
+                color: #ff8f00 !important;
+            }
     </style>
 </head>
 <body>
@@ -31,16 +39,47 @@
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-danger fw-bold" href="#" onclick="verificarAutorizacion()" style="display: flex; align-items: center; gap: 5px;">
-                                <span>🔒</span> Admin API
-                            </a>
-                        </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">
+                                    <i class="fas fa-chart-line"></i> Dashboard (Ping)
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Actividades" asp-action="Index">
+                                    <i class="fas fa-table"></i> Gestión Actividades
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item d-flex align-items-center me-3">
+                                <span class="text-muted small">
+                                    Hola, <strong>@User.Identity.Name</strong>
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-danger fw-bold border border-danger rounded px-3" asp-controller="Acceso" asp-action="Salir">
+                                    <i class="fas fa-sign-out-alt"></i> Salir
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-primary fw-bold" asp-controller="Acceso" asp-action="Login">
+                                    <i class="fas fa-key"></i> Iniciar Sesión
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -58,17 +97,5 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
-
-    <script>
-        function verificarAutorizacion() {
-             let password = prompt("⚠️ ZONA RESTRINGIDA ⚠️\nPor favor ingrese el código de autorización:");
-             // Contraseña: admin123
-             if (password === "admin123") {
-                 window.location.href = '@Url.Action("ValidarCedula", "Apoyo")';
-             } else if (password != null) {
-                 alert("❌ Código incorrecto. Acceso denegado.");
-             }
-         }
-    </script>
 </body>
 </html>

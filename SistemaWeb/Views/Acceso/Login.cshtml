@@ -1,0 +1,83 @@
+﻿@{
+    Layout = null; // Login no lleva menú
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - SistemaWeb</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-login {
+            background: #0a0a0a;
+            border: 1px solid #ff8f00;
+            padding: 40px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(255, 143, 0, 0.2);
+        }
+
+        .btn-amber {
+            background: linear-gradient(135deg, #ff8f00, #ef6c00);
+            border: none;
+            color: black;
+            font-weight: bold;
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+            .btn-amber:hover {
+                background: #ffca28;
+                color: black;
+            }
+
+        .form-control {
+            background: #111;
+            border: 1px solid #333;
+            color: white;
+        }
+
+            .form-control:focus {
+                background: #111;
+                color: white;
+                border-color: #ff8f00;
+                box-shadow: 0 0 10px rgba(255, 143, 0, 0.3);
+            }
+    </style>
+</head>
+<body>
+    <div class="card-login text-center">
+        <h2 class="mb-4">🔐 Acceso Seguro</h2>
+        <form asp-controller="Acceso" asp-action="Login" method="post">
+            <div class="mb-3 text-start">
+                <label>Correo Electrónico</label>
+                <input type="email" name="correo" class="form-control" placeholder="admin@sistema.com" required />
+            </div>
+            <div class="mb-3 text-start">
+                <label>Contraseña</label>
+                <input type="password" name="clave" class="form-control" placeholder="******" required />
+            </div>
+
+            @if (ViewData["Mensaje"] != null)
+            {
+                <div class="alert alert-danger p-2 small">@ViewData["Mensaje"]</div>
+            }
+
+            <button type="submit" class="btn-amber mt-3">Ingresar al Sistema</button>
+        </form>
+    </div>
+</body>
+</html>

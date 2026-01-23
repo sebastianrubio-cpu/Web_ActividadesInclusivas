@@ -7,7 +7,6 @@ namespace SistemaWeb.Services
         private readonly ActividadRepository _repository;
         private readonly ILogService _logger;
 
-        // Dependency Injection: The Service gets the Repository
         public ActividadService(ActividadRepository repository, ILogService logger)
         {
             _repository = repository;
@@ -21,7 +20,6 @@ namespace SistemaWeb.Services
 
         public void Agregar(Actividad actividad)
         {
-
             if (string.IsNullOrEmpty(actividad.Estado))
             {
                 actividad.Estado = "Activo";
@@ -48,6 +46,13 @@ namespace SistemaWeb.Services
                 actividad.Estado = "Lleno";
             }
             _repository.Actualizar(actividad);
+        }
+
+        // 👇 ESTE ES EL MÉTODO NUEVO QUE NECESITAS PARA EL ERROR CS1061 👇
+        public void Eliminar(string codigo)
+        {
+            _repository.Eliminar(codigo);
+            _logger.Log($"Actividad eliminada: {codigo}");
         }
     }
 }

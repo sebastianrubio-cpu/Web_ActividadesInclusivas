@@ -67,5 +67,19 @@ namespace SistemaWeb.Controllers
             }
             return View(actividad);
         }
+
+
+
+        [HttpPost]
+        public IActionResult Eliminar(string codigo)
+        {
+            // OJO: Asegúrate que tu _service tenga el método Eliminar expuesto
+            // Si no usas servicio, llama directo al repositorio: _repository.Eliminar(codigo);
+
+            // Asumiendo que agregaste el método al servicio:
+            _service.Eliminar(codigo);
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
