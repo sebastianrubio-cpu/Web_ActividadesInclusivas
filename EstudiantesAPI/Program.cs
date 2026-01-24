@@ -28,8 +28,8 @@ app.MapGet("/api/estudiantes/{cedula}", async (string cedula) =>
     {
         await conn.OpenAsync();
 
-       
-        var sql = "SELECT TOP 1 EsEstudiante, Nombre FROM Estudiantes WHERE Cedula = @cedula";
+        // 1. CORREGIDO: Seleccionamos columnas que SÍ existen (Nombre, Apellido)
+        var sql = "SELECT TOP 1 IdEstudiante, Nombre, Apellido FROM Estudiantes WHERE Cedula = @cedula";
 
         using (var cmd = new SqlCommand(sql, conn))
         {
@@ -39,21 +39,25 @@ app.MapGet("/api/estudiantes/{cedula}", async (string cedula) =>
             {
                 if (await reader.ReadAsync())
                 {
-                    // Si encontramos la cédula
+                    // 2. LOGICA: Si entró aquí, es porque encontró el registro.
+                    // Armamos el nombre completo y devolvemos true "hardcodeado" porque la validación pasó.
+                    string nombreCompleto = $"{reader["Nombre"]} {reader["Apellido"]}";
+
                     return Results.Ok(new
                     {
                         cedula = cedula,
-                        esEstudiante = reader.GetBoolean(0), 
-                        nombre = reader.GetString(1),       
+                        esEstudiante = true, // Si lo encontró en la DB, es true.
+                        nombre = nombreCompleto,
                         mensaje = "Pertenece a un estudiante"
                     });
                 }
                 else
                 {
-                    // Si NO encontramos la cédula
+                    // Si NO encontra la cédula
                     return Results.NotFound(new
                     {
                         cedula = cedula,
+                        esEstudiante = false,
                         mensaje = "Cédula no encontrada en UISEK"
                     });
                 }
@@ -61,6 +65,6 @@ app.MapGet("/api/estudiantes/{cedula}", async (string cedula) =>
         }
     }
 })
-.WithName("GetEstudiante"); 
+.WithName("GetEstudiante");
 
 app.Run();
