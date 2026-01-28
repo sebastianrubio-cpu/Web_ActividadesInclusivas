@@ -72,7 +72,7 @@ namespace SistemaWeb.Controllers
         [HttpPost]
         public IActionResult Eliminar(string codigo)
         {
-            _repository.Eliminar(codigo);
+           
 
             
             _service.Eliminar(codigo);
