@@ -3,6 +3,76 @@
     ViewData["Title"] = "Gestión de Actividades";
 }
 
+<style>
+    /* 1. Quitamos los iconos por defecto de DataTables */
+    table.dataTable thead .sorting,
+    table.dataTable thead .sorting_asc,
+    table.dataTable thead .sorting_desc {
+        background-image: none !important; /* Elimina flechas default */
+        position: relative;
+        cursor: pointer;
+        padding-right: 20px !important; /* Espacio para nuestras flechas */
+    }
+
+    /* 2. Definimos la posición común para ambas flechas usando pseudo-elementos */
+    table.dataTable thead th::before,
+    table.dataTable thead th::after {
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        position: absolute;
+        right: 10px;
+        font-size: 0.8rem;
+        transition: color 0.2s;
+    }
+
+    /* --- FLECHA ARRIBA (::before) --- */
+    table.dataTable thead th::before {
+        content: "\f0d8"; /* Código FontAwesome Caret Up */
+        top: 30%; /* Posición superior */
+        color: #ccc; /* Gris por defecto (Inactivo) */
+    }
+
+    /* --- FLECHA ABAJO (::after) --- */
+    table.dataTable thead th::after {
+        content: "\f0d7"; /* Código FontAwesome Caret Down */
+        top: 45%; /* Posición inferior (apilada) */
+        color: #ccc; /* Gris por defecto (Inactivo) */
+    }
+
+    /* 3. Lógica de Colores Activos */
+    table.dataTable thead th.sorting_asc::before {
+        color: black !important;
+    }
+
+    table.dataTable thead th.sorting_desc::after {
+        color: black !important;
+    }
+
+    /* Opcional: Hover */
+    table.dataTable thead th:hover::before,
+    table.dataTable thead th:hover::after {
+        color: #999;
+    }
+
+    table.dataTable thead th.sorting_asc:hover::before {
+        color: black !important;
+    }
+
+    table.dataTable thead th.sorting_desc:hover::after {
+        color: black !important;
+    }
+    table.dataTable thead th:last-child::before,
+    table.dataTable thead th:last-child::after {
+        display: none !important;
+        content: none !important;
+    }
+   
+    table.dataTable thead th:last-child {
+        padding-right: 8px !important;
+    }
+
+</style>
+
 <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
     <h2 class="fw-bold" style="color: var(--uisek-blue);">
         <i class="fas fa-tasks me-2"></i>Listado de Actividades
@@ -35,12 +105,14 @@
                     <tr>
                         <th>Código</th>
                         <th>Actividad</th>
+
                         <th>Fecha</th>
                         <th>Cupo</th>
                         <th>Responsable</th>
                         <th>Estado</th>
                         <th class="text-end">Acciones</th>
                     </tr>
+
                 </thead>
                 <tbody>
                     @foreach (var item in Model)
@@ -48,10 +120,12 @@
                         <tr>
                             <td class="fw-bold text-muted">@item.Codigo</td>
                             <td>
+
                                 <div class="fw-bold text-dark">@item.Nombre</div>
                                 <small class="text-muted">@item.TipoDiscapacidad</small>
                             </td>
                             <td>@item.FechaRealizacion.ToShortDateString()</td>
+
                             <td>
                                 <span class="badge bg-light text-dark border">
                                     <i class="fas fa-users me-1"></i>@item.Cupo
@@ -61,24 +135,30 @@
                             <td>
                                 @if (item.Estado == "Activo")
                                 {
+
                                     <span class="badge bg-success rounded-pill">Activo</span>
                                 }
                                 else
                                 {
+
                                     <span class="badge bg-secondary rounded-pill">@item.Estado</span>
                                 }
                             </td>
                             <td class="text-end">
+
                                 <a asp-action="Editar" asp-route-id="@item.Codigo" class="btn btn-sm btn-outline-primary rounded-circle" title="Editar">
                                     <i class="fas fa-pen"></i>
                                 </a>
+
                                 <form asp-action="Eliminar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar la actividad @item.Nombre?');">
                                     <input type="hidden" name="codigo" value="@item.Codigo" />
                                     <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar">
+
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
                             </td>
+
                         </tr>
                     }
                 </tbody>
@@ -94,57 +174,52 @@
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <script>
+        // 1. Configuración de DataTables
         jQuery(document).ready(function($) {
-            // Inicializar DataTables con Buscador (f) y Paginación (p)
             var table = $('#tablaActividades').DataTable({
                 "pageLength": 10,
                 "lengthChange": true,
+                "ordering": true,
+                "order": [[ 2, "desc" ]],
+                "columnDefs": [
+                    { "orderable": false, "targets": 6 } 
+                ],
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
                 },
-                // f = filtro (buscador), p = paginación, i = información
                 "dom": "<'row mb-3'<'col-md-6'f><'col-md-6 text-end'>>" +
                        "<'row'<'col-sm-12'tr>>" +
                        "<'row mt-3'<'col-md-5'i><'col-md-7'p>>"
             });
         });
 
-        // FUNCIÓN EXPORTAR EXCEL (Ya la tenías, ahora está conectada al botón)
+        // 2. Funciones Globales
         function exportarExcel() {
             var tabla = document.getElementById("tablaActividades");
-            // Convierte la tabla HTML a hoja de cálculo
             var wb = XLSX.utils.table_to_book(tabla, {sheet: "Actividades"});
-            // Guarda el archivo
             XLSX.writeFile(wb, 'Reporte_Actividades.xlsx');
         }
 
-        // FUNCIÓN LECTURA DE VOZ (Accesibilidad)
         function leerTabla() {
-            // Cancelar cualquier lectura anterior
             window.speechSynthesis.cancel();
 
             var mensaje = new SpeechSynthesisUtterance();
-            mensaje.lang = 'es-LA'; // Español Latinoamericano
-            mensaje.rate = 1; // Velocidad normal
+            mensaje.lang = 'es-LA';
+            mensaje.rate = 1;
 
-            // Leer filas visibles
             var visibleRows = document.querySelectorAll('#tablaActividades tbody tr');
             var texto = "Iniciando lectura de actividades. ";
 
             if (visibleRows.length === 0) {
                 texto = "No hay actividades visibles en la tabla.";
             } else {
-                // Leemos solo las primeras 5 para no saturar
                 var limite = Math.min(5, visibleRows.length);
                 for(var i=0; i < limite; i++) {
                     var celdas = visibleRows[i].getElementsByTagName('td');
                     if(celdas.length > 1) {
-                        // Índice 1 es la columna "Actividad"
                         var nombre = celdas[1].innerText.replace(/(\r\n|\n|\r)/gm, " ");
-                        // Índice 4 es la columna "Responsable"
                         var responsable = celdas[4].innerText;
-
-                        texto += "Actividad número " + (i+1) + ": " + nombre + ", a cargo de " + responsable + ". ";
+                        texto += "Actividad: " + nombre + ", responsable: " + responsable + ". ";
                     }
                 }
             }
