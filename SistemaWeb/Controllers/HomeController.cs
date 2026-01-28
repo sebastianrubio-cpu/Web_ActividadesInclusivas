@@ -1,25 +1,29 @@
 using Microsoft.AspNetCore.Mvc;
 using SistemaWeb.Models;
-using SistemaWeb.Services;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization; // Importante para permitir acceso
 
 namespace SistemaWeb.Controllers
 {
+    // [Authorize] // Descomenta si quieres que solo logueados vean esto
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly EstudiantesClient _estudiantesClient;
 
-        public HomeController(ILogger<HomeController> logger, EstudiantesClient estudiantesClient)
+        public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
-            _estudiantesClient = estudiantesClient;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var estado = await ValidarSistema.RealizarChequeo(_estudiantesClient);
-            return View(estado);
+            
+            return RedirectToAction("Index", "Actividades");
+        }
+
+        public IActionResult Proyecto()
+        {
+            return View();
         }
 
         public IActionResult Privacy()

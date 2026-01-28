@@ -1,5 +1,6 @@
 ﻿@{
-    Layout = null; // Login no lleva menú
+    ViewData["Title"] = "Iniciar Sesión";
+    Layout = null; // No usamos el layout estándar para tener control total del fondo
 }
 
 <!DOCTYPE html>
@@ -7,77 +8,47 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - SistemaWeb</title>
+    <title>Login - UISEK Inclusiva</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <style>
-        body {
-            background-color: #000;
-            color: #fff;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .card-login {
-            background: #0a0a0a;
-            border: 1px solid #ff8f00;
-            padding: 40px;
-            border-radius: 15px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 0 30px rgba(255, 143, 0, 0.2);
-        }
-
-        .btn-amber {
-            background: linear-gradient(135deg, #ff8f00, #ef6c00);
-            border: none;
-            color: black;
-            font-weight: bold;
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-            .btn-amber:hover {
-                background: #ffca28;
-                color: black;
-            }
-
-        .form-control {
-            background: #111;
-            border: 1px solid #333;
-            color: white;
-        }
-
-            .form-control:focus {
-                background: #111;
-                color: white;
-                border-color: #ff8f00;
-                box-shadow: 0 0 10px rgba(255, 143, 0, 0.3);
-            }
-    </style>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <div class="card-login text-center">
-        <h2 class="mb-4">🔐 Acceso Seguro</h2>
-        <form asp-controller="Acceso" asp-action="Login" method="post">
-            <div class="mb-3 text-start">
-                <label>Correo Electrónico</label>
-                <input type="email" name="correo" class="form-control" placeholder="admin@sistema.com" required />
+<body class="login-body">
+
+    <div class="login-card animate__animated animate__fadeInUp">
+        <div class="mb-4">
+            <img src="https://uisek.edu.ec/wp-content/uploads/2022/09/Logo-UISEK-2022.png" alt="UISEK Logo" style="width: 180px;">
+        </div>
+
+        <h4 class="fw-bold text-dark mb-1">Bienvenido</h4>
+        <p class="text-muted mb-4">Gestión de Actividades Inclusivas</p>
+
+        <form asp-action="Login" method="post">
+            <div class="form-floating mb-3">
+                <input type="email" name="correo" class="form-control" id="floatingInput" placeholder="name@example.com" required>
+                <label for="floatingInput">Correo Institucional</label>
             </div>
-            <div class="mb-3 text-start">
-                <label>Contraseña</label>
-                <input type="password" name="clave" class="form-control" placeholder="******" required />
+            <div class="form-floating mb-4">
+                <input type="password" name="clave" class="form-control" id="floatingPassword" placeholder="Password" required>
+                <label for="floatingPassword">Contraseña</label>
             </div>
 
-            @if (ViewData["Mensaje"] != null)
+            @if (ViewBag.Error != null)
             {
-                <div class="alert alert-danger p-2 small">@ViewData["Mensaje"]</div>
+                <div class="alert alert-danger text-start py-2" role="alert">
+                    <small><i class="fas fa-exclamation-circle me-1"></i> @ViewBag.Error</small>
+                </div>
             }
 
-            <button type="submit" class="btn-amber mt-3">Ingresar al Sistema</button>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-uisek btn-lg">INGRESAR</button>
+            </div>
         </form>
+
+        <div class="mt-4">
+            <small class="text-muted">&copy; 2026 Universidad Internacional SEK</small>
+        </div>
     </div>
+
 </body>
 </html>

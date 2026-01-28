@@ -1,198 +1,129 @@
-/* CONFIGURACIÓN GLOBAL JET BLACK */
+/* --- PALETA UISEK & ESTILOS GLOBALES --- */
 :root {
-    color-scheme: dark;
+    --uisek-blue: #002d5b; /* Azul oscuro institucional */
+    --uisek-light-blue: #0056b3; /* Azul vibrante para botones */
+    --uisek-gold: #c5a017; /* Dorado sutil para detalles */
+    --bg-light: #f4f7f6;
+    --text-dark: #2c3e50;
+    --white: #ffffff;
 }
 
 body {
-    background-color: #000000; /* Jet Black puro */
-    color: #e0e0e0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
 }
 
-/* CONTENEDOR CENTRAL */
-.container {
-    flex: 1;
+/* --- TARJETAS FLOTANTES (MINIMALISMO) --- */
+.card-custom {
+    background: var(--white);
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 45, 91, 0.08); /* Sombra azulada sutil */
+    padding: 2rem;
+    transition: transform 0.2s ease;
+}
+
+    .card-custom:hover {
+        transform: translateY(-2px);
+    }
+
+/* --- BOTONES ELEGANTES --- */
+.btn-uisek {
+    background-color: var(--uisek-blue);
+    color: var(--white);
+    border-radius: 8px;
+    padding: 10px 25px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s;
+}
+
+    .btn-uisek:hover {
+        background-color: var(--uisek-light-blue);
+        color: var(--white);
+        box-shadow: 0 4px 15px rgba(0, 86, 179, 0.3);
+    }
+
+/* --- TABLA ELEGANTE --- */
+.table-container {
+    background: var(--white);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    overflow: hidden; /* Para bordes redondeados */
+}
+
+.table-elegant {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px; /* Separación entre filas */
+}
+
+    .table-elegant thead th {
+        background-color: transparent;
+        color: var(--uisek-blue);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        border-bottom: 2px solid #eef2f7;
+        padding: 15px;
+    }
+
+    .table-elegant tbody tr {
+        background-color: var(--white);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        transition: 0.2s;
+    }
+
+        .table-elegant tbody tr:hover {
+            background-color: #f8fbff;
+            transform: scale(1.005);
+        }
+
+    .table-elegant td {
+        padding: 15px;
+        vertical-align: middle;
+        border-top: 1px solid #f4f4f4;
+    }
+
+/* --- LOGIN SCREEN --- */
+.login-body {
+    /* Imagen de fondo (puedes cambiar la URL por una foto real de la UISEK) */
+    background: linear-gradient(135deg, rgba(0, 45, 91, 0.9), rgba(0, 86, 179, 0.8)), url('https://upload.wikimedia.org/wikipedia/commons/e/e8/Campus_UISEK_Quito.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
     display: flex;
-    flex-direction: column;
+    align-items: center;
     justify-content: center;
 }
 
-/* LINKS GENERALES */
-a {
-    text-decoration: none;
-    transition: 0.3s;
-    color: #ffca28;
-}
-
-    a:hover {
-        text-decoration: none;
-        opacity: 0.8;
-        color: #ffca28;
-    }
-
-/* --- NUEVA BARRA DE NAVEGACIÓN AMBER --- */
-.navbar-amber {
-    background: linear-gradient(90deg, #ff8f00, #ffb300); /* Degradado Naranja del Monitor */
-    box-shadow: 0 4px 20px rgba(255, 143, 0, 0.3); /* Resplandor naranja */
-    border-bottom: 1px solid #ff6f00;
-}
-
-.navbar-brand {
-    font-weight: 700 !important;
-    letter-spacing: 1px;
-    color: #000 !important; /* Texto negro para contraste */
-}
-
-.nav-link {
-    color: #222 !important; /* Texto casi negro */
-    font-weight: 500;
-}
-
-    .nav-link:hover {
-        color: #000 !important;
-        transform: translateY(-1px);
-        text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-    }
-
-/* --- TABLA TIPO EXCEL (Ahora en Naranja) --- */
-.excel-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    background-color: #0a0a0a;
-    box-shadow: 0 0 20px rgba(255, 152, 0, 0.05); /* Resplandor ámbar sutil */
-    border-radius: 8px;
-    overflow: hidden;
-    margin-top: 20px;
-    font-size: 15px;
-}
-
-    .excel-table thead tr {
-        /* Nuevo degradado Naranja para la cabecera */
-        background: linear-gradient(135deg, #ef6c00 0%, #ff9800 100%);
-        color: white; /* Texto blanco en la tabla para leer bien */
-    }
-
-    .excel-table th {
-        padding: 15px;
-        font-weight: 600;
-        border-bottom: 1px solid #333;
-    }
-
-    .excel-table td {
-        padding: 12px 15px;
-        border-bottom: 1px solid #1a1a1a;
-        color: #cfcfcf;
-    }
-
-    .excel-table tbody tr:hover {
-        background-color: #111;
-    }
-
-/* --- TARJETAS --- */
-.minimal-card {
-    background-color: #050505;
-    padding: 50px;
+.login-card {
+    background: rgba(255, 255, 255, 0.95); /* Efecto vidrio sólido */
     border-radius: 20px;
-    border: 1px solid #333;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    padding: 3rem;
     width: 100%;
-    max-width: 550px;
-    margin: 40px auto;
-}
-
-.minimal-title {
-    text-align: center;
-    color: #fff;
-    font-weight: 200;
-    margin-bottom: 40px;
-    font-size: 2rem;
-    letter-spacing: 1px;
-}
-
-/* INPUTS */
-.form-group {
-    margin-bottom: 25px;
-    position: relative;
-}
-
-.control-label {
-    font-size: 0.85rem;
-    color: #888;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    display: block;
-}
-
-.form-control {
-    background-color: #0f0f0f;
-    border: 1px solid #222;
-    color: white;
-    border-radius: 8px;
-    padding: 12px 15px;
-    width: 100%;
-    transition: all 0.3s ease;
-}
-
-    .form-control:focus {
-        background-color: #151515;
-        border-color: #ff9800; /* Borde naranja al escribir */
-        box-shadow: 0 0 15px rgba(255, 152, 0, 0.2);
-        outline: none;
-    }
-
-/* INPUT FECHA */
-input[type="date"] {
-    cursor: pointer;
-    position: relative;
-}
-
-    input[type="date"]::-webkit-calendar-picker-indicator {
-        background-color: #222;
-        padding: 5px;
-        border-radius: 5px;
-        cursor: pointer;
-        filter: invert(1);
-    }
-
-/* --- BOTONES (Actualizados a Naranja) --- */
-.btn-excel {
-    /* Degradado Ámbar/Naranja */
-    background: linear-gradient(135deg, #ff8f00 0%, #ef6c00 100%);
-    color: black; /* Texto negro para mejor contraste con naranja */
-    border: none;
-    padding: 12px 30px;
-    border-radius: 50px;
-    font-weight: 700; /* Más negrita */
-    box-shadow: 0 4px 15px rgba(255, 143, 0, 0.3);
-    transition: transform 0.2s, box-shadow 0.2s;
-    width: 100%;
-    display: inline-block;
+    max-width: 450px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
     text-align: center;
 }
 
-    .btn-excel:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 143, 0, 0.5);
-        color: black;
-    }
-
-.btn-secondary-min {
-    background: transparent;
-    border: 1px solid #444;
-    color: #888;
-    padding: 12px 30px;
-    border-radius: 50px;
-    transition: all 0.3s;
-    display: inline-block;
-    margin-top: 10px;
+/* --- BADGES (Etiquetas) --- */
+.badge-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 600;
 }
 
-    .btn-secondary-min:hover {
-        border-color: #ff9800;
-        color: #ff9800;
-        background: rgba(255, 152, 0, 0.05);
-    }
+.bg-active {
+    background-color: #e1f5fe;
+    color: #0277bd;
+}
+
+.bg-inactive {
+    background-color: #ffebee;
+    color: #c62828;
+}

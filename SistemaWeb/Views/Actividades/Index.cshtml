@@ -1,150 +1,65 @@
 ﻿@model IEnumerable<SistemaWeb.Models.Actividad>
-
 @{
-    ViewData["Title"] = "Actividades | Paginación 30";
+    ViewData["Title"] = "Gestión de Actividades";
 }
 
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+    <h2 class="fw-bold" style="color: var(--uisek-blue);">Listado de Actividades</h2>
+    <a asp-action="Crear" class="btn btn-uisek">
+        <i class="fas fa-plus me-2"></i> Nueva Actividad
+    </a>
+</div>
 
-<style>
-    /* Estilo General Dashboard */
-    body {
-        background-color: #f4f6f9;
-    }
-
-    .card-container {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        margin-top: 20px;
-    }
-
-    /* Corrección para que el Buscador sea legible */
-    .dataTables_filter input {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        border: 2px solid #ced4da !important;
-        border-radius: 5px;
-        padding: 5px 10px;
-    }
-
-    .dataTables_filter label {
-        color: #333333 !important;
-        font-weight: bold;
-    }
-
-    /* Paginación limpia */
-    .page-item.active .page-link {
-        background-color: #333;
-        border-color: #333;
-        color: white !important;
-    }
-
-    .page-link {
-        color: #333;
-        background-color: white;
-    }
-
-    /* Estilos de tabla y etiquetas */
-    .table-hover tbody tr:hover {
-        background-color: #f1f3f5;
-        transform: scale(1.002);
-        transition: 0.2s;
-    }
-
-    .badge-soft-success {
-        background-color: #d1e7dd;
-        color: #0f5132;
-    }
-
-    .badge-soft-danger {
-        background-color: #f8d7da;
-        color: #842029;
-    }
-
-    .badge-soft-primary {
-        background-color: #cfe2ff;
-        color: #084298;
-    }
-
-    .badge-pill {
-        padding: 6px 12px;
-        border-radius: 20px;
-    }
-</style>
-
-<div class="container card-container">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0">Gestión de Actividades</h2>
-            <p class="text-muted mb-0">Listado oficial • 30 registros por vista</p>
-        </div>
-        <div>
-            <button onclick="leerTabla()" class="btn btn-outline-primary me-2">
-                <i class="fas fa-volume-up"></i> Voz
-            </button>
-            <button onclick="exportarExcel()" class="btn btn-success me-2">
-                <i class="fas fa-file-excel"></i> Exportar Vista (.xlsx)
-            </button>
-            <a asp-action="Crear" class="btn btn-dark">
-                <i class="fas fa-plus"></i> Nuevo
-            </a>
-        </div>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table table-hover align-middle" id="tablaActividades" style="width:100%">
-            <thead class="table-light">
+<div class="table-container animate__animated animate__fadeIn">
+    <table class="table table-elegant">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Actividad</th>
+                <th>Fecha</th>
+                <th>Cupo</th>
+                <th>Responsable</th>
+                <th>Estado</th>
+                <th class="text-end">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
                 <tr>
-                    <th>Código</th>
-                    <th>Actividad</th>
-                    <th>Fecha</th>
-                    <th class="text-center">Cupo</th>
-                    <th>Responsable</th>
-                    <th class="text-center">Estado</th>
-                    <th></th>
+                    <td class="fw-bold text-muted">@item.Codigo</td>
+                    <td>
+                        <div class="fw-bold text-dark">@item.Nombre</div>
+                        <small class="text-muted">@item.TipoDiscapacidad</small>
+                    </td>
+                    <td>@item.FechaRealizacion.ToShortDateString()</td>
+                    <td>@item.Cupo</td>
+                    <td>@item.Responsable</td>
+                    <td>
+                        @if (item.Estado == "Activo")
+                        {
+                            <span class="badge-status bg-active">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge-status bg-inactive">@item.Estado</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="Editar" asp-route-id="@item.Codigo" class="btn btn-sm btn-light text-primary rounded-circle" title="Editar">
+                            <i class="fas fa-pen"></i>
+                        </a>
+                        <form asp-action="Eliminar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar esto?');">
+                            <input type="hidden" name="codigo" value="@item.Codigo" />
+                            <button type="submit" class="btn btn-sm btn-light text-danger rounded-circle" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td class="fw-bold text-muted">@item.Codigo</td>
-                        <td>
-                            <strong class="text-dark">@item.Nombre</strong>
-                            <br><small class="text-muted">@item.TipoDiscapacidad</small>
-                        </td>
-                        <td>@item.FechaRealizacion.ToShortDateString()</td>
-                        <td class="text-center">
-                            <span class="badge badge-soft-primary badge-pill">@item.Cupo</span>
-                        </td>
-                        <td>
-                            <span>@item.Responsable</span>
-                            <br><small class="text-muted" style="font-size:0.8em">@item.GmailProfesor</small>
-                        </td>
-                        <td class="text-center">
-                            @if (item.Estado == "Activo")
-                            {
-                                <span class="badge badge-soft-success badge-pill">Activo</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-soft-danger badge-pill">@item.Estado</span>
-                            }
-                        </td>
-                        <td class="text-end">
-                            <a asp-action="Editar" asp-route-id="@item.Codigo" class="btn btn-sm btn-light rounded-circle">
-                                <i class="fas fa-pen"></i>
-                            </a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+            }
+        </tbody>
+    </table>
 </div>
 
 @section Scripts {

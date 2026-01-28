@@ -1,70 +1,23 @@
-﻿@model SistemaWeb.Models.ValidacionCedulaResult
-
-@{
-    ViewData["Title"] = "Verificación de Identidad";
+﻿@{
+    ViewData["Title"] = "Validación";
 }
 
-<div class="minimal-card" style="border: 1px solid #333;">
-    <div style="text-align: center; margin-bottom: 30px;">
-        <h2 class="minimal-title" style="margin-bottom: 10px;">🛡️ Zona de Verificación</h2>
-        <p style="color: #666; font-size: 0.9rem;">Sistema Integrado de Control de Acceso</p>
-    </div>
-
-    <form asp-action="ValidarCedula" method="post">
-        <div class="form-group">
-            <label class="control-label">Número de Cédula / ID</label>
-            <div style="display: flex; gap: 10px;">
-                <input type="text" name="cedula" class="form-control" placeholder="Ingrese documento..." style="text-align: center; letter-spacing: 2px; font-weight: bold;" />
-                <button type="submit" class="btn-excel" style="width: auto; padding: 0 25px;">🔍 Buscar</button>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card-custom text-center">
+            <div class="mb-4 text-primary">
+                <i class="fas fa-id-card fa-3x"></i>
             </div>
-            @if (ViewBag.Error != null)
-            {
-                <p class="text-danger" style="margin-top: 10px; text-align: center;">@ViewBag.Error</p>
-            }
-        </div>
-    </form>
 
-    @if (Model != null)
-    {
-        <div style="margin-top: 40px; animation: fadeIn 0.5s ease-in;">
+            <h3 class="fw-bold mb-3">Verificar Estudiante</h3>
+            <p class="text-muted mb-4">Ingresa el número de cédula para consultar la base de datos académica.</p>
 
-            @if (Model.EsValida && Model.EsEstudiante)
-            {
-                <div style="background: rgba(16, 124, 65, 0.15); border: 1px solid #107c41; padding: 20px; border-radius: 10px; text-align: center;">
-                    <h1 style="font-size: 3rem; margin: 0;">✅</h1>
-                    <h3 style="color: #4cd964; margin-top: 10px;">Acceso Autorizado</h3>
-                    <p style="color: #ccc; margin-bottom: 5px;">Estudiante: <strong style="color: white; font-size: 1.1rem;">@Model.Nombre</strong></p>
-                    <p style="color: #666; font-size: 0.8rem;">Documento: @Model.Cedula</p>
+            <form action="/Apoyo/ValidarCedula" method="post">
+                <div class="input-group mb-3">
+                    <input type="text" name="cedula" class="form-control form-control-lg text-center" placeholder="Ej: 1720000000" required maxlength="10">
+                    <button class="btn btn-uisek" type="submit">Consultar</button>
                 </div>
-            }
-            else
-            {
-                <div style="background: rgba(200, 0, 0, 0.15); border: 1px solid #ff5c5c; padding: 20px; border-radius: 10px; text-align: center;">
-                    <h1 style="font-size: 3rem; margin: 0;">⛔</h1>
-                    <h3 style="color: #ff5c5c; margin-top: 10px;">Acceso Denegado</h3>
-                    <p style="color: #ccc;">@Model.Mensaje</p>
-                    <p style="color: #666; font-size: 0.8rem;">Por favor diríjase a secretaría.</p>
-                </div>
-            }
+            </form>
         </div>
-    }
-
-    <div style="text-align: center; margin-top: 30px;">
-        <a asp-controller="Actividades" asp-action="Index" class="btn-secondary-min">← Volver al Sistema</a>
     </div>
 </div>
-
-<style>
-    /* OJO AQUÍ: Usamos @@ para escapar el símbolo y que Razor no se confunda */
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
