@@ -21,8 +21,7 @@ namespace SistemaWeb.Controllers
             return View(actividades);
         }
 
-        // 2. CREAR - ABRIR FORMULARIO (GET)
-        // ¡Esta era la función que faltaba! 👇
+        // 2. CREAR (GET)
         public IActionResult Crear()
         {
             return View();
@@ -40,7 +39,7 @@ namespace SistemaWeb.Controllers
             return View(actividad);
         }
 
-        // 4. EDITAR - ABRIR FORMULARIO (GET)
+        // 4. EDITAR (GET)
         public IActionResult Editar(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -73,10 +72,9 @@ namespace SistemaWeb.Controllers
         [HttpPost]
         public IActionResult Eliminar(string codigo)
         {
-            // OJO: Asegúrate que tu _service tenga el método Eliminar expuesto
-            // Si no usas servicio, llama directo al repositorio: _repository.Eliminar(codigo);
+            _repository.Eliminar(codigo);
 
-            // Asumiendo que agregaste el método al servicio:
+            
             _service.Eliminar(codigo);
 
             return RedirectToAction(nameof(Index));
