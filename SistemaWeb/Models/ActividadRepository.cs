@@ -22,7 +22,7 @@ namespace SistemaWeb.Models
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                // Cambiamos query inline por nombre del SP
+                
                 using (var command = new SqlCommand("sp_ObtenerActividades", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure; 
