@@ -4,115 +4,151 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
-    <h2 class="fw-bold" style="color: var(--uisek-blue);">Listado de Actividades</h2>
-    <a asp-action="Crear" class="btn btn-uisek">
-        <i class="fas fa-plus me-2"></i> Nueva Actividad
-    </a>
+    <h2 class="fw-bold" style="color: var(--uisek-blue);">
+        <i class="fas fa-tasks me-2"></i>Listado de Actividades
+    </h2>
+
+    <div class="d-flex gap-2">
+        <a asp-action="VerificarSistema" class="btn btn-light text-muted border shadow-sm rounded-pill" title="Verificar estado del servidor">
+            <i class="fas fa-server"></i> <span class="d-none d-md-inline">Sistema</span>
+        </a>
+
+        <button onclick="exportarExcel()" class="btn btn-outline-success rounded-pill shadow-sm" title="Descargar reporte">
+            <i class="fas fa-file-excel me-2"></i>Exportar
+        </button>
+
+        <button onclick="leerTabla()" class="btn btn-outline-primary rounded-pill shadow-sm" style="border-color: var(--uisek-blue); color: var(--uisek-blue);" title="Leer contenido en voz alta">
+            <i class="fas fa-volume-up me-2"></i>Voz
+        </button>
+
+        <a asp-action="Crear" class="btn btn-primary rounded-pill shadow-sm px-4" style="background-color: var(--uisek-blue); border-color: var(--uisek-blue);">
+            <i class="fas fa-plus me-2"></i>Nueva
+        </a>
+    </div>
 </div>
 
-<div class="table-container animate__animated animate__fadeIn">
-    <table class="table table-elegant">
-        <thead>
-            <tr>
-                <th>Código</th>
-                <th>Actividad</th>
-                <th>Fecha</th>
-                <th>Cupo</th>
-                <th>Responsable</th>
-                <th>Estado</th>
-                <th class="text-end">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td class="fw-bold text-muted">@item.Codigo</td>
-                    <td>
-                        <div class="fw-bold text-dark">@item.Nombre</div>
-                        <small class="text-muted">@item.TipoDiscapacidad</small>
-                    </td>
-                    <td>@item.FechaRealizacion.ToShortDateString()</td>
-                    <td>@item.Cupo</td>
-                    <td>@item.Responsable</td>
-                    <td>
-                        @if (item.Estado == "Activo")
-                        {
-                            <span class="badge-status bg-active">Activo</span>
-                        }
-                        else
-                        {
-                            <span class="badge-status bg-inactive">@item.Estado</span>
-                        }
-                    </td>
-                    <td class="text-end">
-                        <a asp-action="Editar" asp-route-id="@item.Codigo" class="btn btn-sm btn-light text-primary rounded-circle" title="Editar">
-                            <i class="fas fa-pen"></i>
-                        </a>
-                        <form asp-action="Eliminar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar esto?');">
-                            <input type="hidden" name="codigo" value="@item.Codigo" />
-                            <button type="submit" class="btn btn-sm btn-light text-danger rounded-circle" title="Eliminar">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="table-container animate__animated animate__fadeIn">
+            <table class="table table-hover table-elegant" id="tablaActividades">
+                <thead class="table-light">
+                    <tr>
+                        <th>Código</th>
+                        <th>Actividad</th>
+                        <th>Fecha</th>
+                        <th>Cupo</th>
+                        <th>Responsable</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold text-muted">@item.Codigo</td>
+                            <td>
+                                <div class="fw-bold text-dark">@item.Nombre</div>
+                                <small class="text-muted">@item.TipoDiscapacidad</small>
+                            </td>
+                            <td>@item.FechaRealizacion.ToShortDateString()</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    <i class="fas fa-users me-1"></i>@item.Cupo
+                                </span>
+                            </td>
+                            <td>@item.Responsable</td>
+                            <td>
+                                @if (item.Estado == "Activo")
+                                {
+                                    <span class="badge bg-success rounded-pill">Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary rounded-pill">@item.Estado</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="Editar" asp-route-id="@item.Codigo" class="btn btn-sm btn-outline-primary rounded-circle" title="Editar">
+                                    <i class="fas fa-pen"></i>
+                                </a>
+                                <form asp-action="Eliminar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar la actividad @item.Nombre?');">
+                                    <input type="hidden" name="codigo" value="@item.Codigo" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <script>
         jQuery(document).ready(function($) {
-            // Inicializar DataTables
+            // Inicializar DataTables con Buscador (f) y Paginación (p)
             var table = $('#tablaActividades').DataTable({
-                "pageLength": 30, // Forzar 30 datos
-                "lengthChange": false,
+                "pageLength": 10,
+                "lengthChange": true,
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
                 },
-                // Configuración visual: Buscador arriba, Paginación abajo
-                "dom": "<'row mb-3'<'col-md-6'f><'col-md-6 text-end'p>>" +
+                // f = filtro (buscador), p = paginación, i = información
+                "dom": "<'row mb-3'<'col-md-6'f><'col-md-6 text-end'>>" +
                        "<'row'<'col-sm-12'tr>>" +
                        "<'row mt-3'<'col-md-5'i><'col-md-7'p>>"
             });
         });
 
-        // ✅ FUNCIÓN EXPORTAR CORREGIDA
+        // FUNCIÓN EXPORTAR EXCEL (Ya la tenías, ahora está conectada al botón)
         function exportarExcel() {
-            // 1. Seleccionamos la tabla HTML
             var tabla = document.getElementById("tablaActividades");
-
-            // 2. Usamos SheetJS para convertir SOLO lo visible en un libro de Excel
-            var wb = XLSX.utils.table_to_book(tabla, {sheet: "Pagina Actual"});
-
-            // 3. Generamos y descargamos el archivo .xlsx
-            XLSX.writeFile(wb, 'Reporte_Actividades_VistaActual.xlsx');
+            // Convierte la tabla HTML a hoja de cálculo
+            var wb = XLSX.utils.table_to_book(tabla, {sheet: "Actividades"});
+            // Guarda el archivo
+            XLSX.writeFile(wb, 'Reporte_Actividades.xlsx');
         }
 
-        // Función de Lectura de Voz
+        // FUNCIÓN LECTURA DE VOZ (Accesibilidad)
         function leerTabla() {
+            // Cancelar cualquier lectura anterior
             window.speechSynthesis.cancel();
-            var mensaje = new SpeechSynthesisUtterance();
-            mensaje.lang = 'es-ES';
-            var visibleRows = document.querySelectorAll('#tablaActividades tbody tr');
-            var texto = "Leyendo datos de la página actual. ";
 
-            // Leemos máximo 3 para no cansar
-            for(var i=0; i < Math.min(3, visibleRows.length); i++) {
-                var celdas = visibleRows[i].getElementsByTagName('td');
-                if(celdas.length > 1) {
-                    var nombre = celdas[1].innerText.replace(/(\r\n|\n|\r)/gm, " ");
-                    texto += "Actividad: " + nombre + ". ";
+            var mensaje = new SpeechSynthesisUtterance();
+            mensaje.lang = 'es-LA'; // Español Latinoamericano
+            mensaje.rate = 1; // Velocidad normal
+
+            // Leer filas visibles
+            var visibleRows = document.querySelectorAll('#tablaActividades tbody tr');
+            var texto = "Iniciando lectura de actividades. ";
+
+            if (visibleRows.length === 0) {
+                texto = "No hay actividades visibles en la tabla.";
+            } else {
+                // Leemos solo las primeras 5 para no saturar
+                var limite = Math.min(5, visibleRows.length);
+                for(var i=0; i < limite; i++) {
+                    var celdas = visibleRows[i].getElementsByTagName('td');
+                    if(celdas.length > 1) {
+                        // Índice 1 es la columna "Actividad"
+                        var nombre = celdas[1].innerText.replace(/(\r\n|\n|\r)/gm, " ");
+                        // Índice 4 es la columna "Responsable"
+                        var responsable = celdas[4].innerText;
+
+                        texto += "Actividad número " + (i+1) + ": " + nombre + ", a cargo de " + responsable + ". ";
+                    }
                 }
             }
+
             mensaje.text = texto;
             window.speechSynthesis.speak(mensaje);
         }

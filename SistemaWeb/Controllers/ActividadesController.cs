@@ -1,17 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SistemaWeb.Models;
 using SistemaWeb.Services;
+using System.Threading.Tasks; // Necesario para Task
 
 namespace SistemaWeb.Controllers
 {
     public class ActividadesController : Controller
     {
-        // Usamos el Servicio en lugar del Repositorio directo
         private readonly ActividadService _service;
+        private readonly EstudiantesClient _apiClient; // [Nuevo] Inyeccion para el Ping
 
-        public ActividadesController(ActividadService service)
+        // Actualizamos el constructor para recibir el cliente de la API
+        public ActividadesController(ActividadService service, EstudiantesClient apiClient)
         {
             _service = service;
+            _apiClient = apiClient;
         }
 
         // 1. LISTADO (GET)
@@ -67,17 +70,23 @@ namespace SistemaWeb.Controllers
             return View(actividad);
         }
 
-
-
+        // 6. ELIMINAR
         [HttpPost]
         public IActionResult Eliminar(string codigo)
         {
-           
-
-            
             _service.Eliminar(codigo);
-
             return RedirectToAction(nameof(Index));
+        }
+
+        // 7. VERIFICAR SISTEMA (PING)
+       
+        public async Task<IActionResult> VerificarSistema()
+        {
+            
+            var reporte = await ValidarSistema.RealizarChequeo(_apiClient);
+            
+
+            return View(reporte); 
         }
     }
 }

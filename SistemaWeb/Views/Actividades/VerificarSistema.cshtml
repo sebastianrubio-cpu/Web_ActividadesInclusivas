@@ -1,0 +1,63 @@
+﻿@model SistemaWeb.Models.ValidarSistema
+@{
+    ViewData["Title"] = "Estado del Sistema";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4 animate__animated animate__fadeInUp">
+
+                <div class="card-header bg-white border-0 pt-4 pb-2 text-center">
+                    <h3 class="fw-bold" style="color: var(--uisek-blue);">
+                        <i class="fas fa-server me-2"></i>Diagnóstico del Sistema
+                    </h3>
+                    <p class="text-muted small">Reporte de conectividad y entorno</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="mb-4 text-center">
+                        <h5 class="text-muted mb-3">Estado de la API Estudiantes</h5>
+                        @if (Model.ApiOnline)
+                        {
+                            <div class="alert alert-success d-inline-block rounded-pill px-5 py-2 shadow-sm border-0">
+                                <i class="fas fa-check-circle me-2"></i>@Model.EstadoApi
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-danger d-inline-block rounded-pill px-5 py-2 shadow-sm border-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>@Model.EstadoApi
+                            </div>
+                        }
+                    </div>
+
+                    <ul class="list-group list-group-flush rounded-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="text-muted"><i class="fas fa-desktop me-2"></i>Sistema Operativo</span>
+                            <span class="fw-bold text-dark">@Model.SistemaOperativo</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="text-muted"><i class="fas fa-calendar-alt me-2"></i>Fecha</span>
+                            <span class="fw-bold text-dark">@Model.Fecha</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="text-muted"><i class="fas fa-clock me-2"></i>Hora del Servidor</span>
+                            <span class="fw-bold text-dark">@Model.Hora</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="text-muted"><i class="fas fa-network-wired me-2"></i>Nodo / Lugar</span>
+                            <span class="fw-bold text-dark">@Model.Lugar</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-footer bg-white border-0 text-center pb-4">
+                    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                        <i class="fas fa-arrow-left me-2"></i>Volver al Listado
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
