@@ -2,13 +2,11 @@
 {
     public class ValidacionCedulaResult
     {
-        public bool EsValida { get; set; }
-        // Agregamos el signo de pregunta '?' para que acepte nulos y no de error
-        public string? Mensaje { get; set; }
+        // 1. Esta propiedad recibe el dato que viene de la API (JSON: "esEstudiante")
         public bool EsEstudiante { get; set; }
-        public string? Cedula { get; set; }
-        public string? Nombre { get; set; }
-
-        public object? DatosEstudiante { get; set; }
+        public bool EsValida { get; set; }
+        public string Cedula { get; set; }
+        public string Nombre { get; set; }
+        public string Mensaje { get; set; }
     }
 }

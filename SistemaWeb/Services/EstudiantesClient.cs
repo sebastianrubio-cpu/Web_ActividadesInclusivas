@@ -11,7 +11,6 @@ namespace SistemaWeb.Services
         public EstudiantesClient(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
-            // Busca la URL en appsettings o usa una por defecto
             _baseUrl = configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7000";
         }
 
@@ -25,7 +24,14 @@ namespace SistemaWeb.Services
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var resultado = JsonConvert.DeserializeObject<ValidacionCedulaResult>(content);
-                    return resultado ?? new ValidacionCedulaResult { EsValida = false, Mensaje = "Respuesta vacía" };
+
+                    if (resultado != null)
+                    {
+                        resultado.EsValida = resultado.EsEstudiante;
+                        return resultado;
+                    }
+
+                    return new ValidacionCedulaResult { EsValida = false, Mensaje = "Respuesta vacía" };
                 }
 
                 return new ValidacionCedulaResult { EsValida = false, Mensaje = "Cédula no encontrada o error en API" };

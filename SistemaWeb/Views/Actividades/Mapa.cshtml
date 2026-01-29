@@ -3,6 +3,8 @@
     ViewData["Title"] = "Mapa de Eventos";
 }
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold" style="color: var(--uisek-blue);">
@@ -21,21 +23,25 @@
 </div>
 
 @section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <script>
-        function initMap() {
-           
-            var centroMap = { lat: -0.0910, lng: -78.4840 };
+        document.addEventListener("DOMContentLoaded", function () {
+            
+            // A. Coordenadas iniciales (UISEK / Quito)
+            var latitudDefault = -0.0910;
+            var longitudDefault = -78.4840;
 
-           
-            var map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 13,
-                center: centroMap,
-                styles: [ 
-                    { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }
-                ]
-            });
+            // B. Inicializar el mapa con Leaflet (L.map)
+            // 'map' es el id del div
+            var map = L.map('map').setView([latitudDefault, longitudDefault], 14);
 
+            // C. Cargar las "baldosas" (el dibujo del mapa) desde OpenStreetMap (Gratis)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
 
+            // D. Traer datos de C# a Javascript (Igual que antes)
             var eventos = @Json.Serialize(Model.Select(e => new { 
                 titulo = e.Nombre, 
                 lat = e.Latitud, 
@@ -43,34 +49,30 @@
                 desc = e.Responsable 
             }));
 
-            var infoWindow = new google.maps.InfoWindow();
-
+            // E. Recorrer y crear marcadores
             eventos.forEach(function(evento) {
-           
+                // Verificamos que tenga coordenadas válidas
                 if (evento.lat !== 0 && evento.lng !== 0) {
                     
-                    var marker = new google.maps.Marker({
-                        position: { lat: evento.lat, lng: evento.lng },
-                        map: map,
-                        title: evento.titulo,
-                        animation: google.maps.Animation.DROP
-                    });
+                    // Crear marcador en Leaflet
+                    var marker = L.marker([evento.lat, evento.lng]).addTo(map);
 
-                  
-                    marker.addListener("click", () => {
-                        var contenido = `
-                            <div style="padding:10px;">
-                                <h6 class="fw-bold text-primary mb-1">${evento.titulo}</h6>
-                                <p class="mb-0 text-muted small">Responsable: ${evento.desc}</p>
-                            </div>
-                        `;
-                        infoWindow.setContent(contenido);
-                        infoWindow.open(map, marker);
-                    });
+                    // Crear el contenido del Popup (Ventana de info)
+                    var contenidoPopup = `
+                        <div class="text-center">
+                            <h6 class="fw-bold text-primary mb-1" style="color: var(--uisek-blue) !important;">
+                                ${evento.titulo}
+                            </h6>
+                            <p class="mb-0 text-muted small">
+                                <b>Responsable:</b> ${evento.desc}
+                            </p>
+                        </div>
+                    `;
+
+                    // Asignar el popup al marcador
+                    marker.bindPopup(contenidoPopup);
                 }
             });
-        }
+        });
     </script>
-
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=APIKEY&callback=initMap"></script>
-} --No se usa el API ya que pide pago/registro de tarjeta de debito para obtener la APY KEY
+}

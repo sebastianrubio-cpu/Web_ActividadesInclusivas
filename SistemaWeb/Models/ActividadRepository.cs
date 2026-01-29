@@ -1,90 +1,69 @@
 ﻿using System.Data;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
+using Microsoft.Data.SqlClient; // <--- USAMOS LA LIBRERÍA MODERNA
+using System.Collections.Generic; // Necesario para List<>
 
 namespace SistemaWeb.Models
 {
     public class ActividadRepository
     {
-        private readonly string? _connectionString;
+        private readonly string _connectionString;
 
         public ActividadRepository(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        // Método usando STORED PROCEDURE
+        // 1. OBTENER TODAS (Cambiamos IEnumerable por List para arreglar el error de conversión)
         public List<Actividad> ObtenerTodas()
         {
-            var actividades = new List<Actividad>();
+            var lista = new List<Actividad>();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (var conn = new SqlConnection(_connectionString))
             {
-                connection.Open();
-                
-                using (var command = new SqlCommand("sp_ObtenerActividades", connection))
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ObtenerActividades", conn))
                 {
-                    command.CommandType = CommandType.StoredProcedure; 
-
-                    using (var reader = command.ExecuteReader())
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            actividades.Add(new Actividad
+                            lista.Add(new Actividad
                             {
                                 Codigo = reader["Codigo"].ToString(),
                                 Nombre = reader["Nombre"].ToString(),
-                                FechaRealizacion = (DateTime)reader["FechaRealizacion"],
-                                TipoDiscapacidad = reader["TipoDiscapacidad"].ToString(), 
-                                Cupo = (int)reader["Cupo"],
+                                FechaRealizacion = Convert.ToDateTime(reader["FechaRealizacion"]),
+                                Cupo = Convert.ToInt32(reader["Cupo"]),
                                 Responsable = reader["Responsable"].ToString(),
-                                Estado = reader["Estado"].ToString(), 
-                                GmailProfesor = reader["GmailProfesor"].ToString()
+                                GmailProfesor = reader["GmailProfesor"] != DBNull.Value ? reader["GmailProfesor"].ToString() : "",
+                                Estado = reader["Estado"].ToString(),
+                                TipoDiscapacidad = reader["TipoDiscapacidad"].ToString(),
+
+                                // COORDENADAS
+                                Latitud = reader["Latitud"] != DBNull.Value ? Convert.ToDouble(reader["Latitud"]) : 0,
+                                Longitud = reader["Longitud"] != DBNull.Value ? Convert.ToDouble(reader["Longitud"]) : 0
                             });
                         }
                     }
                 }
             }
-            return actividades;
+            return lista; // Ahora retorna explícitamente una List
         }
 
-        public void Agregar(Actividad actividad)
-        {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                connection.Open();
-                using (var command = new SqlCommand("sp_InsertarActividad", connection))
-                {
-                    command.CommandType = CommandType.StoredProcedure;
-
-                    // Pasamos parámetros. Ojo: El SP maneja internamente la conversión de Estado/Discapacidad a IDs
-                    command.Parameters.AddWithValue("@Codigo", actividad.Codigo);
-                    command.Parameters.AddWithValue("@Nombre", actividad.Nombre);
-                    command.Parameters.AddWithValue("@FechaRealizacion", actividad.FechaRealizacion);
-                    command.Parameters.AddWithValue("@Cupo", actividad.Cupo);
-                    // Manejo de nulos en C# antes de enviar, porque la DB ya no los acepta
-                    command.Parameters.AddWithValue("@Responsable", actividad.Responsable ?? "Sin Asignar");
-                    command.Parameters.AddWithValue("@GmailProfesor", actividad.GmailProfesor ?? "sin_correo@uisek.edu.ec");
-                    command.Parameters.AddWithValue("@NombreEstado", actividad.Estado ?? "Activo");
-                    command.Parameters.AddWithValue("@NombreDiscapacidad", actividad.TipoDiscapacidad ?? "Ninguna");
-
-                    command.ExecuteNonQuery();
-                }
-            }
-        }
-        public Actividad ObtenerPorId(string id)
+        // 2. OBTENER POR ID
+        public Actividad ObtenerPorId(string codigo)
         {
             Actividad actividad = null;
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                connection.Open();
-                using (var command = new SqlCommand("sp_ObtenerActividadPorId", connection))
-                {
-                    command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@Codigo", id);
 
-                    using (var reader = command.ExecuteReader())
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ObtenerActividadPorId", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Codigo", codigo);
+
+                    using (var reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
@@ -92,12 +71,15 @@ namespace SistemaWeb.Models
                             {
                                 Codigo = reader["Codigo"].ToString(),
                                 Nombre = reader["Nombre"].ToString(),
-                                FechaRealizacion = (DateTime)reader["FechaRealizacion"],
-                                TipoDiscapacidad = reader["TipoDiscapacidad"].ToString(),
-                                Cupo = (int)reader["Cupo"],
+                                FechaRealizacion = Convert.ToDateTime(reader["FechaRealizacion"]),
+                                Cupo = Convert.ToInt32(reader["Cupo"]),
                                 Responsable = reader["Responsable"].ToString(),
+                                GmailProfesor = reader["GmailProfesor"] != DBNull.Value ? reader["GmailProfesor"].ToString() : "",
                                 Estado = reader["Estado"].ToString(),
-                                GmailProfesor = reader["GmailProfesor"].ToString()
+                                TipoDiscapacidad = reader["TipoDiscapacidad"].ToString(),
+
+                                Latitud = reader["Latitud"] != DBNull.Value ? Convert.ToDouble(reader["Latitud"]) : 0,
+                                Longitud = reader["Longitud"] != DBNull.Value ? Convert.ToDouble(reader["Longitud"]) : 0
                             };
                         }
                     }
@@ -106,44 +88,73 @@ namespace SistemaWeb.Models
             return actividad;
         }
 
-        // Método: Actualizar
+        // 3. AGREGAR
+        public void Agregar(Actividad actividad)
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_InsertarActividad", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Codigo", actividad.Codigo);
+                    cmd.Parameters.AddWithValue("@Nombre", actividad.Nombre);
+                    cmd.Parameters.AddWithValue("@FechaRealizacion", actividad.FechaRealizacion);
+                    cmd.Parameters.AddWithValue("@Cupo", actividad.Cupo);
+                    cmd.Parameters.AddWithValue("@Responsable", actividad.Responsable ?? "Sin Asignar");
+                    cmd.Parameters.AddWithValue("@GmailProfesor", actividad.GmailProfesor ?? "contacto@uisek.edu.ec");
+
+                    cmd.Parameters.AddWithValue("@Latitud", actividad.Latitud);
+                    cmd.Parameters.AddWithValue("@Longitud", actividad.Longitud);
+
+                    cmd.Parameters.AddWithValue("@NombreEstado", actividad.Estado ?? "Activo");
+                    cmd.Parameters.AddWithValue("@NombreDiscapacidad", actividad.TipoDiscapacidad ?? "Ninguna");
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // 4. ACTUALIZAR
         public void Actualizar(Actividad actividad)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            using (var conn = new SqlConnection(_connectionString))
             {
-                connection.Open();
-                using (var command = new SqlCommand("sp_ActualizarActividad", connection))
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ActualizarActividad", conn))
                 {
-                    command.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Codigo", actividad.Codigo);
+                    cmd.Parameters.AddWithValue("@Nombre", actividad.Nombre);
+                    cmd.Parameters.AddWithValue("@FechaRealizacion", actividad.FechaRealizacion);
+                    cmd.Parameters.AddWithValue("@Cupo", actividad.Cupo);
+                    cmd.Parameters.AddWithValue("@Responsable", actividad.Responsable ?? "Sin Asignar");
+                    cmd.Parameters.AddWithValue("@GmailProfesor", actividad.GmailProfesor ?? "contacto@uisek.edu.ec");
 
-                    command.Parameters.AddWithValue("@Codigo", actividad.Codigo);
-                    command.Parameters.AddWithValue("@Nombre", actividad.Nombre);
-                    command.Parameters.AddWithValue("@FechaRealizacion", actividad.FechaRealizacion);
-                    command.Parameters.AddWithValue("@Cupo", actividad.Cupo);
-                    command.Parameters.AddWithValue("@Responsable", actividad.Responsable ?? "Sin Asignar");
-                    command.Parameters.AddWithValue("@GmailProfesor", actividad.GmailProfesor ?? "sin_correo@uisek.edu.ec");
-                    command.Parameters.AddWithValue("@NombreEstado", actividad.Estado ?? "Activo");
-                    command.Parameters.AddWithValue("@NombreDiscapacidad", actividad.TipoDiscapacidad ?? "Ninguna");
+                    cmd.Parameters.AddWithValue("@Latitud", actividad.Latitud);
+                    cmd.Parameters.AddWithValue("@Longitud", actividad.Longitud);
 
-                    command.ExecuteNonQuery();
+                    cmd.Parameters.AddWithValue("@NombreEstado", actividad.Estado ?? "Activo");
+                    cmd.Parameters.AddWithValue("@NombreDiscapacidad", actividad.TipoDiscapacidad ?? "Ninguna");
+
+                    cmd.ExecuteNonQuery();
                 }
             }
         }
 
-        // Método: Eliminar
+        // 5. ELIMINAR
         public void Eliminar(string codigo)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            using (var conn = new SqlConnection(_connectionString))
             {
-                connection.Open();
-                using (var command = new SqlCommand("sp_EliminarActividad", connection))
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_EliminarActividad", conn))
                 {
-                    command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@Codigo", codigo);
-                    command.ExecuteNonQuery();
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Codigo", codigo);
+                    cmd.ExecuteNonQuery();
                 }
             }
         }
-
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SistemaWeb.Services;
 using SistemaWeb.Models;
+using System.Threading.Tasks;
 
 namespace SistemaWeb.Controllers
 {
@@ -13,12 +14,13 @@ namespace SistemaWeb.Controllers
             _cliente = cliente;
         }
 
+        // GET: Muestra el formulario vacío
         public IActionResult ValidarCedula()
         {
             return View();
         }
 
-
+        // POST: Procesa la búsqueda
         [HttpPost]
         public async Task<IActionResult> ValidarCedula(string cedula)
         {
@@ -28,10 +30,11 @@ namespace SistemaWeb.Controllers
                 return View();
             }
 
-
+            // 1. Consultamos la API
             var resultado = await _cliente.ConsultarPorCedulaAsync(cedula);
 
-            return View(resultado);
+            // 2. [CORRECCIÓN] Redirigimos a la vista de RESULTADOS enviando el modelo
+            return View("ResultadoCedula", resultado);
         }
     }
 }
