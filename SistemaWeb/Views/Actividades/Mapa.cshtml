@@ -1,78 +1,88 @@
 ﻿@model IEnumerable<SistemaWeb.Models.Actividad>
-@{
-    ViewData["Title"] = "Mapa de Eventos";
-}
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+@{
+    ViewData["Title"] = "Mapa de Actividades";
+}
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold" style="color: var(--uisek-blue);">
-            <i class="fas fa-map-marked-alt me-2"></i>Geolocalización de Eventos
-        </h2>
-        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">
-            <i class="fas fa-arrow-left me-2"></i>Volver al Listado
-        </a>
-    </div>
+    <h2>📍 Mapa de Actividades Inclusivas</h2>
+    <p>Visualiza la ubicación de todas las actividades registradas en el sistema.</p>
 
-    <div class="card shadow-lg border-0 rounded-4 overflow-hidden animate__animated animate__fadeIn">
-        <div class="card-body p-0">
-            <div id="map" style="height: 600px; width: 100%;"></div>
-        </div>
-    </div>
+    <div id="map" style="height: 600px; width: 100%; border-radius: 8px; border: 1px solid #ccc;"></div>
 </div>
 
-@section Scripts {
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin="" />
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            
-            // A. Coordenadas iniciales (UISEK / Quito)
-            var latitudDefault = -0.0910;
-            var longitudDefault = -78.4840;
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
 
-            // B. Inicializar el mapa con Leaflet (L.map)
-            // 'map' es el id del div
-            var map = L.map('map').setView([latitudDefault, longitudDefault], 14);
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
 
-            // C. Cargar las "baldosas" (el dibujo del mapa) desde OpenStreetMap (Gratis)
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+        // 1. Inicializar Mapa (Centrado en Ecuador)
+        var map = L.map('map').setView([-1.8312, -78.1834], 7); // Zoom más alejado para ver todo el país
 
-            // D. Traer datos de C# a Javascript (Igual que antes)
-            var eventos = @Json.Serialize(Model.Select(e => new { 
-                titulo = e.Nombre, 
-                lat = e.Latitud, 
-                lng = e.Longitud,
-                desc = e.Responsable 
-            }));
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
 
-            // E. Recorrer y crear marcadores
-            eventos.forEach(function(evento) {
-                // Verificamos que tenga coordenadas válidas
-                if (evento.lat !== 0 && evento.lng !== 0) {
-                    
-                    // Crear marcador en Leaflet
-                    var marker = L.marker([evento.lat, evento.lng]).addTo(map);
+        // 2. Obtener datos (Raw Data)
+        var actividades = @Json.Serialize(Model);
 
-                    // Crear el contenido del Popup (Ventana de info)
-                    var contenidoPopup = `
-                        <div class="text-center">
-                            <h6 class="fw-bold text-primary mb-1" style="color: var(--uisek-blue) !important;">
-                                ${evento.titulo}
-                            </h6>
-                            <p class="mb-0 text-muted small">
-                                <b>Responsable:</b> ${evento.desc}
-                            </p>
-                        </div>
-                    `;
+        // --- DEBUG: MIRA ESTO EN LA CONSOLA DEL NAVEGADOR (F12) ---
+        console.log("=== INICIO DE DEBUG MAPA ===");
+        console.log("Total actividades recuperadas:", actividades.length);
+        console.log("Datos crudos:", actividades);
 
-                    // Asignar el popup al marcador
-                    marker.bindPopup(contenidoPopup);
-                }
-            });
+        var puntosDibujados = 0;
+
+        // 3. Iterar de forma segura
+        actividades.forEach(function (item, index) {
+
+            // TRUCO DE DEV: Intentamos leer la propiedad en Mayúscula O minúscula
+            // Esto arregla el error de serialización.
+            var lat = item.Latitud || item.latitud || 0;
+            var lng = item.Longitud || item.longitud || 0;
+            var nombre = item.Nombre || item.nombre || "Actividad sin nombre";
+            var resp = item.Responsable || item.responsable || "Sin responsable";
+            var tipo = item.TipoDiscapacidad || item.tipoDiscapacidad || "General";
+            var codigo = item.Codigo || item.codigo || "";
+
+            // Convertir a float por seguridad
+            lat = parseFloat(lat);
+            lng = parseFloat(lng);
+
+            // Log por cada fila para ver si detecta coordenadas
+            console.log(`Fila ${index}: ${nombre} -> Lat: ${lat}, Lng: ${lng}`);
+
+            // Solo dibujamos si las coordenadas son válidas (diferentes de 0)
+            if (lat !== 0 && lng !== 0) {
+
+                var marker = L.marker([lat, lng]).addTo(map);
+
+                var popupContent = `
+                    <div style="text-align:center;">
+                        <h6>${nombre}</h6>
+                        <p><b>Responsable:</b> ${resp}</p>
+                        <span class="badge bg-info text-dark">${tipo}</span>
+                        <br/><br/>
+                        <a href="/Actividades/Editar?id=${codigo}" class="btn btn-sm btn-primary">Ver Detalles</a>
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent);
+                puntosDibujados++;
+            }
         });
-    </script>
-}
+
+        console.log("Total puntos dibujados en el mapa:", puntosDibujados);
+
+        if (puntosDibujados === 0) {
+            alert("Atención: El sistema no encontró coordenadas válidas para dibujar. Revisa la Consola (F12) para más detalles.");
+        }
+    });
+</script>

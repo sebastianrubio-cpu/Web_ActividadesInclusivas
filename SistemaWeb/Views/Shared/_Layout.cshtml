@@ -4,17 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - UISEK Inclusiva</title>
-
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3 py-3">
+        <nav class="navbar navbar-expand-sm border-bottom box-shadow mb-3" style="background-color: var(--navbar-bg);">
             <div class="container">
                 <a class="navbar-brand fw-bold" asp-controller="Actividades" asp-action="Index">
-                    <span style="color: var(--uisek-blue);">UISEK</span> <span class="text-muted fw-light">| Inclusiva</span>
+                    <span style="color: var(--uisek-blue);">UISEK</span> <span style="color: var(--text-muted);">| Inclusiva</span>
                 </a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
@@ -23,44 +23,50 @@
 
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark fw-bold" asp-controller="Actividades" asp-action="Index">
-                                <i class="fas fa-list-ul me-1"></i> Actividades
-                            </a>
-
-                        </li>
 
                         <li class="nav-item">
-    <a class="nav-link text-dark fw-bold" asp-controller="Actividades" asp-action="Mapa">
-        <i class="fas fa-map-marker-alt me-1"></i> Mapa Eventos
-                             </a>
-                          </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link text-dark fw-bold" asp-controller="Home" asp-action="Proyecto">
-                                <i class="fas fa-info-circle me-1"></i> El Proyecto
+                            <a class="nav-anim" asp-controller="Actividades" asp-action="Index">
+                                📅 <span class="nav-text-reveal">Actividades</span>
                             </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-anim" asp-controller="Actividades" asp-action="Mapa">
+                                🗺️ <span class="nav-text-reveal">Mapa Eventos</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-anim" asp-controller="Home" asp-action="Proyecto">
+                                🚀 <span class="nav-text-reveal">El Proyecto</span>
+                            </a>
+                        </li>
+
                     </ul>
 
                     <ul class="navbar-nav align-items-center">
 
                         <li class="nav-item me-3">
-                            <a class="btn btn-outline-primary rounded-pill px-4" asp-controller="Apoyo" asp-action="ValidarCedula">
-                                <i class="fas fa-search me-2"></i>Verificar Estudiante
-                            </a>
+                            <button class="theme-toggle-btn" id="themeToggle" title="Cambiar Tema">
+                                <i class="fas fa-moon"></i>
+                            </button>
                         </li>
 
+                        @if (!User.IsInRole("Estudiante"))
+                        {
+                            <li class="nav-item me-2">
+                                <a class="btn btn-outline-primary rounded-pill btn-sm" asp-controller="Apoyo" asp-action="ValidarCedula">
+                                    <i class="fas fa-id-card me-1"></i> Validar
+                                </a>
+                            </li>
+                        }
+
                         <li class="nav-item">
-                            <a class="nav-link text-danger fw-bold" asp-controller="Acceso" asp-action="Salir">
-                                <i class="fas fa-sign-out-alt"></i> Salir
+                            <a class="nav-anim text-danger" asp-controller="Acceso" asp-action="Salir">
+                                🚪 <span class="nav-text-reveal">Salir</span>
                             </a>
                         </li>
                     </ul>
-
-
-
-
                 </div>
             </div>
         </nav>
@@ -75,6 +81,40 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const toggleBtn = document.getElementById('themeToggle');
+            const icon = toggleBtn.querySelector('i');
+            const body = document.body;
+
+            // 1. Cargar preferencia guardada
+            const currentTheme = localStorage.getItem('theme');
+            if (currentTheme === 'dark') {
+                body.setAttribute('data-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            // 2. Evento Click
+            toggleBtn.addEventListener('click', () => {
+                if (body.hasAttribute('data-theme')) {
+                    // Cambiar a Claro
+                    body.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                } else {
+                    // Cambiar a Oscuro
+                    body.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            });
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

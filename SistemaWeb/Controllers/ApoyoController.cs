@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SistemaWeb.Services;
 using SistemaWeb.Models;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization; // <--- Importante
 
 namespace SistemaWeb.Controllers
 {
+    // BLOQUEAMOS TODO EL CONTROLADOR A ESTUDIANTES
+    // Solo Admins y Profesores pueden usar estas herramientas
+    [Authorize(Roles = "Administrador,Profesor")]
     public class ApoyoController : Controller
     {
         private readonly EstudiantesClient _cliente;
@@ -14,26 +17,24 @@ namespace SistemaWeb.Controllers
             _cliente = cliente;
         }
 
-        // GET: Muestra el formulario vacío
+        [HttpGet]
         public IActionResult ValidarCedula()
         {
             return View();
         }
 
-        // POST: Procesa la búsqueda
         [HttpPost]
         public async Task<IActionResult> ValidarCedula(string cedula)
         {
             if (string.IsNullOrEmpty(cedula))
             {
-                ViewBag.Error = "⚠️ Por favor ingrese un número de identificación.";
+                ViewBag.Error = "Debe ingresar una cédula.";
                 return View();
             }
 
-            // 1. Consultamos la API
             var resultado = await _cliente.ConsultarPorCedulaAsync(cedula);
 
-            // 2. [CORRECCIÓN] Redirigimos a la vista de RESULTADOS enviando el modelo
+            // Pasamos el resultado a la vista de respuesta
             return View("ResultadoCedula", resultado);
         }
     }

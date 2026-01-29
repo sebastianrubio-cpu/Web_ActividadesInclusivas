@@ -1,129 +1,124 @@
-/* --- PALETA UISEK & ESTILOS GLOBALES --- */
+/* --- 1. VARIABLES GLOBALES (TEMA CLARO DEFAULT) --- */
 :root {
-    --uisek-blue: #002d5b; /* Azul oscuro institucional */
-    --uisek-light-blue: #0056b3; /* Azul vibrante para botones */
-    --uisek-gold: #c5a017; /* Dorado sutil para detalles */
-    --bg-light: #f4f7f6;
-    --text-dark: #2c3e50;
-    --white: #ffffff;
+    --uisek-blue: #002d5b;
+    --uisek-hover: #004a99;
+    --bg-body: #f4f7f6;
+    --bg-card: #ffffff;
+    --text-main: #2c3e50;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+    --navbar-bg: #ffffff;
+    --shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
+/* --- 2. TEMA OSCURO --- */
+[data-theme="dark"] {
+    --uisek-blue: #3b82f6; /* Azul más brillante para fondo oscuro */
+    --uisek-hover: #60a5fa;
+    --bg-body: #121212;
+    --bg-card: #1e1e1e;
+    --text-main: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --border-color: #333333;
+    --navbar-bg: #1e1e1e;
+    --shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+/* --- 3. APLICACIÓN DE VARIABLES --- */
 body {
-    background-color: var(--bg-light);
-    color: var(--text-dark);
-    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-family: 'Segoe UI', Roboto, sans-serif;
 }
 
-/* --- TARJETAS FLOTANTES (MINIMALISMO) --- */
-.card-custom {
-    background: var(--white);
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 45, 91, 0.08); /* Sombra azulada sutil */
-    padding: 2rem;
-    transition: transform 0.2s ease;
+.card, .card-custom {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
 }
 
-    .card-custom:hover {
-        transform: translateY(-2px);
-    }
-
-/* --- BOTONES ELEGANTES --- */
-.btn-uisek {
-    background-color: var(--uisek-blue);
-    color: var(--white);
-    border-radius: 8px;
-    padding: 10px 25px;
-    font-weight: 600;
-    border: none;
-    transition: all 0.3s;
+.table-elegant tbody tr {
+    background-color: var(--bg-card);
+    color: var(--text-main);
 }
 
-    .btn-uisek:hover {
-        background-color: var(--uisek-light-blue);
-        color: var(--white);
-        box-shadow: 0 4px 15px rgba(0, 86, 179, 0.3);
+    .table-elegant tbody tr:hover {
+        background-color: rgba(0, 45, 91, 0.05); /* Sutil azul */
     }
 
-/* --- TABLA ELEGANTE --- */
-.table-container {
-    background: var(--white);
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-    overflow: hidden; /* Para bordes redondeados */
+[data-theme="dark"] .table-elegant tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
-.table-elegant {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 10px; /* Separación entre filas */
-}
-
-    .table-elegant thead th {
-        background-color: transparent;
-        color: var(--uisek-blue);
-        font-weight: 700;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-        border-bottom: 2px solid #eef2f7;
-        padding: 15px;
-    }
-
-    .table-elegant tbody tr {
-        background-color: var(--white);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-        transition: 0.2s;
-    }
-
-        .table-elegant tbody tr:hover {
-            background-color: #f8fbff;
-            transform: scale(1.005);
-        }
-
-    .table-elegant td {
-        padding: 15px;
-        vertical-align: middle;
-        border-top: 1px solid #f4f4f4;
-    }
-
-/* --- LOGIN SCREEN --- */
-.login-body {
-    /* Imagen de fondo (puedes cambiar la URL por una foto real de la UISEK) */
-    background: linear-gradient(135deg, rgba(0, 45, 91, 0.9), rgba(0, 86, 179, 0.8)), url('https://upload.wikimedia.org/wikipedia/commons/e/e8/Campus_UISEK_Quito.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    height: 100vh;
+/* --- 4. ANIMACIÓN NAVBAR MINIMALISTA (EMOJI EXPAND) --- */
+.nav-anim {
     display: flex;
     align-items: center;
-    justify-content: center;
-}
-
-.login-card {
-    background: rgba(255, 255, 255, 0.95); /* Efecto vidrio sólido */
-    border-radius: 20px;
-    padding: 3rem;
-    width: 100%;
-    max-width: 450px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-    text-align: center;
-}
-
-/* --- BADGES (Etiquetas) --- */
-.badge-status {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.8em;
+    padding: 8px 15px;
+    border-radius: 50px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efecto rebote suave */
+    background-color: transparent;
+    color: var(--text-main);
+    text-decoration: none;
     font-weight: 600;
+    margin: 0 5px;
+    border: 1px solid transparent;
 }
 
-.bg-active {
-    background-color: #e1f5fe;
-    color: #0277bd;
+    .nav-anim i {
+        font-size: 1.2rem;
+        min-width: 24px;
+        text-align: center;
+    }
+
+/* El texto inicia oculto (ancho 0) */
+.nav-text-reveal {
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    white-space: nowrap;
+    transition: all 0.4s ease;
+    margin-left: 0;
 }
 
-.bg-inactive {
-    background-color: #ffebee;
-    color: #c62828;
+/* AL PASAR EL MOUSE: Expande y muestra texto */
+.nav-anim:hover {
+    background-color: rgba(0, 45, 91, 0.1); /* Fondo sutil */
+    padding-right: 20px; /* Un poco más de aire */
+}
+
+[data-theme="dark"] .nav-anim:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-anim:hover .nav-text-reveal {
+    max-width: 150px; /* Espacio suficiente para el texto */
+    opacity: 1;
+    margin-left: 10px;
+}
+
+/* --- 5. SWITCH DE TEMA --- */
+.theme-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text-main);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+    .theme-toggle-btn:hover {
+        transform: rotate(30deg);
+    }
+
+/* Ajustes adicionales para DataTables en modo oscuro */
+[data-theme="dark"] .table {
+    color: var(--text-main);
+}
+
+[data-theme="dark"] .page-link {
+    background-color: #2c2c2c;
+    border-color: #444;
+    color: white;
 }

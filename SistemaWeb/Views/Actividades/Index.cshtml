@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<SistemaWeb.Models.Actividad>
+
 @{
     ViewData["Title"] = "Gestión de Actividades";
 }
@@ -8,13 +9,13 @@
     table.dataTable thead .sorting,
     table.dataTable thead .sorting_asc,
     table.dataTable thead .sorting_desc {
-        background-image: none !important; /* Elimina flechas default */
+        background-image: none !important;
         position: relative;
         cursor: pointer;
-        padding-right: 20px !important; /* Espacio para nuestras flechas */
+        padding-right: 20px !important;
     }
 
-    /* 2. Definimos la posición común para ambas flechas usando pseudo-elementos */
+    /* 2. Flechas personalizadas */
     table.dataTable thead th::before,
     table.dataTable thead th::after {
         font-family: "Font Awesome 6 Free";
@@ -25,21 +26,21 @@
         transition: color 0.2s;
     }
 
-    /* --- FLECHA ARRIBA (::before) --- */
+    /* Flecha Arriba */
     table.dataTable thead th::before {
-        content: "\f0d8"; /* Código FontAwesome Caret Up */
-        top: 30%; /* Posición superior */
-        color: #ccc; /* Gris por defecto (Inactivo) */
+        content: "\f0d8";
+        top: 30%;
+        color: #ccc;
     }
 
-    /* --- FLECHA ABAJO (::after) --- */
+    /* Flecha Abajo */
     table.dataTable thead th::after {
-        content: "\f0d7"; /* Código FontAwesome Caret Down */
-        top: 45%; /* Posición inferior (apilada) */
-        color: #ccc; /* Gris por defecto (Inactivo) */
+        content: "\f0d7";
+        top: 45%;
+        color: #ccc;
     }
 
-    /* 3. Lógica de Colores Activos */
+    /* Estados Activos */
     table.dataTable thead th.sorting_asc::before {
         color: black !important;
     }
@@ -48,7 +49,7 @@
         color: black !important;
     }
 
-    /* Opcional: Hover */
+    /* Hover */
     table.dataTable thead th:hover::before,
     table.dataTable thead th:hover::after {
         color: #999;
@@ -61,16 +62,17 @@
     table.dataTable thead th.sorting_desc:hover::after {
         color: black !important;
     }
+
+    /* Ocultar flechas en la última columna (Si es Acciones) */
     table.dataTable thead th:last-child::before,
     table.dataTable thead th:last-child::after {
         display: none !important;
         content: none !important;
     }
-   
+
     table.dataTable thead th:last-child {
         padding-right: 8px !important;
     }
-
 </style>
 
 <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
@@ -79,9 +81,13 @@
     </h2>
 
     <div class="d-flex gap-2">
-        <a asp-action="VerificarSistema" class="btn btn-light text-muted border shadow-sm rounded-pill" title="Verificar estado del servidor">
-            <i class="fas fa-server"></i> <span class="d-none d-md-inline">Sistema</span>
-        </a>
+
+        @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
+        {
+            <a asp-action="VerificarSistema" class="btn btn-light text-muted border shadow-sm rounded-pill" title="Verificar estado del servidor">
+                <i class="fas fa-server"></i> <span class="d-none d-md-inline">Sistema</span>
+            </a>
+        }
 
         <button onclick="exportarExcel()" class="btn btn-outline-success rounded-pill shadow-sm" title="Descargar reporte">
             <i class="fas fa-file-excel me-2"></i>Exportar
@@ -91,9 +97,12 @@
             <i class="fas fa-volume-up me-2"></i>Voz
         </button>
 
-        <a asp-action="Crear" class="btn btn-primary rounded-pill shadow-sm px-4" style="background-color: var(--uisek-blue); border-color: var(--uisek-blue);">
-            <i class="fas fa-plus me-2"></i>Nueva
-        </a>
+        @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
+        {
+            <a asp-action="Crear" class="btn btn-primary rounded-pill shadow-sm px-4" style="background-color: var(--uisek-blue); border-color: var(--uisek-blue);">
+                <i class="fas fa-plus me-2"></i>Nueva
+            </a>
+        }
     </div>
 </div>
 
@@ -105,14 +114,16 @@
                     <tr>
                         <th>Código</th>
                         <th>Actividad</th>
-
                         <th>Fecha</th>
                         <th>Cupo</th>
                         <th>Responsable</th>
                         <th>Estado</th>
-                        <th class="text-end">Acciones</th>
-                    </tr>
 
+                        @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
+                        {
+                            <th class="text-end">Acciones</th>
+                        }
+                    </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model)
@@ -120,7 +131,6 @@
                         <tr>
                             <td class="fw-bold text-muted">@item.Codigo</td>
                             <td>
-
                                 <div class="fw-bold text-dark">@item.Nombre</div>
                                 <small class="text-muted">@item.TipoDiscapacidad</small>
                             </td>
@@ -135,30 +145,29 @@
                             <td>
                                 @if (item.Estado == "Activo")
                                 {
-
                                     <span class="badge bg-success rounded-pill">Activo</span>
                                 }
                                 else
                                 {
-
                                     <span class="badge bg-secondary rounded-pill">@item.Estado</span>
                                 }
                             </td>
-                            <td class="text-end">
 
-                                <a asp-action="Editar" asp-route-id="@item.Codigo" class="btn btn-sm btn-outline-primary rounded-circle" title="Editar">
-                                    <i class="fas fa-pen"></i>
-                                </a>
+                            @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
+                            {
+                                <td class="text-end">
+                                    <a asp-action="Editar" asp-route-id="@item.Codigo" class="btn btn-sm btn-outline-primary rounded-circle" title="Editar">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
 
-                                <form asp-action="Eliminar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar la actividad @item.Nombre?');">
-                                    <input type="hidden" name="codigo" value="@item.Codigo" />
-                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar">
-
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-
+                                    <form asp-action="Eliminar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar la actividad @item.Nombre?');">
+                                        <input type="hidden" name="id" value="@item.Codigo" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            }
                         </tr>
                     }
                 </tbody>
@@ -174,15 +183,18 @@
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <script>
-        // 1. Configuración de DataTables
-        jQuery(document).ready(function($) {
+        $(document).ready(function() {
             var table = $('#tablaActividades').DataTable({
                 "pageLength": 10,
                 "lengthChange": true,
                 "ordering": true,
                 "order": [[ 2, "desc" ]],
                 "columnDefs": [
-                    { "orderable": false, "targets": 6 } 
+                    // Solo si es Admin/Profe deshabilitamos orden en la columna 6 (Acciones)
+                    @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
+                    {
+                            <text>{ "orderable": false, "targets": 6 }</text>
+                    }
                 ],
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
@@ -193,7 +205,6 @@
             });
         });
 
-        // 2. Funciones Globales
         function exportarExcel() {
             var tabla = document.getElementById("tablaActividades");
             var wb = XLSX.utils.table_to_book(tabla, {sheet: "Actividades"});
@@ -202,7 +213,6 @@
 
         function leerTabla() {
             window.speechSynthesis.cancel();
-
             var mensaje = new SpeechSynthesisUtterance();
             mensaje.lang = 'es-LA';
             mensaje.rate = 1;
@@ -211,7 +221,7 @@
             var texto = "Iniciando lectura de actividades. ";
 
             if (visibleRows.length === 0) {
-                texto = "No hay actividades visibles en la tabla.";
+                texto = "No hay actividades visibles.";
             } else {
                 var limite = Math.min(5, visibleRows.length);
                 for(var i=0; i < limite; i++) {
@@ -223,7 +233,6 @@
                     }
                 }
             }
-
             mensaje.text = texto;
             window.speechSynthesis.speak(mensaje);
         }

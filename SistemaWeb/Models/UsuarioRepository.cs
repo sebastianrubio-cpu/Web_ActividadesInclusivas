@@ -12,6 +12,7 @@ namespace SistemaWeb.Models
         public string Rol { get; set; }
     }
 
+   
     public class UsuarioRepository
     {
         private readonly string _connectionString;
@@ -21,33 +22,80 @@ namespace SistemaWeb.Models
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
+        // 1. VALIDAR LOGIN (Ya lo debías tener, pero por si acaso)
         public Usuario ValidarUsuario(string correo, string clave)
         {
             Usuario usuario = null;
-            using (var connection = new SqlConnection(_connectionString))
+            using (var conn = new SqlConnection(_connectionString))
             {
-                connection.Open();
-                using (var command = new SqlCommand("SELECT * FROM Usuarios WHERE Correo = @Correo AND Clave = @Clave", connection))
+                conn.Open();
+                string sql = "SELECT Nombre, Rol, Correo FROM Usuarios WHERE Correo = @Correo AND Clave = @Clave";
+                using (var cmd = new SqlCommand(sql, conn))
                 {
-                    command.Parameters.AddWithValue("@Correo", correo);
-                    command.Parameters.AddWithValue("@Clave", clave);
-
-                    using (var reader = command.ExecuteReader())
+                    cmd.Parameters.AddWithValue("@Correo", correo);
+                    cmd.Parameters.AddWithValue("@Clave", clave);
+                    using (var reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
                             usuario = new Usuario
                             {
-                                IdUsuario = (int)reader["IdUsuario"],
-                                Correo = reader["Correo"].ToString(),
                                 Nombre = reader["Nombre"].ToString(),
-                                Rol = reader["Rol"].ToString()
+                                Rol = reader["Rol"].ToString(),
+                                Correo = reader["Correo"].ToString()
                             };
                         }
                     }
                 }
             }
             return usuario;
+        }
+
+        // 2. REGISTRAR ESTUDIANTE (NUEVO)
+        public bool RegistrarEstudiante(string nombre, string correo, string clave)
+        {
+            try
+            {
+                using (var conn = new SqlConnection(_connectionString))
+                {
+                    conn.Open();
+                    // Rol 'Estudiante' hardcodeado como pediste
+                    string sql = "INSERT INTO Usuarios (Nombre, Correo, Clave, Rol) VALUES (@Nombre, @Correo, @Clave, 'Estudiante')";
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Nombre", nombre);
+                        cmd.Parameters.AddWithValue("@Correo", correo);
+                        cmd.Parameters.AddWithValue("@Clave", clave);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return true;
+            }
+            catch
+            {
+                return false; // Probablemente el correo ya existe (Unique Constraint)
+            }
+        }
+
+        // 3. RECUPERAR CLAVE (NUEVO)
+        public string ObtenerClavePorCorreo(string correo)
+        {
+            string clave = null;
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string sql = "SELECT Clave FROM Usuarios WHERE Correo = @Correo";
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Correo", correo);
+                    var result = cmd.ExecuteScalar();
+                    if (result != null)
+                    {
+                        clave = result.ToString();
+                    }
+                }
+            }
+            return clave;
         }
     }
 }

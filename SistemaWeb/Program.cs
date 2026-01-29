@@ -14,7 +14,7 @@ builder.Services.AddScoped<ActividadRepository>();
 builder.Services.AddScoped<ActividadService>();
 builder.Services.AddScoped<UsuarioRepository>(); // <--- NUEVO REPO
 builder.Services.AddSingleton<ILogService, LogService>();
-
+builder.Services.AddScoped<CorreoService>();
 
 // 2. CONFIGURAR SEGURIDAD (COOKIES)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
