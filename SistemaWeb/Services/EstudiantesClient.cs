@@ -14,11 +14,13 @@ namespace SistemaWeb.Services
             _baseUrl = configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7000";
         }
 
+        // Renombrado para que coincida con la llamada del controlador y la nueva lógica
         public async Task<ValidacionCedulaResult> ConsultarPorCedulaAsync(string cedula)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/api/estudiantes/{cedula}");
+                // Ahora apuntamos al endpoint de usuarios en lugar del de estudiantes
+                var response = await _httpClient.GetAsync($"{_baseUrl}/api/usuarios/verificar/{cedula}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -27,6 +29,7 @@ namespace SistemaWeb.Services
 
                     if (resultado != null)
                     {
+                        // Mantenemos la propiedad EsValida para compatibilidad con la vista
                         resultado.EsValida = resultado.EsEstudiante;
                         return resultado;
                     }
@@ -34,7 +37,7 @@ namespace SistemaWeb.Services
                     return new ValidacionCedulaResult { EsValida = false, Mensaje = "Respuesta vacía" };
                 }
 
-                return new ValidacionCedulaResult { EsValida = false, Mensaje = "Cédula no encontrada o error en API" };
+                return new ValidacionCedulaResult { EsValida = false, Mensaje = "Cédula no encontrada en el sistema de usuarios" };
             }
             catch (Exception ex)
             {

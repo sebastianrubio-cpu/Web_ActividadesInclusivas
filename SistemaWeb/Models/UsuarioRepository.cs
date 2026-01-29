@@ -10,6 +10,10 @@ namespace SistemaWeb.Models
         public string Clave { get; set; }
         public string Nombre { get; set; }
         public string Rol { get; set; }
+
+        public string? Cedula { get; set; } 
+        public int? IdGenero { get; set; }
+
     }
 
    
@@ -97,5 +101,33 @@ namespace SistemaWeb.Models
             }
             return clave;
         }
+
+
+        public bool ActualizarPerfilEstudiante(int idUsuario, string nombre, string correo, int idGenero)
+        {
+            // Validación estricta de dominio
+            if (!correo.ToLower().EndsWith("@uisek.edu.ec")) return false;
+
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                // Solo permitimos que se actualice si el rol es 'Estudiante'
+                string sql = @"UPDATE Usuarios 
+                       SET Nombre = @Nombre, Correo = @Correo, IdGenero = @IdGenero 
+                       WHERE IdUsuario = @IdUsuario AND Rol = 'Estudiante'";
+
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Nombre", nombre);
+                    cmd.Parameters.AddWithValue("@Correo", correo);
+                    cmd.Parameters.AddWithValue("@IdGenero", idGenero);
+                    cmd.Parameters.AddWithValue("@IdUsuario", idUsuario);
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+        }
+
+
+
     }
 }
