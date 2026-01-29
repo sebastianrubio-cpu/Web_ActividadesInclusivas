@@ -4,7 +4,7 @@ GO
 USE SistemaInclusivoDB;
 GO
 
--- 2. TABLAS CATÁLOGO (Normalización)
+-- 2. TABLAS CATÁLOGO
 CREATE TABLE Cat_Estados (
     IdEstado INT IDENTITY(1,1) PRIMARY KEY,
     NombreEstado NVARCHAR(50) NOT NULL UNIQUE
@@ -15,7 +15,7 @@ CREATE TABLE Cat_Discapacidades (
     NombreDiscapacidad NVARCHAR(100) NOT NULL UNIQUE
 );
 
--- Seed Data (Datos obligatorios)
+-- Seed Data
 INSERT INTO Cat_Estados (NombreEstado) VALUES ('Activo'), ('Inactivo'), ('Finalizado');
 INSERT INTO Cat_Discapacidades (NombreDiscapacidad) VALUES ('Motriz'), ('Visual'), ('Auditiva'), ('Intelectual'), ('Ninguna');
 GO
@@ -29,9 +29,7 @@ CREATE TABLE Usuarios (
     Rol NVARCHAR(50) NOT NULL CHECK (Rol IN ('Administrador', 'Profesor', 'Estudiante'))
 );
 
--- Usuario Admin por defecto
-INSERT INTO Usuarios (Correo, Clave, Nombre, Rol) 
-VALUES ('sebastian.rubio@uisek.edu.ec', '12345', 'Administrador Sistema', 'Administrador');
+INSERT INTO Usuarios (Correo, Clave, Nombre, Rol) VALUES ('sebastian.rubio@uisek.edu.ec', '12345', 'Administrador Sistema', 'Administrador');
 GO
 
 -- 4. TABLA ESTUDIANTES 
@@ -54,6 +52,10 @@ CREATE TABLE Actividades (
     Responsable NVARCHAR(100) NOT NULL DEFAULT 'Sin Asignar',
     GmailProfesor NVARCHAR(100) NOT NULL DEFAULT 'contacto@uisek.edu.ec',
     
+    -- COORDENADAS PARA MAPA (Con Default UISEK)
+    Latitud FLOAT NOT NULL DEFAULT -0.09106038310321836,
+    Longitud FLOAT NOT NULL DEFAULT -78.4838308629782,
+
     -- Foreign Keys 
     IdEstado INT NOT NULL,
     IdDiscapacidad INT NOT NULL,
@@ -97,7 +99,7 @@ BEGIN
         COALESCE(i.Codigo, d.Codigo),
         @Accion,
         CASE 
-            WHEN @Accion = 'UPDATE' THEN CONCAT('Cambio IdEstado: ', d.IdEstado, ' -> ', i.IdEstado, '. Cupo: ', d.Cupo, ' -> ', i.Cupo)
+            WHEN @Accion = 'UPDATE' THEN CONCAT('Cambio IdEstado: ', d.IdEstado, ' -> ', i.IdEstado, '. Coords: ', i.Latitud, ',', i.Longitud)
             WHEN @Accion = 'INSERT' THEN CONCAT('Nueva actividad: ', i.Nombre)
             WHEN @Accion = 'DELETE' THEN CONCAT('Eliminada: ', d.Nombre)
         END
@@ -108,7 +110,7 @@ GO
 
 -- 7. STORED PROCEDURES
 
--- SP: Obtener 
+-- SP: Obtener Todo
 CREATE OR ALTER PROCEDURE sp_ObtenerActividades
 AS
 BEGIN
@@ -120,6 +122,8 @@ BEGIN
         A.Cupo,
         A.Responsable,
         A.GmailProfesor,
+        A.Latitud,      -- Nueva columna
+        A.Longitud,     -- Nueva columna
         E.NombreEstado AS Estado,             
         D.NombreDiscapacidad AS TipoDiscapacidad 
     FROM Actividades A
@@ -141,6 +145,8 @@ BEGIN
         A.Cupo,
         A.Responsable,
         A.GmailProfesor,
+        A.Latitud,      -- Nueva columna
+        A.Longitud,     -- Nueva columna
         E.NombreEstado AS Estado,
         D.NombreDiscapacidad AS TipoDiscapacidad
     FROM Actividades A
@@ -150,7 +156,7 @@ BEGIN
 END;
 GO
 
--- SP: Insertar 
+-- SP: Insertar
 CREATE OR ALTER PROCEDURE sp_InsertarActividad
     @Codigo NVARCHAR(20),
     @Nombre NVARCHAR(100),
@@ -158,6 +164,8 @@ CREATE OR ALTER PROCEDURE sp_InsertarActividad
     @Cupo INT,
     @Responsable NVARCHAR(100),
     @GmailProfesor NVARCHAR(100),
+    @Latitud FLOAT,  -- Nuevo Parametro
+    @Longitud FLOAT, -- Nuevo Parametro
     @NombreEstado NVARCHAR(50),
     @NombreDiscapacidad NVARCHAR(100)
 AS
@@ -169,12 +177,11 @@ BEGIN
         DECLARE @IdEstado INT = (SELECT TOP 1 IdEstado FROM Cat_Estados WHERE NombreEstado = @NombreEstado);
         DECLARE @IdDiscapacidad INT = (SELECT TOP 1 IdDiscapacidad FROM Cat_Discapacidades WHERE NombreDiscapacidad = @NombreDiscapacidad);
 
-        -- Defaults defensivos
         IF @IdEstado IS NULL SET @IdEstado = 1; 
         IF @IdDiscapacidad IS NULL SET @IdDiscapacidad = 5; 
 
-        INSERT INTO Actividades (Codigo, Nombre, FechaRealizacion, Cupo, Responsable, GmailProfesor, IdEstado, IdDiscapacidad)
-        VALUES (@Codigo, @Nombre, @FechaRealizacion, @Cupo, @Responsable, @GmailProfesor, @IdEstado, @IdDiscapacidad);
+        INSERT INTO Actividades (Codigo, Nombre, FechaRealizacion, Cupo, Responsable, GmailProfesor, Latitud, Longitud, IdEstado, IdDiscapacidad)
+        VALUES (@Codigo, @Nombre, @FechaRealizacion, @Cupo, @Responsable, @GmailProfesor, @Latitud, @Longitud, @IdEstado, @IdDiscapacidad);
 
         COMMIT TRANSACTION;
     END TRY
@@ -193,6 +200,8 @@ CREATE OR ALTER PROCEDURE sp_ActualizarActividad
     @Cupo INT,
     @Responsable NVARCHAR(100),
     @GmailProfesor NVARCHAR(100),
+    @Latitud FLOAT,  -- Nuevo Parametro
+    @Longitud FLOAT, -- Nuevo Parametro
     @NombreEstado NVARCHAR(50),
     @NombreDiscapacidad NVARCHAR(100)
 AS
@@ -214,8 +223,10 @@ BEGIN
             Cupo = @Cupo,
             Responsable = @Responsable,
             GmailProfesor = @GmailProfesor,
-            IdEstado = @IdEstado,             -- Corregido nombre columna
-            IdDiscapacidad = @IdDiscapacidad  -- Corregido nombre columna
+            Latitud = @Latitud,    -- Update coords
+            Longitud = @Longitud,  -- Update coords
+            IdEstado = @IdEstado,             
+            IdDiscapacidad = @IdDiscapacidad  
         WHERE Codigo = @Codigo;
 
         COMMIT TRANSACTION;
@@ -227,9 +238,8 @@ BEGIN
 END;
 GO
 
--- 5. SP: Eliminar 
-DROP PROCEDURE IF EXISTS sp_EliminarActividad;
-GO
+-- 5. SP: Eliminar
+
 CREATE PROCEDURE sp_EliminarActividad
     @Codigo NVARCHAR(20)
 AS
@@ -237,7 +247,13 @@ BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
         BEGIN TRANSACTION;
-        DELETE FROM Actividades WHERE Codigo = @Codigo;
+        
+        -- Verificamos si existe antes de intentar borrar
+        IF EXISTS (SELECT 1 FROM Actividades WHERE Codigo = @Codigo)
+        BEGIN
+            DELETE FROM Actividades WHERE Codigo = @Codigo;
+        END
+
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
@@ -245,5 +261,4 @@ BEGIN
         THROW;
     END CATCH
 END;
-GO
 GO

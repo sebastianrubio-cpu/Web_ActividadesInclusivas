@@ -88,5 +88,17 @@ namespace SistemaWeb.Controllers
 
             return View(reporte); 
         }
+
+
+
+
+
+
+        // 8. VISTA DE MAPA 
+        public IActionResult Mapa()
+        {
+            var actividades = _service.ObtenerTodas();
+            return View(actividades);
+        }
     }
 }

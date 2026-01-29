@@ -27,5 +27,9 @@ namespace SistemaWeb.Models
 
         public string? GmailProfesor { get; set; }
 
+        public double Latitud { get; set; }  
+        public double Longitud { get; set; }
+
+
     }
 }

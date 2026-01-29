@@ -1,0 +1,76 @@
+﻿@model IEnumerable<SistemaWeb.Models.Actividad>
+@{
+    ViewData["Title"] = "Mapa de Eventos";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: var(--uisek-blue);">
+            <i class="fas fa-map-marked-alt me-2"></i>Geolocalización de Eventos
+        </h2>
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">
+            <i class="fas fa-arrow-left me-2"></i>Volver al Listado
+        </a>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden animate__animated animate__fadeIn">
+        <div class="card-body p-0">
+            <div id="map" style="height: 600px; width: 100%;"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function initMap() {
+           
+            var centroMap = { lat: -0.0910, lng: -78.4840 };
+
+           
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 13,
+                center: centroMap,
+                styles: [ 
+                    { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }
+                ]
+            });
+
+
+            var eventos = @Json.Serialize(Model.Select(e => new { 
+                titulo = e.Nombre, 
+                lat = e.Latitud, 
+                lng = e.Longitud,
+                desc = e.Responsable 
+            }));
+
+            var infoWindow = new google.maps.InfoWindow();
+
+            eventos.forEach(function(evento) {
+           
+                if (evento.lat !== 0 && evento.lng !== 0) {
+                    
+                    var marker = new google.maps.Marker({
+                        position: { lat: evento.lat, lng: evento.lng },
+                        map: map,
+                        title: evento.titulo,
+                        animation: google.maps.Animation.DROP
+                    });
+
+                  
+                    marker.addListener("click", () => {
+                        var contenido = `
+                            <div style="padding:10px;">
+                                <h6 class="fw-bold text-primary mb-1">${evento.titulo}</h6>
+                                <p class="mb-0 text-muted small">Responsable: ${evento.desc}</p>
+                            </div>
+                        `;
+                        infoWindow.setContent(contenido);
+                        infoWindow.open(map, marker);
+                    });
+                }
+            });
+        }
+    </script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=TU_API_KEY&callback=initMap"></script>
+}
