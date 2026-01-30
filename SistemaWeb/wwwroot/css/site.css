@@ -97,6 +97,43 @@ body {
     opacity: 1;
     margin-left: 10px;
 }
+.nav-link-custom {
+    display: flex;
+    align-items: center;
+    background: var(--bg-card);
+    border-radius: 50px;
+    padding: 8px 15px;
+    margin: 0 5px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 50px; /* Tamaño inicial circular */
+    overflow: hidden;
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.1);
+    background-color: transparent;
+}
+
+.nav-link-custom:hover {
+    width: 160px; /* Se expande para mostrar el texto */
+    background: var(--uisek-blue);
+    color: white !important;
+}
+
+.nav-icon {
+    font-size: 1.2rem;
+    margin-right: 15px;
+    min-width: 25px;
+    text-align: center;
+}
+
+.nav-text {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-weight: 600;
+}
+
+.nav-link-custom:hover .nav-text {
+    opacity: 1;
+}
 
 /* --- 5. SWITCH DE TEMA --- */
 .theme-toggle-btn {

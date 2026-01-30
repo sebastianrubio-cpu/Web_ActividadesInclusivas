@@ -1,0 +1,100 @@
+﻿@{
+    ViewData["Title"] = "Panel de Estadísticas";
+}
+
+<div class="container mt-5 animate__animated animate__fadeIn">
+    <h2 class="minimal-title mb-4">📊 Panel de Control e Impacto</h2>
+
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="system-monitor-card text-center p-4">
+                <div class="monitor-header">Usuarios Registrados</div>
+                <h1 class="display-4 fw-bold mt-3">@ViewBag.TotalUsuarios</h1>
+                <small class="text-muted">Impacto en la comunidad UISEK</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="system-monitor-card text-center p-4" style="border-color: #00bcd4;">
+                <div class="monitor-header" style="background: linear-gradient(135deg, #0097a7, #00bcd4);">Actividades Totales</div>
+                <h1 class="display-4 fw-bold mt-3">@ViewBag.TotalActividades</h1>
+                <small class="text-muted">Eventos gestionados este semestre</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="system-monitor-card text-center p-4" style="border-color: #8bc34a;">
+                <div class="monitor-header" style="background: linear-gradient(135deg, #689f38, #8bc34a);">Estado del Foro</div>
+                <h1 class="display-4 fw-bold mt-3">Activo</h1>
+                <small class="text-muted">Interacción de usuarios</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="minimal-card p-4">
+                <h5 class="fw-bold mb-4">Distribución por Tipo de Discapacidad</h5>
+                <canvas id="chartDiscapacidad" style="max-height: 400px;"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="minimal-card p-4 h-100">
+                <h5 class="fw-bold mb-3">Análisis de Utilidad</h5>
+                <p class="small text-muted">
+                    Este gráfico permite a los administradores identificar qué áreas de inclusión requieren más atención o recursos.
+                </p>
+                <ul class="list-group list-group-flush bg-transparent">
+                    <li class="list-group-item bg-transparent text-white-50 small border-secondary">
+                        <i class="bi bi-info-circle me-2"></i> Mayor enfoque: Motriz
+                    </li>
+                    <li class="list-group-item bg-transparent text-white-50 small border-secondary">
+                        <i class="bi bi-info-circle me-2"></i> Área a reforzar: Visual
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('chartDiscapacidad').getContext('2d');
+
+        // Serializamos los datos reales desde el controlador
+        const labelsData = @Html.Raw(Json.Serialize(ViewBag.LabelsDiscapacidad));
+        const valuesData = @Html.Raw(Json.Serialize(ViewBag.ValoresDiscapacidad));
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labelsData,
+                datasets: [{
+                    label: 'Cantidad de Actividades',
+                    data: valuesData,
+                    backgroundColor: 'rgba(0, 45, 91, 0.6)', // var(--uisek-blue) con opacidad
+                    borderColor: '#002d5b',
+                    borderWidth: 2,
+                    borderRadius: 10 // Barras redondeadas para que se vea moderno
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, color: 'gray' },
+                        grid: { display: false }
+                    },
+                    x: {
+                        ticks: { color: 'gray' },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
+}

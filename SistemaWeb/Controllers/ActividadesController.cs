@@ -11,11 +11,14 @@ namespace SistemaWeb.Controllers
     {
         private readonly ActividadService _service;
         private readonly EstudiantesClient _apiClient;
+        private readonly UsuarioRepository _usuarioRepo;
 
-        public ActividadesController(ActividadService service, EstudiantesClient apiClient)
+        public ActividadesController(ActividadService service, EstudiantesClient apiClient, UsuarioRepository usuarioRepo)
         {
             _service = service;
             _apiClient = apiClient;
+            _usuarioRepo = usuarioRepo;
+
         }
 
         // --- ZONA PÚBLICA (Accesible para Estudiantes, Profesores y Admins) ---
@@ -112,6 +115,30 @@ namespace SistemaWeb.Controllers
                 _service.Eliminar(id);
             }
             return RedirectToAction(nameof(Index));
+        }
+
+
+        // 9. ESTADÍSTICAS (Corregido)
+        [Authorize(Roles = "Administrador,Profesor")]
+        public IActionResult Estadisticas()
+        {
+            ViewBag.TotalUsuarios = _usuarioRepo.ContarUsuarios();
+            var actividades = _service.ObtenerTodas();
+            ViewBag.TotalActividades = actividades.Count;
+
+            // Agrupamos y sacamos los nombres y conteos reales
+            var resumen = actividades
+                .GroupBy(a => a.TipoDiscapacidad)
+                .Select(g => new {
+                    Nombre = string.IsNullOrEmpty(g.Key) ? "No asignada" : g.Key,
+                    Total = g.Count()
+                }).ToList();
+
+            // Pasamos las listas por separado para el gráfico
+            ViewBag.LabelsDiscapacidad = resumen.Select(r => r.Nombre).ToArray();
+            ViewBag.ValoresDiscapacidad = resumen.Select(r => r.Total).ToArray();
+
+            return View();
         }
     }
 }

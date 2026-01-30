@@ -156,5 +156,19 @@ namespace SistemaWeb.Models
                 }
             }
         }
+        // 6. ESTADÍSTICAS GLOBALES
+        public dynamic ObtenerEstadisticasGlobales()
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                // Total de Usuarios
+                var totalUsuarios = new SqlCommand("SELECT COUNT(*) FROM Usuarios", conn).ExecuteScalar();
+                // Total de Actividades
+                var totalActividades = new SqlCommand("SELECT COUNT(*) FROM Actividades", conn).ExecuteScalar();
+
+                return new { Usuarios = totalUsuarios, Actividades = totalActividades };
+            }
+        }
     }
 }

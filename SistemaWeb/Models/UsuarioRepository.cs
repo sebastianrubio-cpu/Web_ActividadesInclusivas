@@ -177,5 +177,21 @@ namespace SistemaWeb.Models
             }
             return clave;
         }
+
+
+        // 7. CONTAR USUARIOS
+        public int ContarUsuarios()
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                // Contamos todos los registros de la tabla Usuarios
+                string sql = "SELECT COUNT(*) FROM Usuarios";
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    return (int)cmd.ExecuteScalar();
+                }
+            }
+        }
     }
 }
