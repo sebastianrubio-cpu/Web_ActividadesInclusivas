@@ -1,0 +1,63 @@
+﻿@model SistemaWeb.Models.Usuario
+
+@{
+    ViewData["Title"] = "Actualizar Datos";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg animate__animated animate__fadeInUp" style="max-width: 600px; margin: auto;">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-person-bounding-box"></i> Mi Perfil Estudiantil</h4>
+        </div>
+        <div class="card-body p-4">
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Error</div>
+            }
+
+            <form asp-action="GuardarPerfil" method="post">
+                <input type="hidden" asp-for="IdUsuario" />
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Cédula / ID Estudiante</label>
+                    <input type="text" class="form-control bg-light" value="@Model.IdUsuario" readonly />
+                    <small class="text-muted">Este identificador es único y no se puede modificar.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nombre Completo</label>
+                    <input asp-for="Nombre" class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Correo Institucional</label>
+                    <div class="input-group">
+                        <input asp-for="Correo" class="form-control" type="email" required />
+                        <span class="input-group-text bg-light text-muted">@@uisek.edu.ec</span>
+                    </div>
+                    <small class="text-muted">Solo se permiten correos institucionales.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Género</label>
+                    <select asp-for="IdGenero" class="form-select">
+                        <option value="">-- Seleccione --</option>
+                        <option value="0">Masculino</option>
+                        <option value="1">Femenino</option>
+                        <option value="2">No Binario</option>
+                    </select>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                        <i class="bi bi-save"></i> Guardar Cambios
+                    </button>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

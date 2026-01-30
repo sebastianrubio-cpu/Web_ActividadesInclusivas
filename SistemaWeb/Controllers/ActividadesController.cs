@@ -58,7 +58,9 @@ namespace SistemaWeb.Controllers
         // 5. CREAR (POST)
         [Authorize(Roles = "Administrador,Profesor")]
         [HttpPost]
-        public IActionResult Crear(Actividad actividad)
+        public IActionResult Crear(Actividad actividad)  
+
+
         {
             if (ModelState.IsValid)
             {
@@ -68,7 +70,7 @@ namespace SistemaWeb.Controllers
             return View(actividad);
         }
 
-        // 6. EDITAR (GET)
+        // 6. EDITAR (GET) Cambiar
         [Authorize(Roles = "Administrador,Profesor")]
         [HttpGet]
         public IActionResult Editar(string id)
@@ -86,7 +88,7 @@ namespace SistemaWeb.Controllers
             return View(actividad);
         }
 
-        // 7. EDITAR (POST)
+        // 7. EDITAR (POST) Pedir SQL
         [Authorize(Roles = "Administrador,Profesor")]
         [HttpPost]
         public IActionResult Editar(Actividad actividad)
@@ -100,9 +102,9 @@ namespace SistemaWeb.Controllers
         }
 
         // 8. ELIMINAR
-        // NOTA: Cambiamos 'codigo' por 'id' para que coincida con el asp-route-id del HTML
+        
         [Authorize(Roles = "Administrador,Profesor")]
-        [HttpGet] // Normalmente Eliminar suele venir por GET para confirmar o POST directo. Aquí lo dejo accesible para la acción del botón.
+        [HttpPost] 
         public IActionResult Eliminar(string id)
         {
             if (!string.IsNullOrEmpty(id))

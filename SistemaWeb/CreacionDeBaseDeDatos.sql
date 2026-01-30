@@ -5,43 +5,49 @@ USE SistemaInclusivoDB;
 GO
 
 -- 2. TABLAS CATÁLOGO
+
+-- Estados de Actividades
 CREATE TABLE Cat_Estados (
     IdEstado INT IDENTITY(1,1) PRIMARY KEY,
     NombreEstado NVARCHAR(50) NOT NULL UNIQUE
 );
 
+-- Discapacidades
 CREATE TABLE Cat_Discapacidades (
     IdDiscapacidad INT IDENTITY(1,1) PRIMARY KEY,
     NombreDiscapacidad NVARCHAR(100) NOT NULL UNIQUE
 );
 
--- Seed Data
+-- Géneros (NUEVA TABLA)
+CREATE TABLE Cat_Generos (
+    IdGenero INT PRIMARY KEY,
+    NombreGenero NVARCHAR(20) NOT NULL
+);
+
+-- Seed Data (Datos Iniciales)
 INSERT INTO Cat_Estados (NombreEstado) VALUES ('Activo'), ('Inactivo'), ('Finalizado');
 INSERT INTO Cat_Discapacidades (NombreDiscapacidad) VALUES ('Motriz'), ('Visual'), ('Auditiva'), ('Intelectual'), ('Ninguna');
+INSERT INTO Cat_Generos (IdGenero, NombreGenero) VALUES (0, 'Masculino'), (1, 'Femenino'), (2, 'No Binario');
 GO
 
--- 3. TABLA USUARIOS 
+-- 3. TABLA USUARIOS (MODIFICADA: IdUsuario es la Cédula)
 CREATE TABLE Usuarios (
-    IdUsuario INT IDENTITY(1,1) PRIMARY KEY,
+    IdUsuario NVARCHAR(15) PRIMARY KEY, -- Aquí se almacena la Cédula
     Correo NVARCHAR(100) NOT NULL UNIQUE,
     Clave NVARCHAR(100) NOT NULL, 
     Nombre NVARCHAR(100) NOT NULL,
-    Rol NVARCHAR(50) NOT NULL CHECK (Rol IN ('Administrador', 'Profesor', 'Estudiante'))
+    Rol NVARCHAR(50) NOT NULL CHECK (Rol IN ('Administrador', 'Profesor', 'Estudiante')),
+    IdGenero INT NULL,
+    
+    CONSTRAINT FK_Usuarios_Generos FOREIGN KEY (IdGenero) REFERENCES Cat_Generos(IdGenero)
 );
 
-INSERT INTO Usuarios (Correo, Clave, Nombre, Rol) VALUES ('sebastian.rubio@uisek.edu.ec', '12345', 'Administrador Sistema', 'Administrador');
+-- Insertar Administrador (Cédula ficticia '1700000000', Género 0)
+INSERT INTO Usuarios (IdUsuario, Correo, Clave, Nombre, Rol, IdGenero) 
+VALUES ('1700000000', 'sebastian.rubio@uisek.edu.ec', '12345', 'Administrador Sistema', 'Administrador', 0);
 GO
 
--- 4. TABLA ESTUDIANTES 
-CREATE TABLE Estudiantes (
-    IdEstudiante INT IDENTITY(1,1) PRIMARY KEY,
-    Cedula NVARCHAR(10) NOT NULL UNIQUE,
-    Nombre NVARCHAR(100) NOT NULL,
-    Apellido NVARCHAR(100) NOT NULL,
-    Carrera NVARCHAR(100),
-    Semestre INT
-);
-GO
+-- 4. (TABLA ESTUDIANTES ELIMINADA) --
 
 -- 5. TABLA ACTIVIDADES 
 CREATE TABLE Actividades (
@@ -122,8 +128,8 @@ BEGIN
         A.Cupo,
         A.Responsable,
         A.GmailProfesor,
-        A.Latitud,      -- Nueva columna
-        A.Longitud,     -- Nueva columna
+        A.Latitud,
+        A.Longitud,
         E.NombreEstado AS Estado,             
         D.NombreDiscapacidad AS TipoDiscapacidad 
     FROM Actividades A
@@ -145,8 +151,8 @@ BEGIN
         A.Cupo,
         A.Responsable,
         A.GmailProfesor,
-        A.Latitud,      -- Nueva columna
-        A.Longitud,     -- Nueva columna
+        A.Latitud,
+        A.Longitud,
         E.NombreEstado AS Estado,
         D.NombreDiscapacidad AS TipoDiscapacidad
     FROM Actividades A
@@ -164,8 +170,8 @@ CREATE OR ALTER PROCEDURE sp_InsertarActividad
     @Cupo INT,
     @Responsable NVARCHAR(100),
     @GmailProfesor NVARCHAR(100),
-    @Latitud FLOAT,  -- Nuevo Parametro
-    @Longitud FLOAT, -- Nuevo Parametro
+    @Latitud FLOAT,
+    @Longitud FLOAT,
     @NombreEstado NVARCHAR(50),
     @NombreDiscapacidad NVARCHAR(100)
 AS
@@ -200,8 +206,8 @@ CREATE OR ALTER PROCEDURE sp_ActualizarActividad
     @Cupo INT,
     @Responsable NVARCHAR(100),
     @GmailProfesor NVARCHAR(100),
-    @Latitud FLOAT,  -- Nuevo Parametro
-    @Longitud FLOAT, -- Nuevo Parametro
+    @Latitud FLOAT,
+    @Longitud FLOAT,
     @NombreEstado NVARCHAR(50),
     @NombreDiscapacidad NVARCHAR(100)
 AS
@@ -223,8 +229,8 @@ BEGIN
             Cupo = @Cupo,
             Responsable = @Responsable,
             GmailProfesor = @GmailProfesor,
-            Latitud = @Latitud,    -- Update coords
-            Longitud = @Longitud,  -- Update coords
+            Latitud = @Latitud,
+            Longitud = @Longitud,
             IdEstado = @IdEstado,             
             IdDiscapacidad = @IdDiscapacidad  
         WHERE Codigo = @Codigo;
@@ -238,8 +244,7 @@ BEGIN
 END;
 GO
 
--- 5. SP: Eliminar
-
+-- SP: Eliminar
 CREATE PROCEDURE sp_EliminarActividad
     @Codigo NVARCHAR(20)
 AS
@@ -248,7 +253,6 @@ BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
         
-        -- Verificamos si existe antes de intentar borrar
         IF EXISTS (SELECT 1 FROM Actividades WHERE Codigo = @Codigo)
         BEGIN
             DELETE FROM Actividades WHERE Codigo = @Codigo;

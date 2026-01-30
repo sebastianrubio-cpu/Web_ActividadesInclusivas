@@ -1,0 +1,71 @@
+﻿@{
+    Layout = null; // Usamos layout nulo para página de acceso limpia o el Shared si prefieres
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registro Estudiante - UISEK</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
+
+    <div class="card shadow-lg animate__animated animate__fadeIn" style="width: 400px;">
+        <div class="card-header bg-primary text-white text-center py-3">
+            <h4>Registro Estudiantil</h4>
+        </div>
+        <div class="card-body p-4">
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger text-center">@ViewBag.Error</div>
+            }
+
+            <form asp-action="Registrar" method="post">
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Cédula de Identidad</label>
+                    <input name="cedula" class="form-control" placeholder="Ingrese su Cédula" required maxlength="15" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nombre Completo</label>
+                    <input name="nombre" class="form-control" placeholder="Nombre y Apellido" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Correo Institucional</label>
+                    <input name="correo" type="email" class="form-control" placeholder="usuario@uisek.edu.ec" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Contraseña</label>
+                    <input name="clave" type="password" class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Género</label>
+                    <select name="idGenero" class="form-select" required>
+                        @if (ViewBag.Generos != null)
+                        {
+                            foreach (var item in (Dictionary<int, string>)ViewBag.Generos)
+                            {
+                                <option value="@item.Key">@item.Value</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Crear Cuenta</button>
+                    <a asp-action="Login" class="btn btn-outline-secondary">Volver al Login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

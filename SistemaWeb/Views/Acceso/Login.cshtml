@@ -53,7 +53,7 @@
             overflow: hidden;
             width: 900px;
             max-width: 100%;
-            min-height: 600px;
+            min-height: 650px; /* Aumenté un poco la altura para que quepan los nuevos campos */
             transition: all 0.5s ease;
         }
 
@@ -63,7 +63,7 @@
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            padding: 0 60px;
+            padding: 0 50px;
             height: 100%;
             text-align: center;
             transition: all 0.5s ease;
@@ -71,7 +71,7 @@
 
         h1 {
             font-weight: 800;
-            margin: 0 0 25px 0;
+            margin: 0 0 20px 0;
             color: var(--uisek-blue);
             font-size: 32px;
             letter-spacing: -1px;
@@ -91,18 +91,18 @@
         }
 
         span {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--text-secondary);
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             display: block;
         }
 
-        input {
+        input, select {
             background-color: #f4f7f9;
             border: 2px solid #e0e6ed;
-            padding: 15px 20px;
-            margin: 12px 0;
+            padding: 12px 15px;
+            margin: 8px 0;
             width: 100%;
             border-radius: 10px;
             outline: none;
@@ -117,7 +117,7 @@
                 font-weight: 400;
             }
 
-            input:focus {
+            input:focus, select:focus {
                 border-color: var(--uisek-blue);
                 background-color: #fff;
                 box-shadow: 0 5px 15px rgba(0, 45, 91, 0.1);
@@ -135,7 +135,7 @@
             text-transform: uppercase;
             transition: transform 80ms ease-in, box-shadow 0.3s;
             cursor: pointer;
-            margin-top: 30px;
+            margin-top: 25px;
             font-family: 'Montserrat', sans-serif;
         }
 
@@ -161,7 +161,7 @@
             text-decoration: none;
             border-bottom: 2px solid transparent;
             transition: all 0.3s;
-            cursor: pointer; /* IMPORTANTE */
+            cursor: pointer;
         }
 
             a.forgot-pass:hover {
@@ -413,9 +413,18 @@
                 <h1>Crear Cuenta</h1>
                 <span>Use su correo institucional (@@uisek.edu.ec)</span>
 
+                <input type="text" name="cedula" placeholder="Cédula de Identidad" required maxlength="15" />
+
                 <input type="text" name="nombre" placeholder="Nombre Completo" required />
                 <input type="email" name="correo" placeholder="Correo Electrónico" required />
                 <input type="password" name="clave" placeholder="Contraseña" required />
+
+                <select name="idGenero" required>
+                    <option value="" disabled selected>Seleccione su Género</option>
+                    <option value="0">Masculino</option>
+                    <option value="1">Femenino</option>
+                    <option value="2">No Binario</option>
+                </select>
 
                 <button type="submit">Registrarse</button>
 

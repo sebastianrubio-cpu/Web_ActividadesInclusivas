@@ -122,3 +122,51 @@ body {
     border-color: #444;
     color: white;
 }
+/* --- BOTÓN ANIMADO PARA ESTUDIANTES --- */
+.btn-anim {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 25px;
+    border-radius: 50px;
+    background-color: var(--uisek-blue); /* Usa tus variables globales */
+    color: white !important;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+}
+
+    .btn-anim i {
+        font-size: 1.3rem;
+        transition: transform 0.3s ease;
+    }
+
+/* El texto inicia oculto */
+.btn-text-reveal {
+    max-width: 0;
+    opacity: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: all 0.5s ease;
+}
+
+/* HOVER: Expande el botón y revela el texto */
+.btn-anim:hover {
+    background-color: var(--uisek-hover);
+    padding-right: 35px; /* Espacio extra para el texto */
+    transform: translateY(-3px); /* Levanta un poco el botón */
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+}
+
+    .btn-anim:hover i {
+        transform: scale(1.1); /* Agranda ligeramente el icono */
+    }
+
+    .btn-anim:hover .btn-text-reveal {
+        max-width: 200px; /* Ancho suficiente para el texto */
+        opacity: 1;
+        margin-left: 12px;
+    }

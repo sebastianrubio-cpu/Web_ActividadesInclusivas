@@ -82,6 +82,16 @@
 
     <div class="d-flex gap-2">
 
+        @if (User.IsInRole("Estudiante"))
+        {
+            <a asp-controller="Estudiante" asp-action="ActualizarPerfil"
+               class="btn btn-outline-primary rounded-pill shadow-sm"
+               style="border-color: var(--uisek-blue); color: var(--uisek-blue);"
+               title="Actualizar mis datos personales">
+                <i class="fas fa-user-cog me-2"></i>Mis Datos
+            </a>
+        }
+
         @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
         {
             <a asp-action="VerificarSistema" class="btn btn-light text-muted border shadow-sm rounded-pill" title="Verificar estado del servidor">
@@ -193,7 +203,7 @@
                     // Solo si es Admin/Profe deshabilitamos orden en la columna 6 (Acciones)
                     @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
                     {
-                            <text>{ "orderable": false, "targets": 6 }</text>
+                                <text>{ "orderable": false, "targets": 6 }</text>
                     }
                 ],
                 "language": {

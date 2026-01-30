@@ -1,22 +1,18 @@
-﻿using Microsoft.Data.SqlClient; // <--- CORREGIDO (Antes era System.Data)
+﻿using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace SistemaWeb.Models
 {
     public class Usuario
     {
-        public int IdUsuario { get; set; }
+        public string IdUsuario { get; set; } // Cédula (PK)
         public string Correo { get; set; }
         public string Clave { get; set; }
         public string Nombre { get; set; }
         public string Rol { get; set; }
-
-        public string? Cedula { get; set; } 
         public int? IdGenero { get; set; }
-
     }
 
-   
     public class UsuarioRepository
     {
         private readonly string _connectionString;
@@ -26,14 +22,14 @@ namespace SistemaWeb.Models
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        // 1. VALIDAR LOGIN (Ya lo debías tener, pero por si acaso)
+        // 1. VALIDAR LOGIN
         public Usuario ValidarUsuario(string correo, string clave)
         {
             Usuario usuario = null;
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                string sql = "SELECT Nombre, Rol, Correo FROM Usuarios WHERE Correo = @Correo AND Clave = @Clave";
+                string sql = "SELECT IdUsuario, Nombre, Rol, Correo, IdGenero FROM Usuarios WHERE Correo = @Correo AND Clave = @Clave";
                 using (var cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@Correo", correo);
@@ -44,9 +40,11 @@ namespace SistemaWeb.Models
                         {
                             usuario = new Usuario
                             {
+                                IdUsuario = reader["IdUsuario"].ToString(),
                                 Nombre = reader["Nombre"].ToString(),
                                 Rol = reader["Rol"].ToString(),
-                                Correo = reader["Correo"].ToString()
+                                Correo = reader["Correo"].ToString(),
+                                IdGenero = reader["IdGenero"] != DBNull.Value ? Convert.ToInt32(reader["IdGenero"]) : null
                             };
                         }
                     }
@@ -55,21 +53,24 @@ namespace SistemaWeb.Models
             return usuario;
         }
 
-        // 2. REGISTRAR ESTUDIANTE (NUEVO)
-        public bool RegistrarEstudiante(string nombre, string correo, string clave)
+        // 2. REGISTRAR ESTUDIANTE (Cédula es el IdUsuario)
+        public bool RegistrarEstudiante(string cedula, string nombre, string correo, string clave, int idGenero)
         {
             try
             {
                 using (var conn = new SqlConnection(_connectionString))
                 {
                     conn.Open();
-                    // Rol 'Estudiante' hardcodeado como pediste
-                    string sql = "INSERT INTO Usuarios (Nombre, Correo, Clave, Rol) VALUES (@Nombre, @Correo, @Clave, 'Estudiante')";
+                    string sql = @"INSERT INTO Usuarios (IdUsuario, Nombre, Correo, Clave, Rol, IdGenero) 
+                                   VALUES (@IdUsuario, @Nombre, @Correo, @Clave, 'Estudiante', @IdGenero)";
+
                     using (var cmd = new SqlCommand(sql, conn))
                     {
+                        cmd.Parameters.AddWithValue("@IdUsuario", cedula);
                         cmd.Parameters.AddWithValue("@Nombre", nombre);
                         cmd.Parameters.AddWithValue("@Correo", correo);
                         cmd.Parameters.AddWithValue("@Clave", clave);
+                        cmd.Parameters.AddWithValue("@IdGenero", idGenero);
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -77,11 +78,89 @@ namespace SistemaWeb.Models
             }
             catch
             {
-                return false; // Probablemente el correo ya existe (Unique Constraint)
+                return false; // Error por duplicado
             }
         }
 
-        // 3. RECUPERAR CLAVE (NUEVO)
+        // 3. OBTENER POR CORREO (Necesario para cargar la vista de edición)
+        public Usuario ObtenerUsuarioPorCorreo(string correo)
+        {
+            Usuario usuario = null;
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string sql = "SELECT IdUsuario, Nombre, Rol, Correo, IdGenero FROM Usuarios WHERE Correo = @Correo";
+
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Correo", correo);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            usuario = new Usuario
+                            {
+                                IdUsuario = reader["IdUsuario"].ToString(),
+                                Nombre = reader["Nombre"].ToString(),
+                                Rol = reader["Rol"].ToString(),
+                                Correo = reader["Correo"].ToString(),
+                                IdGenero = reader["IdGenero"] != DBNull.Value ? Convert.ToInt32(reader["IdGenero"]) : null
+                            };
+                        }
+                    }
+                }
+            }
+            return usuario;
+        }
+
+        // 4. ACTUALIZAR PERFIL (Corregido para IdUsuario string)
+        public bool ActualizarPerfilEstudiante(Usuario user)
+        {
+            if (!user.Correo.ToLower().EndsWith("@uisek.edu.ec")) return false;
+
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                // Nota: No actualizamos IdUsuario porque es la PK (Cédula) y es fija.
+                string sql = @"UPDATE Usuarios 
+                               SET Nombre = @Nombre, 
+                                   Correo = @Correo, 
+                                   IdGenero = @IdGenero 
+                               WHERE IdUsuario = @IdUsuario AND Rol = 'Estudiante'";
+
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Nombre", user.Nombre);
+                    cmd.Parameters.AddWithValue("@Correo", user.Correo);
+                    cmd.Parameters.AddWithValue("@IdGenero", (object)user.IdGenero ?? DBNull.Value);
+
+                    // Aquí IdUsuario es la Cédula que viene del modelo oculto en la vista
+                    cmd.Parameters.AddWithValue("@IdUsuario", user.IdUsuario);
+
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+        }
+
+        // 5. DROPDOWN DE GÉNEROS
+        public Dictionary<int, string> ObtenerGeneros()
+        {
+            var generos = new Dictionary<int, string>();
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string sql = "SELECT IdGenero, NombreGenero FROM Cat_Generos";
+                using (var cmd = new SqlCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                        generos.Add((int)reader["IdGenero"], reader["NombreGenero"].ToString());
+                }
+            }
+            return generos;
+        }
+
+        // 6. RECUPERAR CLAVE (Auxiliar)
         public string ObtenerClavePorCorreo(string correo)
         {
             string clave = null;
@@ -93,41 +172,10 @@ namespace SistemaWeb.Models
                 {
                     cmd.Parameters.AddWithValue("@Correo", correo);
                     var result = cmd.ExecuteScalar();
-                    if (result != null)
-                    {
-                        clave = result.ToString();
-                    }
+                    if (result != null) clave = result.ToString();
                 }
             }
             return clave;
         }
-
-
-        public bool ActualizarPerfilEstudiante(int idUsuario, string nombre, string correo, int idGenero)
-        {
-            // Validación estricta de dominio
-            if (!correo.ToLower().EndsWith("@uisek.edu.ec")) return false;
-
-            using (var conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-                // Solo permitimos que se actualice si el rol es 'Estudiante'
-                string sql = @"UPDATE Usuarios 
-                       SET Nombre = @Nombre, Correo = @Correo, IdGenero = @IdGenero 
-                       WHERE IdUsuario = @IdUsuario AND Rol = 'Estudiante'";
-
-                using (var cmd = new SqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Nombre", nombre);
-                    cmd.Parameters.AddWithValue("@Correo", correo);
-                    cmd.Parameters.AddWithValue("@IdGenero", idGenero);
-                    cmd.Parameters.AddWithValue("@IdUsuario", idUsuario);
-                    return cmd.ExecuteNonQuery() > 0;
-                }
-            }
-        }
-
-
-
     }
 }
