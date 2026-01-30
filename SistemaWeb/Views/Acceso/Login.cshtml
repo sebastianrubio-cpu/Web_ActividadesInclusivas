@@ -28,10 +28,10 @@
 
         body {
             background-color: var(--bg-body);
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/8/8f/Logo_uisek.svg');
+            background-image: url(/img/br.jpg);
             background-repeat: no-repeat;
-            background-position: center;
-            background-size: 35%;
+            background-position: center center;
+            background-size: cover;
             background-attachment: fixed;
             background-blend-mode: overlay;
             display: flex;
@@ -43,6 +43,7 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
+            
         }
 
         .container {
@@ -53,7 +54,7 @@
             overflow: hidden;
             width: 900px;
             max-width: 100%;
-            min-height: 650px; /* Aumenté un poco la altura para que quepan los nuevos campos */
+            min-height: 650px;
             transition: all 0.5s ease;
         }
 
