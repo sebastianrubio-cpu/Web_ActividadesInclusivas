@@ -20,7 +20,7 @@ namespace SistemaWeb.Controllers
         {
             // 1. Obtenemos el correo de la sesión actual
             var correo = User.FindFirstValue(ClaimTypes.Name) ?? User.Identity.Name;
-
+            
             // 2. CORRECCIÓN: Usamos el método que NO pide contraseña
             var usuario = _repo.ObtenerUsuarioPorCorreo(correo);
 

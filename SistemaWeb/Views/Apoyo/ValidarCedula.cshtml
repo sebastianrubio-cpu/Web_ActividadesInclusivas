@@ -1,23 +1,87 @@
 ﻿@{
-    ViewData["Title"] = "Validación";
+    ViewData["Title"] = "Validar Estudiante";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-6">
-        <div class="card-custom text-center">
-            <div class="mb-4 text-primary">
-                <i class="fas fa-id-card fa-3x"></i>
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-5">
+
+        <div class="card shadow-lg border-0 animate__animated animate__fadeInUp" style="border-radius: 20px; overflow: hidden;">
+
+            <div class="card-header text-white text-center py-4"
+                 style="background: linear-gradient(135deg, var(--uisek-blue) 0%, var(--uisek-hover) 100%);">
+                <i class="fas fa-id-card fa-3x mb-2"></i>
+                <h3 class="fw-bold mb-0">Consulta de Estudiantes</h3>
+                <small class="opacity-75">Sistema de Verificación de Identidad</small>
             </div>
 
-            <h3 class="fw-bold mb-3">Verificar Estudiante</h3>
-            <p class="text-muted mb-4">Ingresa el número de cédula para consultar la base de datos académica.</p>
+            <div class="card-body p-5" style="background-color: var(--bg-card);">
 
-            <form action="/Apoyo/ValidarCedula" method="post">
-                <div class="input-group mb-3">
-                    <input type="text" name="cedula" class="form-control form-control-lg text-center" placeholder="Ej: 1720000000" required maxlength="10">
-                    <button class="btn btn-uisek" type="submit">Consultar</button>
-                </div>
-            </form>
+                <form asp-action="ResultadoCedula" method="post">
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold" style="color: var(--text-main);">
+                            Ingrese el número de Cédula o ID:
+                        </label>
+
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text border-0" style="background-color: var(--bg-body); color: var(--uisek-blue);">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text"
+                                   name="cedula"
+                                   class="form-control border-0 shadow-sm"
+                                   placeholder="Ej: 1700000000"
+                                   required
+                                   maxlength="15"
+                                   style="background-color: var(--bg-body); color: var(--text-main);" />
+                        </div>
+                        <div class="form-text mt-2" style="color: var(--text-muted);">
+                            <i class="fas fa-info-circle"></i> Se buscará en la base de datos de usuarios activos.
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm"
+                                style="background-color: var(--uisek-blue); border: none; transition: all 0.3s;">
+                            <span class="fw-bold">Verificar Ahora</span> <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+
+                </form>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger mt-4 d-flex align-items-center animate__animated animate__shakeX" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <div>
+                            @ViewBag.Error
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="card-footer text-center py-3 border-0" style="background-color: var(--bg-body);">
+                <a asp-controller="Home" asp-action="Index" class="text-decoration-none fw-bold" style="color: var(--text-muted);">
+                    <i class="fas fa-arrow-left me-1"></i> Volver al Inicio
+                </a>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Pequeño script para mejorar la UX del input
+        const input = document.querySelector('input[name="cedula"]');
+        input.addEventListener('focus', () => {
+            input.parentElement.classList.add('shadow');
+            input.parentElement.style.transform = "scale(1.02)";
+            input.parentElement.style.transition = "all 0.3s ease";
+        });
+
+        input.addEventListener('blur', () => {
+            input.parentElement.classList.remove('shadow');
+            input.parentElement.style.transform = "scale(1)";
+        });
+    </script>
+}

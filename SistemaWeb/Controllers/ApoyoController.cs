@@ -1,41 +1,46 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SistemaWeb.Services;
 using SistemaWeb.Models;
-using Microsoft.AspNetCore.Authorization; // <--- Importante
 
 namespace SistemaWeb.Controllers
 {
-    // BLOQUEAMOS TODO EL CONTROLADOR A ESTUDIANTES
-    // Solo Admins y Profesores pueden usar estas herramientas
-    [Authorize(Roles = "Administrador,Profesor")]
     public class ApoyoController : Controller
     {
-        private readonly EstudiantesClient _cliente;
+        private readonly EstudiantesClient _apiClient;
 
-        public ApoyoController(EstudiantesClient cliente)
+        public ApoyoController(EstudiantesClient apiClient)
         {
-            _cliente = cliente;
+            _apiClient = apiClient;
         }
 
+        // GET: Muestra la vista de búsqueda
         [HttpGet]
         public IActionResult ValidarCedula()
         {
             return View();
         }
 
+        // POST: Procesa la búsqueda
         [HttpPost]
-        public async Task<IActionResult> ValidarCedula(string cedula)
+        public async Task<IActionResult> ResultadoCedula(string cedula)
         {
             if (string.IsNullOrEmpty(cedula))
             {
-                ViewBag.Error = "Debe ingresar una cédula.";
-                return View();
+                ViewBag.Error = "Debe ingresar un número de cédula.";
+                return View("ValidarCedula");
             }
 
-            var resultado = await _cliente.ConsultarPorCedulaAsync(cedula);
-
-            // Pasamos el resultado a la vista de respuesta
-            return View("ResultadoCedula", resultado);
+            try
+            {
+                // Llama a la API (que ahora busca en IdUsuario)
+                ValidacionCedulaResult resultado = await _apiClient.ConsultarPorCedulaAsync(cedula);
+                return View(resultado);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error de conexión: " + ex.Message;
+                return View("ValidarCedula");
+            }
         }
     }
 }

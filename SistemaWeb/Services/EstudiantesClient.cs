@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SistemaWeb.Models;
 
-namespace SistemaWeb.Services // <--- Verifica que este namespace sea correcto
+namespace SistemaWeb.Services
 {
     public class EstudiantesClient
     {
@@ -18,7 +18,10 @@ namespace SistemaWeb.Services // <--- Verifica que este namespace sea correcto
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/api/usuarios/verificar/{cedula}");
+                // CORRECCIÓN: La ruta debe coincidir con la definida en tu API (Program.cs)
+                // Antes tenías: api/usuarios/verificar/
+                // Ahora es: api/estudiantes/
+                var response = await _httpClient.GetAsync($"{_baseUrl}/api/estudiantes/{cedula}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -27,16 +30,20 @@ namespace SistemaWeb.Services // <--- Verifica que este namespace sea correcto
 
                     if (resultado != null)
                     {
+                        // Sincronizamos EsValida con lo que devolvió la API
                         resultado.EsValida = resultado.EsEstudiante;
                         return resultado;
                     }
-                    return new ValidacionCedulaResult { EsValida = false, Mensaje = "Respuesta vacía" };
+
+                    return new ValidacionCedulaResult { EsValida = false, Mensaje = "Respuesta vacía del servidor." };
                 }
-                return new ValidacionCedulaResult { EsValida = false, Mensaje = "No encontrado" };
+
+                // Si la API devuelve 404 u otro error
+                return new ValidacionCedulaResult { EsValida = false, Mensaje = "Cédula no encontrada en el sistema." };
             }
             catch (Exception ex)
             {
-                return new ValidacionCedulaResult { EsValida = false, Mensaje = $"Error: {ex.Message}" };
+                return new ValidacionCedulaResult { EsValida = false, Mensaje = $"Error de conexión: {ex.Message}" };
             }
         }
     }
