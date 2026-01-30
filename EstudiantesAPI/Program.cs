@@ -3,12 +3,10 @@ using System.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -18,18 +16,23 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
 // Obtener la cadena de conexión
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+// ENDPOINT: Buscar estudiante por Cédula
 app.MapGet("/api/estudiantes/{cedula}", async (string cedula) =>
 {
     using (var conn = new SqlConnection(connectionString))
     {
         await conn.OpenAsync();
 
-        // 1. CORREGIDO: Seleccionamos columnas que SÍ existen (Nombre, Apellido)
-        var sql = "SELECT TOP 1 IdEstudiante, Nombre, Apellido FROM Estudiantes WHERE Cedula = @cedula";
+        // 1. CORRECCIÓN CRÍTICA: 
+        // - Buscamos en tabla 'Usuarios'
+        // - Usamos 'IdUsuario' que ahora es la cédula
+        // - Filtramos que el Rol sea 'Estudiante'
+        var sql = @"SELECT TOP 1 IdUsuario, Nombre 
+                    FROM Usuarios 
+                    WHERE IdUsuario = @cedula AND Rol = 'Estudiante'";
 
         using (var cmd = new SqlCommand(sql, conn))
         {
@@ -39,26 +42,26 @@ app.MapGet("/api/estudiantes/{cedula}", async (string cedula) =>
             {
                 if (await reader.ReadAsync())
                 {
-                    // 2. LOGICA: Si entró aquí, es porque encontró el registro.
-                    // Armamos el nombre completo y devolvemos true "hardcodeado" porque la validación pasó.
-                    string nombreCompleto = $"{reader["Nombre"]} {reader["Apellido"]}";
+                    // 2. ÉXITO: Usuario encontrado
+                    string nombre = reader["Nombre"].ToString();
+                    string idEncontrado = reader["IdUsuario"].ToString();
 
                     return Results.Ok(new
                     {
-                        cedula = cedula,
-                        esEstudiante = true, // Si lo encontró en la DB, es true.
-                        nombre = nombreCompleto,
-                        mensaje = "Pertenece a un estudiante"
+                        cedula = idEncontrado,
+                        esEstudiante = true,
+                        nombre = nombre,
+                        mensaje = "Estudiante activo encontrado."
                     });
                 }
                 else
                 {
-                    // Si NO encontra la cédula
+                    // 3. FALLO: No existe o no es estudiante
                     return Results.NotFound(new
                     {
                         cedula = cedula,
                         esEstudiante = false,
-                        mensaje = "Cédula no encontrada en UISEK"
+                        mensaje = "Cédula no encontrada o el usuario no tiene rol de Estudiante."
                     });
                 }
             }

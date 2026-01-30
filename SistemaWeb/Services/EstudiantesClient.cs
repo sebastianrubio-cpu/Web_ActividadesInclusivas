@@ -11,17 +11,16 @@ namespace SistemaWeb.Services
         public EstudiantesClient(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
-            _baseUrl = configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7000";
+            _baseUrl = configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7199";
         }
 
         public async Task<ValidacionCedulaResult> ConsultarPorCedulaAsync(string cedula)
         {
             try
             {
-                // CORRECCIÓN: La ruta debe coincidir con la definida en tu API (Program.cs)
-                // Antes tenías: api/usuarios/verificar/
-                // Ahora es: api/estudiantes/
-                var response = await _httpClient.GetAsync($"{_baseUrl}/api/estudiantes/{cedula}");
+                // Verifica que la URL base no tenga barra al final para evitar dobles barras
+                var url = $"{_baseUrl.TrimEnd('/')}/api/estudiantes/{cedula}";
+                var response = await _httpClient.GetAsync(url);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -30,20 +29,23 @@ namespace SistemaWeb.Services
 
                     if (resultado != null)
                     {
-                        // Sincronizamos EsValida con lo que devolvió la API
                         resultado.EsValida = resultado.EsEstudiante;
                         return resultado;
                     }
-
                     return new ValidacionCedulaResult { EsValida = false, Mensaje = "Respuesta vacía del servidor." };
                 }
 
-                // Si la API devuelve 404 u otro error
-                return new ValidacionCedulaResult { EsValida = false, Mensaje = "Cédula no encontrada en el sistema." };
+                // --- MEJORA DE DIAGNÓSTICO ---
+                // Si falla, devolvemos el código de error exacto (ej: 500 Internal Server Error)
+                return new ValidacionCedulaResult
+                {
+                    EsValida = false,
+                    Mensaje = $"Error del Servidor API: {response.StatusCode} ({response.ReasonPhrase})"
+                };
             }
             catch (Exception ex)
             {
-                return new ValidacionCedulaResult { EsValida = false, Mensaje = $"Error de conexión: {ex.Message}" };
+                return new ValidacionCedulaResult { EsValida = false, Mensaje = $"Error de Conexión: {ex.Message}" };
             }
         }
     }
