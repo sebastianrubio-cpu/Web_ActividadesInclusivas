@@ -1,0 +1,195 @@
+﻿@model IEnumerable<SistemaWeb.Models.Actividad>
+
+@{
+    ViewData["Title"] = "Explorar Actividades";
+}
+
+<div class="container mt-5 animate__animated animate__fadeIn">
+
+    <div class="text-center mb-5">
+        <h1 class="fw-bold" style="color: var(--uisek-blue);">
+            <i class="fas fa-compass me-2"></i>Descubre Actividades
+        </h1>
+        <p class="text-muted">Espacios inclusivos diseñados para tu desarrollo.</p>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm card-hover-effect" style="border-radius: 20px; overflow: hidden;">
+
+                    <div style="height: 10px; background: linear-gradient(90deg, var(--uisek-blue), var(--uisek-hover));"></div>
+
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="badge rounded-pill bg-light text-dark border">
+                                <i class="fas fa-universal-access me-1"></i> @item.TipoDiscapacidad
+                            </span>
+                            <small class="text-muted fw-bold">
+                                @item.FechaRealizacion.ToString("dd MMM")
+                            </small>
+                        </div>
+
+                        <h4 class="card-title fw-bold mb-3" style="color: var(--text-main);">@item.Nombre</h4>
+
+                        <p class="card-text text-muted small mb-4">
+                            Organizado por: <strong>@item.Responsable</strong><br />
+                            <i class="fas fa-users me-1"></i> Cupos disponibles: @item.Cupo
+                        </p>
+
+                        <div class="mt-auto">
+                            <button class="btn btn-outline-primary w-100 rounded-pill fw-bold"
+                                    onclick="abrirModalDetalles(
+                                            '@item.Nombre',
+                                            '@item.FechaRealizacion.ToLongDateString()',
+                                            '@item.Responsable',
+                                            '@item.Cupo',
+                                            '@item.TipoDiscapacidad',
+                                            '@item.Estado'
+                                        )">
+                                Ver Detalles <i class="fas fa-search-plus ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg animate__animated animate__zoomIn" style="border-radius: 25px;">
+
+            <div class="modal-header border-0 text-white" style="background: var(--uisek-blue); border-radius: 25px 25px 0 0;">
+                <h5 class="modal-title fw-bold" id="modalTitulo"><i class="fas fa-info-circle me-2"></i>Detalle de Actividad</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" onclick="pararLectura()"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <h3 class="fw-bold text-center mb-2" id="modalNombreActividad" style="color: var(--uisek-blue);"></h3>
+                <p class="text-center text-muted mb-4" id="modalFecha"></p>
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded-3 text-center h-100">
+                            <i class="fas fa-user-tie text-secondary mb-2 fs-4"></i>
+                            <h6 class="fw-bold small">Responsable</h6>
+                            <span class="text-muted small" id="modalResponsable"></span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded-3 text-center h-100">
+                            <i class="fas fa-users text-secondary mb-2 fs-4"></i>
+                            <h6 class="fw-bold small">Cupo Total</h6>
+                            <span class="text-muted small" id="modalCupo"></span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="p-3 bg-light rounded-3 d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="fw-bold small mb-0">Enfoque de Inclusión</h6>
+                                <span class="text-muted small" id="modalDiscapacidad"></span>
+                            </div>
+                            <i class="fas fa-universal-access fs-2 text-info opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4 opacity-25">
+
+                <div class="d-flex justify-content-center gap-2">
+                    <button onclick="leerContenido()" class="btn btn-primary rounded-pill px-4">
+                        <i class="fas fa-volume-up me-2"></i> Escuchar
+                    </button>
+                    <button onclick="pararLectura()" class="btn btn-outline-danger rounded-pill px-4">
+                        <i class="fas fa-stop-circle me-2"></i> Parar Voz
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-secondary rounded-pill px-5" data-bs-dismiss="modal" onclick="pararLectura()">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+
+    .card-hover-effect {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .card-hover-effect:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important;
+        }
+
+    body {
+        background-color: var(--bg-body);
+        background-image: url(/img/br.jpg); /* Asegúrate de que esta imagen exista */
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>
+
+<script>
+    // Variables globales para la síntesis de voz
+    let synth = window.speechSynthesis;
+    let textoParaLeer = "";
+
+    // 1. ABRIR MODAL Y CARGAR DATOS
+    function abrirModalDetalles(nombre, fecha, responsable, cupo, discapacidad, estado) {
+        // Llenar los campos visuales
+        document.getElementById('modalNombreActividad').textContent = nombre;
+        document.getElementById('modalFecha').textContent = fecha;
+        document.getElementById('modalResponsable').textContent = responsable;
+        document.getElementById('modalCupo').textContent = cupo + " Estudiantes";
+        document.getElementById('modalDiscapacidad').textContent = discapacidad;
+
+        // Construir el texto amigable para la lectura
+        textoParaLeer = `Detalle de la actividad: ${nombre}. ` +
+                        `Se realizará el ${fecha}. ` +
+                        `El responsable es ${responsable}. ` +
+                        `Está enfocada en discapacidad ${discapacidad} y tiene un cupo para ${cupo} personas.`;
+
+        // Mostrar el modal usando Bootstrap
+        var myModal = new bootstrap.Modal(document.getElementById('detalleModal'));
+        myModal.show();
+    }
+
+    // 2. FUNCIÓN LEER (TEXT-TO-SPEECH)
+    function leerContenido() {
+        // Cancelar cualquier lectura previa para evitar superposición
+        if (synth.speaking) {
+            synth.cancel();
+        }
+
+        const utterThis = new SpeechSynthesisUtterance(textoParaLeer);
+
+        // Configuración de la voz (Intenta español, si no usa default)
+        utterThis.lang = 'es-ES';
+        utterThis.rate = 0.9; // Velocidad un poco más lenta para claridad
+        utterThis.pitch = 1;
+
+        synth.speak(utterThis);
+    }
+
+    // 3. FUNCIÓN PARAR LECTURA
+    function pararLectura() {
+        if (synth.speaking) {
+            synth.cancel();
+        }
+    }
+
+    // Limpieza: Asegurar que pare de hablar si se recarga la página
+    window.onbeforeunload = function () {
+        synth.cancel();
+    };
+</script>

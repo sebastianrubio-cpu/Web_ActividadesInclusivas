@@ -23,6 +23,48 @@
 
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+                        <ul class="navbar-nav flex-grow-1">
+
+                            @if (!User.IsInRole("Estudiante"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-anim" asp-controller="Actividades" asp-action="Index">
+                                        📅 <span class="nav-text-reveal">Actividades</span>
+                                    </a>
+                                </li>
+                            }
+
+                            @if (User.IsInRole("Estudiante"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-anim animate__animated animate__fadeIn" asp-controller="Actividades" asp-action="VistaEstudiante">
+                                        🎓 <span class="nav-text-reveal">Explorar</span>
+                                    </a>
+                                </li>
+                            }
+
+                            @if (User.Identity.IsAuthenticated && (User.IsInRole("Administrador") || User.IsInRole("Profesor")))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-anim animate__animated animate__fadeIn" asp-controller="Actividades" asp-action="Estadisticas">
+                                        📊 <span class="nav-text-reveal">Estadísticas</span>
+                                    </a>
+                                </li>
+                            }
+
+                            <li class="nav-item">
+                                <a class="nav-anim" asp-controller="Actividades" asp-action="Mapa">
+                                    🗺️ <span class="nav-text-reveal">Mapa Eventos</span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-anim" asp-controller="Home" asp-action="Proyecto">
+                                    🚀 <span class="nav-text-reveal">El Proyecto</span>
+                                </a>
+                            </li>
+
+                        </ul>
 
                         <li class="nav-item">
                             <a class="nav-anim" asp-controller="Actividades" asp-action="Index">
@@ -37,16 +79,6 @@
                                 </a>
                             </li>
                         }
-                        <li class="nav-item">
-                            <a class="nav-anim" asp-controller="Actividades" asp-action="Mapa">
-                                🗺️ <span class="nav-text-reveal">Mapa Eventos</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-anim" asp-controller="Home" asp-action="Proyecto">
-                                🚀 <span class="nav-text-reveal">El Proyecto</span>
-                            </a>
                         </li>
 
                     </ul>

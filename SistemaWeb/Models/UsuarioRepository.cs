@@ -1,5 +1,8 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
+using Microsoft.Extensions.Configuration; // Necesario para IConfiguration
+using System.Collections.Generic; // Necesario para Dictionary
+using System;
 
 namespace SistemaWeb.Models
 {
@@ -53,7 +56,15 @@ namespace SistemaWeb.Models
             return usuario;
         }
 
-        // 2. REGISTRAR ESTUDIANTE (Cédula es el IdUsuario)
+        // 2. REGISTRAR (Método genérico que llama el Controlador) [NUEVO]
+        public bool Registrar(Usuario user)
+        {
+            // Llamamos a la lógica interna pasando los datos del objeto
+            // Si IdGenero es null, pasamos 0 o DBNull según tu lógica (aquí asumo 0 por defecto)
+            return RegistrarEstudiante(user.IdUsuario, user.Nombre, user.Correo, user.Clave, user.IdGenero ?? 0);
+        }
+
+        // 2.1 Lógica SQL de Registro
         public bool RegistrarEstudiante(string cedula, string nombre, string correo, string clave, int idGenero)
         {
             try
@@ -82,7 +93,7 @@ namespace SistemaWeb.Models
             }
         }
 
-        // 3. OBTENER POR CORREO (Necesario para cargar la vista de edición)
+        // 3. OBTENER POR CORREO
         public Usuario ObtenerUsuarioPorCorreo(string correo)
         {
             Usuario usuario = null;
@@ -113,7 +124,7 @@ namespace SistemaWeb.Models
             return usuario;
         }
 
-        // 4. ACTUALIZAR PERFIL (Corregido para IdUsuario string)
+        // 4. ACTUALIZAR PERFIL
         public bool ActualizarPerfilEstudiante(Usuario user)
         {
             if (!user.Correo.ToLower().EndsWith("@uisek.edu.ec")) return false;
@@ -121,7 +132,6 @@ namespace SistemaWeb.Models
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                // Nota: No actualizamos IdUsuario porque es la PK (Cédula) y es fija.
                 string sql = @"UPDATE Usuarios 
                                SET Nombre = @Nombre, 
                                    Correo = @Correo, 
@@ -133,8 +143,6 @@ namespace SistemaWeb.Models
                     cmd.Parameters.AddWithValue("@Nombre", user.Nombre);
                     cmd.Parameters.AddWithValue("@Correo", user.Correo);
                     cmd.Parameters.AddWithValue("@IdGenero", (object)user.IdGenero ?? DBNull.Value);
-
-                    // Aquí IdUsuario es la Cédula que viene del modelo oculto en la vista
                     cmd.Parameters.AddWithValue("@IdUsuario", user.IdUsuario);
 
                     return cmd.ExecuteNonQuery() > 0;
@@ -160,7 +168,22 @@ namespace SistemaWeb.Models
             return generos;
         }
 
-        // 6. RECUPERAR CLAVE (Auxiliar)
+        // 6. CONTAR USUARIOS (Necesario para Estadísticas) [NUEVO]
+        public int ContarUsuarios()
+        {
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string sql = "SELECT COUNT(*) FROM Usuarios";
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    var result = cmd.ExecuteScalar();
+                    return result != DBNull.Value ? Convert.ToInt32(result) : 0;
+                }
+            }
+        }
+
+        // 7. RECUPERAR CLAVE
         public string ObtenerClavePorCorreo(string correo)
         {
             string clave = null;
@@ -176,22 +199,6 @@ namespace SistemaWeb.Models
                 }
             }
             return clave;
-        }
-
-
-        // 7. CONTAR USUARIOS
-        public int ContarUsuarios()
-        {
-            using (var conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-                // Contamos todos los registros de la tabla Usuarios
-                string sql = "SELECT COUNT(*) FROM Usuarios";
-                using (var cmd = new SqlCommand(sql, conn))
-                {
-                    return (int)cmd.ExecuteScalar();
-                }
-            }
         }
     }
 }

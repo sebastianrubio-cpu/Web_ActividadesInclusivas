@@ -1,80 +1,121 @@
 ﻿@{
-    ViewData["Title"] = "Panel de Estadísticas";
+    ViewData["Title"] = "Métricas del Sistema";
 }
 
-<div class="container mt-5 animate__animated animate__fadeIn">
-    <h2 class="minimal-title mb-4">📊 Panel de Control e Impacto</h2>
+<div class="container mt-4 animate__animated animate__fadeIn">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: var(--uisek-blue);">
+            <i class="fas fa-chart-line me-2"></i>Dashboard de Impacto
+        </h2>
+        <span class="badge bg-secondary p-2">Vista de Administrador</span>
+    </div>
 
     <div class="row mb-5">
         <div class="col-md-4">
-            <div class="system-monitor-card text-center p-4">
-                <div class="monitor-header">Usuarios Registrados</div>
-                <h1 class="display-4 fw-bold mt-3">@ViewBag.TotalUsuarios</h1>
-                <small class="text-muted">Impacto en la comunidad UISEK</small>
+            <div class="p-3 rounded-4 shadow-sm border-start border-5 border-primary bg-white">
+                <small class="text-muted text-uppercase fw-bold">Total Usuarios</small>
+                <h2 class="fw-bold mb-0">@ViewBag.UsuarioTotal</h2>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="system-monitor-card text-center p-4" style="border-color: #00bcd4;">
-                <div class="monitor-header" style="background: linear-gradient(135deg, #0097a7, #00bcd4);">Actividades Totales</div>
-                <h1 class="display-4 fw-bold mt-3">@ViewBag.TotalActividades</h1>
-                <small class="text-muted">Eventos gestionados este semestre</small>
+            <div class="p-3 rounded-4 shadow-sm border-start border-5 border-info bg-white">
+                <small class="text-muted text-uppercase fw-bold">Actividades Creadas</small>
+                <h2 class="fw-bold mb-0">@ViewBag.TotalActividades</h2>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="system-monitor-card text-center p-4" style="border-color: #8bc34a;">
-                <div class="monitor-header" style="background: linear-gradient(135deg, #689f38, #8bc34a);">Estado del Foro</div>
-                <h1 class="display-4 fw-bold mt-3">Activo</h1>
-                <small class="text-muted">Interacción de usuarios</small>
+            <div class="p-3 rounded-4 shadow-sm border-start border-5 border-success bg-white">
+                <small class="text-muted text-uppercase fw-bold">Cupos Ofertados</small>
+                <h2 class="fw-bold mb-0">@ViewBag.TotalCupos</h2>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="minimal-card p-4">
-                <h5 class="fw-bold mb-4">Distribución por Tipo de Discapacidad</h5>
-                <canvas id="chartDiscapacidad" style="max-height: 400px;"></canvas>
+    <div class="row g-4">
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100 rounded-4">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold">Distribución por Discapacidad</h5>
+                    <small class="text-muted">Proporción de actividades según enfoque.</small>
+                </div>
+                <div class="card-body d-flex justify-content-center align-items-center" style="position: relative; height: 300px;">
+                    <canvas id="pieChart"></canvas>
+                </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="minimal-card p-4 h-100">
-                <h5 class="fw-bold mb-3">Análisis de Utilidad</h5>
-                <p class="small text-muted">
-                    Este gráfico permite a los administradores identificar qué áreas de inclusión requieren más atención o recursos.
-                </p>
-                <ul class="list-group list-group-flush bg-transparent">
-                    <li class="list-group-item bg-transparent text-white-50 small border-secondary">
-                        <i class="bi bi-info-circle me-2"></i> Mayor enfoque: Motriz
-                    </li>
-                    <li class="list-group-item bg-transparent text-white-50 small border-secondary">
-                        <i class="bi bi-info-circle me-2"></i> Área a reforzar: Visual
-                    </li>
-                </ul>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100 rounded-4">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold">Oferta de Cupos (Expectativa)</h5>
+                    <small class="text-muted">Total de cupos abiertos por categoría.</small>
+                </div>
+                <div class="card-body" style="position: relative; height: 300px;">
+                    <canvas id="barChart"></canvas>
+                </div>
             </div>
         </div>
+
     </div>
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-        const ctx = document.getElementById('chartDiscapacidad').getContext('2d');
+        // 1. OBTENER DATOS DEL SERVIDOR (ViewBag)
+        // Usamos Html.Raw y Json.Serialize para convertir los arrays de C# a Arrays de JS
+        const labelsJS = @Html.Raw(Json.Serialize(ViewBag.Labels));
+        const dataCantidadJS = @Html.Raw(Json.Serialize(ViewBag.DataCantidad));
+        const dataCuposJS = @Html.Raw(Json.Serialize(ViewBag.DataCupos));
 
-        // Serializamos los datos reales desde el controlador
-        const labelsData = @Html.Raw(Json.Serialize(ViewBag.LabelsDiscapacidad));
-        const valuesData = @Html.Raw(Json.Serialize(ViewBag.ValoresDiscapacidad));
+        // Colores UISEK para los gráficos
+        const colors = ['#002d5b', '#004a99', '#3b82f6', '#60a5fa', '#93c5fd'];
 
-        new Chart(ctx, {
+        // --- CONFIGURACIÓN GRÁFICO PASTEL ---
+        const ctxPie = document.getElementById('pieChart').getContext('2d');
+        new Chart(ctxPie, {
+            type: 'doughnut', // Tipo 'Donut' es más moderno que 'Pie' simple
+            data: {
+                labels: labelsJS,
+                datasets: [{
+                    data: dataCantidadJS,
+                    backgroundColor: colors,
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        },
+                        // INTERACTIVIDAD: Chart.js permite por defecto ocultar datos al dar click en la leyenda
+                        onClick: null // Mantiene el comportamiento default de filtrar
+                    }
+                }
+            }
+        });
+
+        // --- CONFIGURACIÓN GRÁFICO BARRAS (EXPECTATIVA) ---
+        const ctxBar = document.getElementById('barChart').getContext('2d');
+        new Chart(ctxBar, {
             type: 'bar',
             data: {
-                labels: labelsData,
+                labels: labelsJS,
                 datasets: [{
-                    label: 'Cantidad de Actividades',
-                    data: valuesData,
-                    backgroundColor: 'rgba(0, 45, 91, 0.6)', // var(--uisek-blue) con opacidad
-                    borderColor: '#002d5b',
-                    borderWidth: 2,
-                    borderRadius: 10 // Barras redondeadas para que se vea moderno
+                    label: 'Cupos Totales (Expectativa)',
+                    data: dataCuposJS,
+                    backgroundColor: '#002d5b',
+                    borderRadius: 5,
+                    barPercentage: 0.6
                 }]
             },
             options: {
@@ -83,16 +124,14 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: { stepSize: 1, color: 'gray' },
-                        grid: { display: false }
+                        grid: { display: true, color: '#f0f0f0' }
                     },
                     x: {
-                        ticks: { color: 'gray' },
                         grid: { display: false }
                     }
                 },
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false } // Ocultamos leyenda en barras si es una sola serie
                 }
             }
         });

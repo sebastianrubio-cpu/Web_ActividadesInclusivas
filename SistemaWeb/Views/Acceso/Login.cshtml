@@ -1,6 +1,11 @@
-﻿@{
+﻿@model SistemaWeb.Models.Usuario
+
+@{
     ViewData["Title"] = "Acceso Institucional";
     Layout = null;
+
+    // Verificamos si hay que mantener abierto el panel de registro (por error)
+    bool mostrarRegistro = ViewData["MostrarRegistro"] as bool? == true;
 }
 
 <!DOCTYPE html>
@@ -13,7 +18,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- ESTILOS PREVIOS (MANTENIDOS) --- */
+        /* --- ESTILOS PREVIOS (EXACTAMENTE IGUALES) --- */
         :root {
             --uisek-blue: #002d5b;
             --uisek-light-blue: #004a99;
@@ -28,7 +33,7 @@
 
         body {
             background-color: var(--bg-body);
-            background-image: url(/img/br.jpg);
+            background-image: url(/img/br.jpg); /* Asegúrate de que esta imagen exista */
             background-repeat: no-repeat;
             background-position: center center;
             background-size: cover;
@@ -43,7 +48,6 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
-            
         }
 
         .container {
@@ -414,25 +418,28 @@
                 <h1>Crear Cuenta</h1>
                 <span>Use su correo institucional (@@uisek.edu.ec)</span>
 
-                <input type="text" name="cedula" placeholder="Cédula de Identidad" required maxlength="15" />
+                <input type="text" name="IdUsuario" placeholder="Cédula de Identidad" required maxlength="15" />
+                <input type="text" name="Nombre" placeholder="Nombre Completo" required />
+                <input type="email" name="Correo" placeholder="Correo Electrónico" required />
+                <input type="password" name="Clave" placeholder="Contraseña" required />
 
-                <input type="text" name="nombre" placeholder="Nombre Completo" required />
-                <input type="email" name="correo" placeholder="Correo Electrónico" required />
-                <input type="password" name="clave" placeholder="Contraseña" required />
-
-                <select name="idGenero" required>
+                <select name="IdGenero" required>
                     <option value="" disabled selected>Seleccione su Género</option>
                     <option value="0">Masculino</option>
                     <option value="1">Femenino</option>
                     <option value="2">No Binario</option>
                 </select>
 
+                <div style="font-size: 11px; color: #666; margin-bottom: 10px;">
+                    * Mínimo 8 caracteres, 1 Mayúscula, 1 Símbolo.
+                </div>
+
                 <button type="submit">Registrarse</button>
 
-                @if (ViewBag.ErrorRegistro != null)
+                @if (ViewData["ErrorRegistro"] != null)
                 {
-                    <div style="color: #d32f2f; font-size: 12px; margin-top: 10px;">
-                        @ViewBag.ErrorRegistro
+                    <div style="color: #d32f2f; font-size: 12px; margin-top: 10px; font-weight: bold;">
+                        <i class="fas fa-exclamation-triangle"></i> @ViewData["ErrorRegistro"]
                     </div>
                 }
             </form>
@@ -445,8 +452,8 @@
                 <h1>Acceso UISEK</h1>
                 <span>Sistema de Actividades Inclusivas</span>
 
-                <input type="email" name="correo" placeholder="Correo Institucional" required />
-                <input type="password" name="clave" placeholder="Contraseña" required />
+                <input type="email" name="Correo" placeholder="Correo Institucional" required />
+                <input type="password" name="Clave" placeholder="Contraseña" required />
 
                 <a onclick="openModal()" class="forgot-pass">
                     ¿Olvidó su contraseña?
@@ -454,17 +461,17 @@
 
                 <button type="submit">Ingresar</button>
 
-                @if (ViewBag.Error != null)
+                @if (ViewData["Error"] != null)
                 {
-                    <div style="color: #d32f2f; font-size: 14px; margin-top: 20px; font-weight:700; background: #ffcdd2; padding: 10px 15px; border-radius: 8px; width: 100%;">
-                        <i class="fas fa-exclamation-circle"></i> @ViewBag.Error
+                    <div style="color: #d32f2f; font-size: 13px; margin-top: 15px; font-weight:700; background: #ffebee; padding: 10px; border-radius: 8px; width: 100%;">
+                        <i class="fas fa-exclamation-circle"></i> @ViewData["Error"]
                     </div>
                 }
 
-                @if (ViewBag.Mensaje != null)
+                @if (ViewData["Exito"] != null)
                 {
-                    <div style="color: #166534; font-size: 14px; margin-top: 20px; font-weight:700; background: #dcfce7; padding: 10px 15px; border-radius: 8px; width: 100%;">
-                        <i class="fas fa-check"></i> @ViewBag.Mensaje
+                    <div style="color: #166534; font-size: 13px; margin-top: 15px; font-weight:700; background: #dcfce7; padding: 10px; border-radius: 8px; width: 100%;">
+                        <i class="fas fa-check"></i> @ViewData["Exito"]
                     </div>
                 }
             </form>
@@ -508,6 +515,7 @@
         const signInButton = document.getElementById('signIn');
         const container = document.getElementById('container');
 
+        // Lógica del Slider
         signUpButton.addEventListener('click', () => {
             container.classList.add("right-panel-active");
         });
@@ -515,6 +523,13 @@
         signInButton.addEventListener('click', () => {
             container.classList.remove("right-panel-active");
         });
+
+        // IMPORTANTE: Si hubo un error en el registro (ViewData["MostrarRegistro"] es true),
+        // abrimos automáticamente el panel de registro al cargar la página.
+        var mostrarRegistro = '@(mostrarRegistro)';
+        if (mostrarRegistro === 'True') {
+            container.classList.add("right-panel-active");
+        }
 
         // Lógica del Modal
         function openModal() {
@@ -525,7 +540,6 @@
             document.getElementById('modalRecuperar').classList.remove('active');
         }
 
-        // Cerrar modal si clic afuera
         window.onclick = function(event) {
             const modal = document.getElementById('modalRecuperar');
             if (event.target == modal) {
@@ -533,7 +547,7 @@
             }
         }
 
-        // Desaparecer alertas automáticas
+        // Desaparecer alertas
         setTimeout(function() {
             const alerts = document.querySelectorAll('.alert-custom');
             alerts.forEach(alert => alert.style.display = 'none');

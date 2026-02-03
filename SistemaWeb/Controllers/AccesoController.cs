@@ -1,110 +1,124 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SistemaWeb.Models;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using SistemaWeb.Models;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq; // Necesario para validar contraseña
 
 namespace SistemaWeb.Controllers
 {
     public class AccesoController : Controller
     {
-        private readonly UsuarioRepository _usuarioRepository;
+        private readonly UsuarioRepository _usuarioRepo;
 
-        public AccesoController(UsuarioRepository usuarioRepository)
+        public AccesoController(UsuarioRepository usuarioRepo)
         {
-            _usuarioRepository = usuarioRepository;
+            _usuarioRepo = usuarioRepo;
         }
 
+        // GET: Mostrar Login
+        [HttpGet]
         public IActionResult Login()
         {
-            // Si ya está logueado, redirigir al inicio
-            if (User.Identity!.IsAuthenticated)
+            if (User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction(User.IsInRole("Estudiante") ? "VistaEstudiante" : "Index", "Actividades");
             }
+
+            // Usamos ViewData para evitar errores dinámicos en Razor
+            ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
             return View();
         }
 
+        // POST: Procesar Login
         [HttpPost]
-        public async Task<IActionResult> Login(string correo, string clave)
+        public async Task<IActionResult> Login(string Correo, string Clave)
         {
-            Usuario usuario = _usuarioRepository.ValidarUsuario(correo, clave);
+            Usuario usuario = _usuarioRepo.ValidarUsuario(Correo, Clave);
 
             if (usuario != null)
             {
-                // 1. CREAR LOS CLAIMS (Datos del usuario en la cookie)
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, usuario.Correo),
-                    new Claim("NombreCompleto", usuario.Nombre),
-                    
-                    // ¡IMPORTANTE! Esta línea permite que User.IsInRole("Estudiante") funcione
+                    new Claim(ClaimTypes.Name, usuario.Nombre),
+                    new Claim("Correo", usuario.Correo),
                     new Claim(ClaimTypes.Role, usuario.Rol)
                 };
 
-                // 2. CREAR LA IDENTIDAD
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                // 3. INICIAR SESIÓN (Crear la cookie)
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction(usuario.Rol == "Estudiante" ? "VistaEstudiante" : "Index", "Actividades");
             }
-            else
-            {
-                ViewBag.Error = "Correo o clave incorrectos";
-                return View();
-            }
-        }
 
-        public async Task<IActionResult> Salir()
-        {
-            // BORRAR LA COOKIE
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login", "Acceso");
-        }
-
-
-
-        // GET: Mostrar formulario de registro
-        public IActionResult Registrar()
-        {
-            if (User.Identity!.IsAuthenticated) return RedirectToAction("Index", "Home");
-
-            // Cargar géneros para el select
-            ViewBag.Generos = _usuarioRepository.ObtenerGeneros();
+            ViewData["Error"] = "Correo o contraseña incorrectos";
+            ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
             return View();
         }
 
-        // POST: Procesar registro
+        // POST: Procesar Registro
         [HttpPost]
-        public IActionResult Registrar(string cedula, string nombre, string correo, string clave, int idGenero)
+        public IActionResult Registrar(Usuario usuario)
         {
-            // 1. Validaciones básicas
-            if (!correo.EndsWith("@uisek.edu.ec"))
+            // 1. Asignar Rol por defecto
+            usuario.Rol = "Estudiante";
+
+            // 2. Quitar 'Rol' de la validación automática
+            ModelState.Remove("Rol");
+
+            // 3. Validar Seguridad de Contraseña
+            if (!EsClaveSegura(usuario.Clave))
             {
-                ViewBag.Error = "El correo debe ser institucional (@uisek.edu.ec)";
-                ViewBag.Generos = _usuarioRepository.ObtenerGeneros();
-                return View();
+                ViewData["ErrorRegistro"] = "La contraseña debe tener 8 caracteres, una mayúscula y un signo especial.";
+                ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
+                ViewData["MostrarRegistro"] = true; // Mantiene el panel abierto
+                return View("Login", usuario);
             }
 
-            // 2. Intentar registrar
-            bool resultado = _usuarioRepository.RegistrarEstudiante(cedula, nombre, correo, clave, idGenero);
-
-            if (resultado)
+            // 4. Intentar guardar
+            if (ModelState.IsValid)
             {
-                // Éxito: Redirigir al Login
-                return RedirectToAction("Login");
+                bool resultado = _usuarioRepo.Registrar(usuario);
+                if (resultado)
+                {
+                    ViewData["Exito"] = "Cuenta creada correctamente. Inicie sesión.";
+                    ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
+                    // Al ser exitoso, NO enviamos 'MostrarRegistro' para que muestre el Login limpio
+                    return View("Login");
+                }
+                else
+                {
+                    ViewData["ErrorRegistro"] = "La Cédula o el Correo ya están registrados.";
+                }
             }
             else
             {
-                // Error (Duplicado)
-                ViewBag.Error = "No se pudo registrar. Verifique que la Cédula o Correo no existan ya.";
-                ViewBag.Generos = _usuarioRepository.ObtenerGeneros();
-                return View();
+                ViewData["ErrorRegistro"] = "Por favor complete todos los campos obligatorios.";
             }
+
+            // Si falló algo, recargamos la vista manteniendo el panel de registro abierto
+            ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
+            ViewData["MostrarRegistro"] = true;
+            return View("Login", usuario);
         }
 
+        // SALIR
+        public async Task<IActionResult> Salir()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login");
+        }
 
+        // --- MÉTODO PRIVADO DE VALIDACIÓN ---
+        private bool EsClaveSegura(string clave)
+        {
+            if (string.IsNullOrEmpty(clave)) return false;
+            if (clave.Length < 8) return false;
+            if (!clave.Any(char.IsUpper)) return false; // Al menos una mayúscula
+            if (!clave.Any(ch => !char.IsLetterOrDigit(ch))) return false; // Al menos un símbolo
+            return true;
+        }
     }
 }
