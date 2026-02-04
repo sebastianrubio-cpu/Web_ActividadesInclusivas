@@ -1,6 +1,8 @@
 ﻿using System.Data;
 using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
+using System;
 
 namespace SistemaWeb.Models
 {
@@ -32,7 +34,6 @@ namespace SistemaWeb.Models
                                 Nombre = reader["Nombre"].ToString(),
                                 FechaRealizacion = Convert.ToDateTime(reader["FechaRealizacion"]),
                                 Cupo = Convert.ToInt32(reader["Cupo"]),
-                                // El SP devuelve el nombre del usuario, lo ponemos en Responsable para visualización
                                 Responsable = reader["Responsable"].ToString(),
                                 GmailProfesor = reader["GmailProfesor"] != DBNull.Value ? reader["GmailProfesor"].ToString() : "",
                                 Estado = reader["Estado"].ToString(),
@@ -82,7 +83,6 @@ namespace SistemaWeb.Models
             return actividad;
         }
 
-        // AGREGAR: Recibe ID Responsable y Auditoria
         public void Agregar(Actividad actividad, string idUsuarioAuditoria)
         {
             using (var conn = new SqlConnection(_connectionString))
@@ -95,16 +95,13 @@ namespace SistemaWeb.Models
                     cmd.Parameters.AddWithValue("@Nombre", actividad.Nombre);
                     cmd.Parameters.AddWithValue("@FechaRealizacion", actividad.FechaRealizacion);
                     cmd.Parameters.AddWithValue("@Cupo", actividad.Cupo);
-
-                    // Nuevo: FK del profesor
                     cmd.Parameters.AddWithValue("@IdResponsable", actividad.IdResponsable);
-
                     cmd.Parameters.AddWithValue("@Latitud", actividad.Latitud);
                     cmd.Parameters.AddWithValue("@Longitud", actividad.Longitud);
                     cmd.Parameters.AddWithValue("@NombreEstado", actividad.Estado ?? "Activo");
                     cmd.Parameters.AddWithValue("@NombreDiscapacidad", actividad.TipoDiscapacidad ?? "Ninguna");
 
-                    // Nuevo: Auditoria
+                    // Este parámetro viaja al SP y se inyecta en la Sesión para el Trigger
                     cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuarioAuditoria);
 
                     cmd.ExecuteNonQuery();
@@ -112,7 +109,6 @@ namespace SistemaWeb.Models
             }
         }
 
-        // ACTUALIZAR: Recibe ID Responsable y Auditoria
         public void Actualizar(Actividad actividad, string idUsuarioAuditoria)
         {
             using (var conn = new SqlConnection(_connectionString))
@@ -125,16 +121,11 @@ namespace SistemaWeb.Models
                     cmd.Parameters.AddWithValue("@Nombre", actividad.Nombre);
                     cmd.Parameters.AddWithValue("@FechaRealizacion", actividad.FechaRealizacion);
                     cmd.Parameters.AddWithValue("@Cupo", actividad.Cupo);
-
-                    // Nuevo
                     cmd.Parameters.AddWithValue("@IdResponsable", actividad.IdResponsable);
-
                     cmd.Parameters.AddWithValue("@Latitud", actividad.Latitud);
                     cmd.Parameters.AddWithValue("@Longitud", actividad.Longitud);
                     cmd.Parameters.AddWithValue("@NombreEstado", actividad.Estado ?? "Activo");
                     cmd.Parameters.AddWithValue("@NombreDiscapacidad", actividad.TipoDiscapacidad ?? "Ninguna");
-
-                    // Nuevo
                     cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuarioAuditoria);
 
                     cmd.ExecuteNonQuery();
@@ -142,7 +133,6 @@ namespace SistemaWeb.Models
             }
         }
 
-        // ELIMINAR: Recibe Auditoria
         public void Eliminar(string codigo, string idUsuarioAuditoria)
         {
             using (var conn = new SqlConnection(_connectionString))
@@ -158,7 +148,6 @@ namespace SistemaWeb.Models
             }
         }
 
-        // ... (Mantener ObtenerEstadisticasGlobales igual) ...
         public dynamic ObtenerEstadisticasGlobales()
         {
             using (var conn = new SqlConnection(_connectionString))

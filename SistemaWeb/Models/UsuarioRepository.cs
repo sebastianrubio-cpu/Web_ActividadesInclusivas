@@ -1,18 +1,29 @@
 ﻿using Microsoft.Data.SqlClient;
-using System.Data;
 using Microsoft.Extensions.Configuration; // Necesario para IConfiguration
-using System.Collections.Generic; // Necesario para Dictionary
 using System;
+using System.Collections.Generic; // Necesario para Dictionary
+using System.ComponentModel.DataAnnotations;
+using System.Data;
 
 namespace SistemaWeb.Models
 {
     public class Usuario
     {
+        [Required(ErrorMessage = "La cédula es obligatoria")]
         public string IdUsuario { get; set; } // Cédula (PK)
+
+        [Required, EmailAddress]
         public string Correo { get; set; }
+
+        [Required]
         public string Clave { get; set; }
+
+        [Required]
         public string Nombre { get; set; }
-        public string Rol { get; set; }
+
+        public int IdRol { get; set; } // Para guardar en BD (FK)
+        public string? Rol { get; set; } // Para leer el nombre (JOIN)
+
         public int? IdGenero { get; set; }
     }
 
@@ -25,14 +36,20 @@ namespace SistemaWeb.Models
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        // 1. VALIDAR LOGIN
+        // 1. VALIDAR LOGIN (Con JOIN a Cat_Roles)
         public Usuario ValidarUsuario(string correo, string clave)
         {
             Usuario usuario = null;
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                string sql = "SELECT IdUsuario, Nombre, Rol, Correo, IdGenero FROM Usuarios WHERE Correo = @Correo AND Clave = @Clave";
+                // JOIN clave para obtener el NombreRol a partir del IdRol
+                string sql = @"
+                    SELECT U.IdUsuario, U.Nombre, U.Correo, U.IdGenero, U.IdRol, R.NombreRol 
+                    FROM Usuarios U
+                    INNER JOIN Cat_Roles R ON U.IdRol = R.IdRol
+                    WHERE U.Correo = @Correo AND U.Clave = @Clave";
+
                 using (var cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@Correo", correo);
@@ -45,8 +62,9 @@ namespace SistemaWeb.Models
                             {
                                 IdUsuario = reader["IdUsuario"].ToString(),
                                 Nombre = reader["Nombre"].ToString(),
-                                Rol = reader["Rol"].ToString(),
                                 Correo = reader["Correo"].ToString(),
+                                IdRol = Convert.ToInt32(reader["IdRol"]),
+                                Rol = reader["NombreRol"].ToString(), // Mapeamos el nombre aquí
                                 IdGenero = reader["IdGenero"] != DBNull.Value ? Convert.ToInt32(reader["IdGenero"]) : null
                             };
                         }
@@ -56,15 +74,13 @@ namespace SistemaWeb.Models
             return usuario;
         }
 
-        // 2. REGISTRAR (Método genérico que llama el Controlador) [NUEVO]
+        // 2. REGISTRAR (Método genérico)
         public bool Registrar(Usuario user)
         {
-            // Llamamos a la lógica interna pasando los datos del objeto
-            // Si IdGenero es null, pasamos 0 o DBNull según tu lógica (aquí asumo 0 por defecto)
             return RegistrarEstudiante(user.IdUsuario, user.Nombre, user.Correo, user.Clave, user.IdGenero ?? 0);
         }
 
-        // 2.1 Lógica SQL de Registro
+        // 2.1 Lógica SQL de Registro (Usa IdRol = 3 para Estudiantes)
         public bool RegistrarEstudiante(string cedula, string nombre, string correo, string clave, int idGenero)
         {
             try
@@ -72,8 +88,9 @@ namespace SistemaWeb.Models
                 using (var conn = new SqlConnection(_connectionString))
                 {
                     conn.Open();
-                    string sql = @"INSERT INTO Usuarios (IdUsuario, Nombre, Correo, Clave, Rol, IdGenero) 
-                                   VALUES (@IdUsuario, @Nombre, @Correo, @Clave, 'Estudiante', @IdGenero)";
+                    // Hardcodeamos el 3 porque en el Seed Data, 3 es Estudiante
+                    string sql = @"INSERT INTO Usuarios (IdUsuario, Nombre, Correo, Clave, IdRol, IdGenero) 
+                                   VALUES (@IdUsuario, @Nombre, @Correo, @Clave, 3, @IdGenero)";
 
                     using (var cmd = new SqlCommand(sql, conn))
                     {
@@ -89,18 +106,22 @@ namespace SistemaWeb.Models
             }
             catch
             {
-                return false; // Error por duplicado
+                return false;
             }
         }
 
-        // 3. OBTENER POR CORREO
+        // 3. OBTENER POR CORREO (Para validaciones o edición)
         public Usuario ObtenerUsuarioPorCorreo(string correo)
         {
             Usuario usuario = null;
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                string sql = "SELECT IdUsuario, Nombre, Rol, Correo, IdGenero FROM Usuarios WHERE Correo = @Correo";
+                string sql = @"
+                    SELECT U.IdUsuario, U.Nombre, U.Correo, U.IdGenero, U.IdRol, R.NombreRol 
+                    FROM Usuarios U
+                    INNER JOIN Cat_Roles R ON U.IdRol = R.IdRol
+                    WHERE U.Correo = @Correo";
 
                 using (var cmd = new SqlCommand(sql, conn))
                 {
@@ -113,7 +134,8 @@ namespace SistemaWeb.Models
                             {
                                 IdUsuario = reader["IdUsuario"].ToString(),
                                 Nombre = reader["Nombre"].ToString(),
-                                Rol = reader["Rol"].ToString(),
+                                IdRol = Convert.ToInt32(reader["IdRol"]),
+                                Rol = reader["NombreRol"].ToString(),
                                 Correo = reader["Correo"].ToString(),
                                 IdGenero = reader["IdGenero"] != DBNull.Value ? Convert.ToInt32(reader["IdGenero"]) : null
                             };
@@ -132,11 +154,12 @@ namespace SistemaWeb.Models
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
+                // Validamos que sea Rol 3 (Estudiante) antes de actualizar
                 string sql = @"UPDATE Usuarios 
                                SET Nombre = @Nombre, 
                                    Correo = @Correo, 
                                    IdGenero = @IdGenero 
-                               WHERE IdUsuario = @IdUsuario AND Rol = 'Estudiante'";
+                               WHERE IdUsuario = @IdUsuario AND IdRol = 3";
 
                 using (var cmd = new SqlCommand(sql, conn))
                 {
@@ -168,7 +191,7 @@ namespace SistemaWeb.Models
             return generos;
         }
 
-        // 6. CONTAR USUARIOS (Necesario para Estadísticas) [NUEVO]
+        // 6. CONTAR USUARIOS
         public int ContarUsuarios()
         {
             using (var conn = new SqlConnection(_connectionString))
@@ -183,35 +206,15 @@ namespace SistemaWeb.Models
             }
         }
 
-        // 7. RECUPERAR CLAVE
-        public string ObtenerClavePorCorreo(string correo)
-        {
-            string clave = null;
-            using (var conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-                string sql = "SELECT Clave FROM Usuarios WHERE Correo = @Correo";
-                using (var cmd = new SqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Correo", correo);
-                    var result = cmd.ExecuteScalar();
-                    if (result != null) clave = result.ToString();
-                }
-            }
-            return clave;
-        }
-
-    
-
-        // 8. OBTENER LISTA DE PROFESORES 
+        // 7. OBTENER PROFESORES (Para el Dropdown de Actividades)
         public List<Usuario> ObtenerProfesores()
         {
             var lista = new List<Usuario>();
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                // Asumiendo que el Rol es 'Profesor'
-                string sql = "SELECT IdUsuario, Nombre, Correo FROM Usuarios WHERE Rol = 'Profesor'";
+                // IdRol 2 = Profesor según Seed Data
+                string sql = "SELECT IdUsuario, Nombre, Correo FROM Usuarios WHERE IdRol = 2";
                 using (var cmd = new SqlCommand(sql, conn))
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -228,8 +231,5 @@ namespace SistemaWeb.Models
             }
             return lista;
         }
-
-
-
     }
 }

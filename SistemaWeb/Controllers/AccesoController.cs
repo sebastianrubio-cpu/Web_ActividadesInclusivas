@@ -5,7 +5,7 @@ using System.Security.Claims;
 using SistemaWeb.Models;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Linq; // Necesario para validar contraseña
+using System.Linq;
 
 namespace SistemaWeb.Controllers
 {
@@ -18,7 +18,6 @@ namespace SistemaWeb.Controllers
             _usuarioRepo = usuarioRepo;
         }
 
-        // GET: Mostrar Login
         [HttpGet]
         public IActionResult Login()
         {
@@ -26,13 +25,10 @@ namespace SistemaWeb.Controllers
             {
                 return RedirectToAction(User.IsInRole("Estudiante") ? "VistaEstudiante" : "Index", "Actividades");
             }
-
-            // Usamos ViewData para evitar errores dinámicos en Razor
             ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
             return View();
         }
 
-        // POST: Procesar Login
         [HttpPost]
         public async Task<IActionResult> Login(string Correo, string Clave)
         {
@@ -42,10 +38,11 @@ namespace SistemaWeb.Controllers
             {
                 var claims = new List<Claim>
                 {
-                    
+                    // CRÍTICO: Guardar ID Usuario para la Auditoría
                     new Claim("IdUsuario", usuario.IdUsuario),
                     new Claim(ClaimTypes.Name, usuario.Nombre),
                     new Claim("Correo", usuario.Correo),
+                    // Usamos usuario.Rol que viene lleno con el nombre ("Administrador", etc.)
                     new Claim(ClaimTypes.Role, usuario.Rol)
                 };
 
@@ -60,26 +57,21 @@ namespace SistemaWeb.Controllers
             return View();
         }
 
-        // POST: Procesar Registro
         [HttpPost]
         public IActionResult Registrar(Usuario usuario)
         {
-            // 1. Asignar Rol por defecto
-            usuario.Rol = "Estudiante";
-
-            // 2. Quitar 'Rol' de la validación automática
+            // El rol se asigna en BD (IdRol = 3), limpiamos validación
             ModelState.Remove("Rol");
+            ModelState.Remove("IdRol");
 
-            // 3. Validar Seguridad de Contraseña
             if (!EsClaveSegura(usuario.Clave))
             {
                 ViewData["ErrorRegistro"] = "La contraseña debe tener 8 caracteres, una mayúscula y un signo especial.";
                 ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
-                ViewData["MostrarRegistro"] = true; // Mantiene el panel abierto
+                ViewData["MostrarRegistro"] = true;
                 return View("Login", usuario);
             }
 
-            // 4. Intentar guardar
             if (ModelState.IsValid)
             {
                 bool resultado = _usuarioRepo.Registrar(usuario);
@@ -87,7 +79,6 @@ namespace SistemaWeb.Controllers
                 {
                     ViewData["Exito"] = "Cuenta creada correctamente. Inicie sesión.";
                     ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
-                    // Al ser exitoso, NO enviamos 'MostrarRegistro' para que muestre el Login limpio
                     return View("Login");
                 }
                 else
@@ -100,26 +91,23 @@ namespace SistemaWeb.Controllers
                 ViewData["ErrorRegistro"] = "Por favor complete todos los campos obligatorios.";
             }
 
-            // Si falló algo, recargamos la vista manteniendo el panel de registro abierto
             ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
             ViewData["MostrarRegistro"] = true;
             return View("Login", usuario);
         }
 
-        // SALIR
         public async Task<IActionResult> Salir()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login");
         }
 
-        // --- MÉTODO PRIVADO DE VALIDACIÓN ---
         private bool EsClaveSegura(string clave)
         {
             if (string.IsNullOrEmpty(clave)) return false;
             if (clave.Length < 8) return false;
-            if (!clave.Any(char.IsUpper)) return false; // Al menos una mayúscula
-            if (!clave.Any(ch => !char.IsLetterOrDigit(ch))) return false; // Al menos un símbolo
+            if (!clave.Any(char.IsUpper)) return false;
+            if (!clave.Any(ch => !char.IsLetterOrDigit(ch))) return false;
             return true;
         }
     }
