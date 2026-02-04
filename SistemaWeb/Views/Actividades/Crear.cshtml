@@ -5,137 +5,150 @@
 }
 
 <style>
+    /* Forzamos el fondo de imagen cubriendo toda la pantalla */
     body {
-        background-color: #f4f6f9;
-        background-image: url(/img/br.jpg);
+        background-image: url('/img/br.jpg') !important;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
     }
 
-    .card-custom {
-        background: white;
-        border-radius: 12px;
+    /* Contenedor tipo "Card" centrado */
+    .modern-container {
+        max-width: 600px;
+        margin: 50px auto; /* Centrado horizontal y margen superior */
+        background-color: rgba(255, 255, 255, 0.95); /* Blanco con ligera transparencia */
         padding: 40px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        border: none;
-    }
-
-    .form-label {
-        font-weight: 600;
-        color: #344767;
+        border-radius: 20px; /* Bordes redondeados */
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2); /* Sombra elegante */
     }
 
     .form-control, .form-select {
-        border-radius: 8px;
-        padding: 10px;
-        border: 1px solid #d2d6da;
+        border-radius: 10px;
+        border: 1px solid #ced4da;
+        padding: 12px;
+        transition: all 0.3s ease-in-out; /* Animación suave */
     }
 
+        /* Animación al enfocar inputs */
         .form-control:focus, .form-select:focus {
-            border-color: #333;
-            box-shadow: 0 0 0 0.2rem rgba(51, 51, 51, 0.1);
+            border-color: #0d6efd;
+            box-shadow: 0 0 8px rgba(13, 110, 253, 0.3);
+            transform: translateY(-2px);
         }
 
-    .btn-dark-custom {
-        background-color: #344767;
-        color: white;
-        border-radius: 8px;
-        padding: 10px 20px;
+    .btn-custom-primary {
+        width: 100%;
+        border-radius: 10px;
+        padding: 12px;
         font-weight: bold;
-        transition: 0.3s;
+        transition: transform 0.2s;
     }
 
-        .btn-dark-custom:hover {
-            background-color: #233044;
+        .btn-custom-primary:hover {
+            transform: scale(1.02);
         }
 </style>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card card-custom">
-
-                <div class="text-center mb-4">
-                    <h2 class="fw-bold text-dark">Nueva Actividad</h2>
-                    <p class="text-muted">Ingresa los detalles de la actividad inclusiva</p>
-                </div>
-
-                <form asp-action="Crear">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label asp-for="Codigo" class="form-label">Código</label>
-                            <input asp-for="Codigo" class="form-control" placeholder="Ej: A001" />
-                            <span asp-validation-for="Codigo" class="text-danger"></span>
-                        </div>
-                        <div class="col-md-8 mb-3">
-                            <label asp-for="Nombre" class="form-label">Nombre de la Actividad</label>
-                            <input asp-for="Nombre" class="form-control" placeholder="Ej: Taller de Braille" />
-                            <span asp-validation-for="Nombre" class="text-danger"></span>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="FechaRealizacion" class="form-label">Fecha de Realización</label>
-                            <input asp-for="FechaRealizacion" type="date" class="form-control" />
-                            <span asp-validation-for="FechaRealizacion" class="text-danger"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Cupo" class="form-label">Cupo Disponible</label>
-                            <input asp-for="Cupo" type="number" class="form-control" placeholder="0" />
-                            <span asp-validation-for="Cupo" class="text-danger"></span>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="TipoDiscapacidad" class="form-label">Tipo de Discapacidad</label>
-                            <select asp-for="TipoDiscapacidad" class="form-select">
-                                <option value="">-- Seleccione --</option>
-                                <option value="Motriz">Motriz</option>
-                                <option value="Visual">Visual</option>
-                                <option value="Auditiva">Auditiva</option>
-                                <option value="Intelectual">Intelectual</option>
-                                <option value="Ninguna">Ninguna</option>
-                            </select>
-                            <span asp-validation-for="TipoDiscapacidad" class="text-danger"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Estado" class="form-label">Estado</label>
-                            <select asp-for="Estado" class="form-select">
-                                <option value="Activo">Activo</option>
-                                <option value="Inactivo">Inactivo</option>
-                                <option value="Finalizado">Finalizado</option>
-                            </select>
-                            <span asp-validation-for="Estado" class="text-danger"></span>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Responsable" class="form-label">Profesor Responsable</label>
-                            <input asp-for="Responsable" class="form-control" placeholder="Nombre del docente" />
-                            <span asp-validation-for="Responsable" class="text-danger"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="GmailProfesor" class="form-label">Correo Institucional</label>
-                            <input asp-for="GmailProfesor" type="email" class="form-control" placeholder="profe@uisek.edu.ec" />
-                            <span asp-validation-for="GmailProfesor" class="text-danger"></span>
-                        </div>
-                    </div>
-
-                    <div class="d-grid gap-2 mt-4">
-                        <input type="submit" value="Guardar Actividad" class="btn btn-dark-custom" />
-                        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar y Volver</a>
-                    </div>
-                </form>
-            </div>
-        </div>
+<div class="modern-container">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary">Nueva Actividad</h2>
+        <p class="text-muted">Complete la información para registrar una actividad</p>
     </div>
+
+    <form asp-action="Crear">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Codigo" class="form-label fw-bold">Código</label>
+            <input asp-for="Codigo" class="form-control" placeholder="Ej: A001" />
+            <span asp-validation-for="Codigo" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Nombre" class="form-label fw-bold">Nombre de la Actividad</label>
+            <input asp-for="Nombre" class="form-control" placeholder="Nombre descriptivo" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="FechaRealizacion" class="form-label fw-bold">Fecha de Realización</label>
+            <input asp-for="FechaRealizacion" class="form-control" type="datetime-local" />
+            <span asp-validation-for="FechaRealizacion" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label class="form-label fw-bold">Responsable (Profesor)</label>
+            <select asp-for="IdResponsable" class="form-select" required>
+                <option value="">-- Seleccione un Profesor --</option>
+                @if (ViewBag.ListaProfesores != null)
+                {
+                    foreach (var prof in ViewBag.ListaProfesores)
+                    {
+                        <option value="@prof.IdUsuario">@prof.Nombre (@prof.Correo)</option>
+                    }
+                }
+            </select>
+            <span asp-validation-for="IdResponsable" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Cupo" class="form-label fw-bold">Cupo Disponible</label>
+            <input asp-for="Cupo" class="form-control" type="number" min="1" placeholder="0" />
+            <span asp-validation-for="Cupo" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="TipoDiscapacidad" class="form-label fw-bold">Enfoque de Inclusión</label>
+            <select asp-for="TipoDiscapacidad" class="form-select">
+                <option value="Ninguna">General / Ninguna</option>
+                <option value="Motriz">Discapacidad Motriz</option>
+                <option value="Visual">Discapacidad Visual</option>
+                <option value="Auditiva">Discapacidad Auditiva</option>
+                <option value="Intelectual">Discapacidad Intelectual</option>
+            </select>
+            <span asp-validation-for="TipoDiscapacidad" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-4">
+            <label class="form-label fw-bold">Ubicación del Evento</label>
+            <select id="UbicacionSelect" class="form-select" onchange="actualizarCoordenadas()">
+                <option value="">-- Seleccione un lugar --</option>
+                <option value="-0.09140617873589534,-78.4840387474237">Miguel de Cervantes</option>
+                <option value="-0.19066184443918271,-78.49051741510313">Felipe Segovia</option>
+                <option value="-0.08850952965507608,-78.4793601930223">Parque Einstein</option>
+                <option value="-0.19991051428662168,-78.47553834876912">Guapulo</option>
+                <option value="-0.14076380797690877,-78.48807062587358">Bicentenario</option>
+            </select>
+            <small class="text-muted">Seleccione una ubicación predefinida.</small>
+        </div>
+
+        <input type="hidden" asp-for="Latitud" id="Latitud" />
+        <input type="hidden" asp-for="Longitud" id="Longitud" />
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-custom-primary">Guardar Actividad</button>
+            <a asp-action="Index" class="btn btn-outline-secondary" style="border-radius: 10px;">Cancelar</a>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        function actualizarCoordenadas() {
+            var select = document.getElementById("UbicacionSelect");
+            var valor = select.value;
+
+            if (valor) {
+                var coords = valor.split(',');
+                document.getElementById("Latitud").value = coords[0];
+                document.getElementById("Longitud").value = coords[1];
+            }
+        }
+    </script>
 }

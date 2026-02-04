@@ -4,96 +4,140 @@
     ViewData["Title"] = "Editar Actividad";
 }
 
-<div class="container mt-5 animate__animated animate__fadeIn">
-    <div class="minimal-card">
-        <h2 class="minimal-title">✏️ Editar Actividad</h2>
+<style>
+    body {
+        background-image: url('/img/br.jpg') !important;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
 
-        <form asp-action="Editar" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom: 20px;"></div>
+    .modern-container {
+        max-width: 600px;
+        margin: 50px auto;
+        background-color: rgba(255, 255, 255, 0.95);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
 
-            <input type="hidden" asp-for="Codigo" />
-            <div class="form-group">
-                <label class="control-label fw-bold">Código Único</label>
-                <input asp-for="Codigo" class="form-control" disabled style="opacity: 0.6; cursor: not-allowed;" />
-            </div>
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #ced4da;
+        padding: 12px;
+        transition: all 0.3s ease-in-out;
+    }
 
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label fw-bold">Nombre de la actividad</label>
-                <input asp-for="Nombre" class="form-control" placeholder="Escribe el nombre..." />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
-            </div>
+        .form-control:focus, .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 8px rgba(13, 110, 253, 0.3);
+            transform: translateY(-2px);
+        }
 
-            <div class="form-group">
-                <label class="control-label fw-bold">📍 Campus / Ubicación</label>
-                <select id="selectLugar" class="form-control" style="cursor: pointer;">
-                    <option value="">-- Seleccione un Campus --</option>
-                    <option value="FelipeSegovia" data-lat="-0.19047870866644473" data-lng="-78.49058597462638">Felipe Segovia</option>
-                    <option value="MiguelCervantes" data-lat="-0.09162242580716055" data-lng="-78.48439227687655">Miguel de Cervantes</option>
-                    <option value="Guapulo" data-lat="-0.20002172092048476" data-lng="-78.47543024813045">Guápulo</option>
-                </select>
-                <small class="text-muted">Esto ubicará la actividad automáticamente en el mapa.</small>
-            </div>
+    .btn-custom-primary {
+        width: 100%;
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: bold;
+        transition: transform 0.2s;
+    }
 
-            <input type="hidden" asp-for="Latitud" id="latitudInput" />
-            <input type="hidden" asp-for="Longitud" id="longitudInput" />
+        .btn-custom-primary:hover {
+            transform: scale(1.02);
+        }
+</style>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="FechaRealizacion" class="control-label fw-bold">📅 Fecha del evento</label>
-                        <input asp-for="FechaRealizacion" type="date" class="form-control" onclick="this.showPicker()" />
-                        <span asp-validation-for="FechaRealizacion" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="Cupo" class="control-label fw-bold">👥 Cupo</label>
-                        <input asp-for="Cupo" type="number" class="form-control" />
-                        <span asp-validation-for="Cupo" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="TipoDiscapacidad" class="control-label fw-bold">Enfoque (Discapacidad)</label>
-                <input asp-for="TipoDiscapacidad" class="form-control" placeholder="Ej: Visual, Motriz..." />
-                <span asp-validation-for="TipoDiscapacidad" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Responsable" class="control-label fw-bold">Responsable</label>
-                <input asp-for="Responsable" class="form-control" />
-                <span asp-validation-for="Responsable" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Estado" class="control-label fw-bold">Estado Actual</label>
-                <select asp-for="Estado" class="form-control" style="cursor: pointer;">
-                    <option value="Activo">🟢 Activo</option>
-                    <option value="Inactivo">🔴 Inactivo</option>
-                    <option value="Finalizado">⚪ Finalizado</option>
-                </select>
-            </div>
-
-            <div class="text-center" style="margin-top: 40px;">
-                <button type="submit" class="btn-excel" style="width: auto; padding: 12px 40px;">Guardar Cambios</button>
-                <div style="margin-top: 15px;">
-                    <a asp-action="Index" class="btn-secondary-min">Cancelar y Volver</a>
-                </div>
-            </div>
-        </form>
-
-        <hr class="my-5" style="border-color: #444;" />
-        <div class="text-center">
-            <p class="text-muted small">¿Deseas eliminar permanentemente esta actividad?</p>
-            <form asp-action="Eliminar" method="post" onsubmit="return confirm('⚠️ ¿Estás SEGURO de eliminar esta actividad? Esta acción no se puede deshacer.');">
-                <input type="hidden" name="id" value="@Model.Codigo" />
-                <button type="submit" class="btn btn-outline-danger btn-sm px-4 rounded-pill">
-                    🗑️ Eliminar Actividad
-                </button>
-            </form>
-        </div>
+<div class="modern-container">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary">Editar Actividad</h2>
+        <p class="text-muted">Modifique los datos necesarios</p>
     </div>
+
+    <form asp-action="Editar">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Codigo" class="form-label fw-bold">Código</label>
+            <input asp-for="Codigo" class="form-control bg-light" readonly />
+            <span asp-validation-for="Codigo" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Nombre" class="form-label fw-bold">Nombre</label>
+            <input asp-for="Nombre" class="form-control" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="FechaRealizacion" class="form-label fw-bold">Fecha</label>
+            <input asp-for="FechaRealizacion" class="form-control" />
+            <span asp-validation-for="FechaRealizacion" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label class="form-label fw-bold">Responsable</label>
+            <select asp-for="IdResponsable" class="form-select" required>
+                <option value="">-- Seleccione --</option>
+                @if (ViewBag.ListaProfesores != null)
+                {
+                    foreach (var prof in ViewBag.ListaProfesores)
+                    {
+                        <option value="@prof.IdUsuario">@prof.Nombre (@prof.Correo)</option>
+                    }
+                }
+            </select>
+            <span asp-validation-for="IdResponsable" class="text-danger"></span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="Cupo" class="form-label fw-bold">Cupo</label>
+                <input asp-for="Cupo" class="form-control" type="number" />
+                <span asp-validation-for="Cupo" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Estado" class="form-label fw-bold">Estado</label>
+                <select asp-for="Estado" class="form-select">
+                    <option value="Activo">Activo</option>
+                    <option value="Inactivo">Inactivo</option>
+                    <option value="Finalizado">Finalizado</option>
+                    <option value="Lleno">Lleno</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="TipoDiscapacidad" class="form-label fw-bold">Inclusión</label>
+            <select asp-for="TipoDiscapacidad" class="form-select">
+                <option value="Ninguna">Ninguna</option>
+                <option value="Motriz">Motriz</option>
+                <option value="Visual">Visual</option>
+                <option value="Auditiva">Auditiva</option>
+                <option value="Intelectual">Intelectual</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-4">
+            <label class="form-label fw-bold">Ubicación</label>
+            <select id="UbicacionSelect" class="form-select" onchange="actualizarCoordenadas()">
+                <option value="">-- Otra / Personalizada --</option>
+                <option value="-0.09140617873589534,-78.4840387474237">Miguel de Cervantes</option>
+                <option value="-0.19066184443918271,-78.49051741510313">Felipe Segovia</option>
+                <option value="-0.08850952965507608,-78.4793601930223">Parque Einstein</option>
+                <option value="-0.19991051428662168,-78.47553834876912">Guapulo</option>
+                <option value="-0.14076380797690877,-78.48807062587358">Bicentenario</option>
+            </select>
+        </div>
+
+        <input type="hidden" asp-for="Latitud" id="Latitud" />
+        <input type="hidden" asp-for="Longitud" id="Longitud" />
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-custom-primary">Guardar Cambios</button>
+            <a asp-action="Index" class="btn btn-outline-secondary" style="border-radius: 10px;">Cancelar</a>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
@@ -102,27 +146,32 @@
     }
 
     <script>
-        // Actualizar coordenadas al cambiar el lugar
-        document.getElementById('selectLugar').addEventListener('change', function() {
-            var selectedOption = this.options[this.selectedIndex];
-
-            if (selectedOption.value !== "") {
-                document.getElementById('latitudInput').value = selectedOption.getAttribute('data-lat');
-                document.getElementById('longitudInput').value = selectedOption.getAttribute('data-lng');
+        // Función para actualizar los inputs ocultos
+        function actualizarCoordenadas() {
+            var select = document.getElementById("UbicacionSelect");
+            var valor = select.value;
+            if (valor) {
+                var coords = valor.split(',');
+                document.getElementById("Latitud").value = coords[0];
+                document.getElementById("Longitud").value = coords[1];
             }
-        });
+        }
 
-        // Pre-seleccionar el campus correcto al cargar la página basado en las coordenadas guardadas
-        window.addEventListener('load', function() {
-            var lat = "@Model.Latitud".replace(',', '.'); // Asegurar formato decimal
-            var lng = "@Model.Longitud".replace(',', '.');
-            var select = document.getElementById('selectLugar');
+        // Lógica para pre-seleccionar la ubicación correcta al cargar la página
+        document.addEventListener("DOMContentLoaded", function() {
+            var lat = document.getElementById("Latitud").value.replace(',', '.'); // Asegurar formato decimal punto
+            var lon = document.getElementById("Longitud").value.replace(',', '.');
 
-            for (var i = 0; i < select.options.length; i++) {
-                var optLat = select.options[i].getAttribute('data-lat');
-                var optLng = select.options[i].getAttribute('data-lng');
+            // Reconstruimos el string buscado (ej: "-0.09... , -78.48...")
+            // Ojo: Javascript puede variar precisión, comparamos aproximado o string directo si viene exacto.
+            // Para asegurar compatibilidad con lo guardado en los values del select:
 
-                if (optLat === lat && optLng === lng) {
+            var select = document.getElementById("UbicacionSelect");
+            var options = select.options;
+
+            for (var i = 0; i < options.length; i++) {
+                // Verificamos si el value contiene la latitud (simple check)
+                if (options[i].value.includes(lat) && options[i].value.includes(lon)) {
                     select.selectedIndex = i;
                     break;
                 }

@@ -18,41 +18,31 @@ namespace SistemaWeb.Services
             return _repository.ObtenerTodas();
         }
 
-        public void Agregar(Actividad actividad)
-        {
-            if (string.IsNullOrEmpty(actividad.Estado))
-            {
-                actividad.Estado = "Activo";
-            }
-
-            if (actividad.Cupo <= 0)
-            {
-                actividad.Estado = "Lleno";
-            }
-
-            _repository.Agregar(actividad);
-            _logger.Log($"Nueva actividad creada: {actividad.Nombre}");
-        }
-
         public Actividad ObtenerPorId(string id)
         {
             return _repository.ObtenerPorId(id);
         }
 
-        public void Actualizar(Actividad actividad)
+        // Modificado para pedir el ID de auditoría
+        public void Agregar(Actividad actividad, string idUsuarioAuditoria)
         {
-            if (actividad.Cupo <= 0)
-            {
-                actividad.Estado = "Lleno";
-            }
-            _repository.Actualizar(actividad);
+            if (string.IsNullOrEmpty(actividad.Estado)) actividad.Estado = "Activo";
+            if (actividad.Cupo <= 0) actividad.Estado = "Lleno";
+
+            _repository.Agregar(actividad, idUsuarioAuditoria);
+            _logger.Log($"Nueva actividad creada: {actividad.Nombre} por usuario {idUsuarioAuditoria}");
         }
 
-        // 👇 ESTE ES EL MÉTODO NUEVO QUE NECESITAS PARA EL ERROR CS1061 👇
-        public void Eliminar(string codigo)
+        public void Actualizar(Actividad actividad, string idUsuarioAuditoria)
         {
-            _repository.Eliminar(codigo);
-            _logger.Log($"Actividad eliminada: {codigo}");
+            if (actividad.Cupo <= 0) actividad.Estado = "Lleno";
+            _repository.Actualizar(actividad, idUsuarioAuditoria);
+        }
+
+        public void Eliminar(string codigo, string idUsuarioAuditoria)
+        {
+            _repository.Eliminar(codigo, idUsuarioAuditoria);
+            _logger.Log($"Actividad eliminada: {codigo} por usuario {idUsuarioAuditoria}");
         }
     }
 }

@@ -43,14 +43,6 @@
                                 </li>
                             }
 
-                            @if (User.Identity.IsAuthenticated && (User.IsInRole("Administrador") || User.IsInRole("Profesor")))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-anim animate__animated animate__fadeIn" asp-controller="Actividades" asp-action="Estadisticas">
-                                        📊 <span class="nav-text-reveal">Estadísticas</span>
-                                    </a>
-                                </li>
-                            }
 
                             <li class="nav-item">
                                 <a class="nav-anim" asp-controller="Actividades" asp-action="Mapa">
@@ -66,11 +58,6 @@
 
                         </ul>
 
-                        <li class="nav-item">
-                            <a class="nav-anim" asp-controller="Actividades" asp-action="Index">
-                                📅 <span class="nav-text-reveal">Actividades</span>
-                            </a>
-                        </li>
                         @if (User.Identity.IsAuthenticated && (User.IsInRole("Administrador") || User.IsInRole("Profesor")))
                         {
                             <li class="nav-item">

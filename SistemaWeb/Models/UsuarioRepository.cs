@@ -200,5 +200,36 @@ namespace SistemaWeb.Models
             }
             return clave;
         }
+
+    
+
+        // 8. OBTENER LISTA DE PROFESORES 
+        public List<Usuario> ObtenerProfesores()
+        {
+            var lista = new List<Usuario>();
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                // Asumiendo que el Rol es 'Profesor'
+                string sql = "SELECT IdUsuario, Nombre, Correo FROM Usuarios WHERE Rol = 'Profesor'";
+                using (var cmd = new SqlCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        lista.Add(new Usuario
+                        {
+                            IdUsuario = reader["IdUsuario"].ToString(),
+                            Nombre = reader["Nombre"].ToString(),
+                            Correo = reader["Correo"].ToString()
+                        });
+                    }
+                }
+            }
+            return lista;
+        }
+
+
+
     }
 }

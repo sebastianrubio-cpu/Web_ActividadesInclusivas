@@ -1,6 +1,6 @@
 ﻿using System.Data;
-using Microsoft.Data.SqlClient; // <--- USAMOS LA LIBRERÍA MODERNA
-using System.Collections.Generic; // Necesario para List<>
+using Microsoft.Data.SqlClient;
+using System.Collections.Generic;
 
 namespace SistemaWeb.Models
 {
@@ -13,11 +13,9 @@ namespace SistemaWeb.Models
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        // 1. OBTENER TODAS (Cambiamos IEnumerable por List para arreglar el error de conversión)
         public List<Actividad> ObtenerTodas()
         {
             var lista = new List<Actividad>();
-
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
@@ -34,12 +32,11 @@ namespace SistemaWeb.Models
                                 Nombre = reader["Nombre"].ToString(),
                                 FechaRealizacion = Convert.ToDateTime(reader["FechaRealizacion"]),
                                 Cupo = Convert.ToInt32(reader["Cupo"]),
+                                // El SP devuelve el nombre del usuario, lo ponemos en Responsable para visualización
                                 Responsable = reader["Responsable"].ToString(),
                                 GmailProfesor = reader["GmailProfesor"] != DBNull.Value ? reader["GmailProfesor"].ToString() : "",
                                 Estado = reader["Estado"].ToString(),
                                 TipoDiscapacidad = reader["TipoDiscapacidad"].ToString(),
-
-                                // COORDENADAS
                                 Latitud = reader["Latitud"] != DBNull.Value ? Convert.ToDouble(reader["Latitud"]) : 0,
                                 Longitud = reader["Longitud"] != DBNull.Value ? Convert.ToDouble(reader["Longitud"]) : 0
                             });
@@ -47,14 +44,12 @@ namespace SistemaWeb.Models
                     }
                 }
             }
-            return lista; // Ahora retorna explícitamente una List
+            return lista;
         }
 
-        // 2. OBTENER POR ID
         public Actividad ObtenerPorId(string codigo)
         {
             Actividad actividad = null;
-
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
@@ -77,7 +72,6 @@ namespace SistemaWeb.Models
                                 GmailProfesor = reader["GmailProfesor"] != DBNull.Value ? reader["GmailProfesor"].ToString() : "",
                                 Estado = reader["Estado"].ToString(),
                                 TipoDiscapacidad = reader["TipoDiscapacidad"].ToString(),
-
                                 Latitud = reader["Latitud"] != DBNull.Value ? Convert.ToDouble(reader["Latitud"]) : 0,
                                 Longitud = reader["Longitud"] != DBNull.Value ? Convert.ToDouble(reader["Longitud"]) : 0
                             };
@@ -88,8 +82,8 @@ namespace SistemaWeb.Models
             return actividad;
         }
 
-        // 3. AGREGAR
-        public void Agregar(Actividad actividad)
+        // AGREGAR: Recibe ID Responsable y Auditoria
+        public void Agregar(Actividad actividad, string idUsuarioAuditoria)
         {
             using (var conn = new SqlConnection(_connectionString))
             {
@@ -101,22 +95,25 @@ namespace SistemaWeb.Models
                     cmd.Parameters.AddWithValue("@Nombre", actividad.Nombre);
                     cmd.Parameters.AddWithValue("@FechaRealizacion", actividad.FechaRealizacion);
                     cmd.Parameters.AddWithValue("@Cupo", actividad.Cupo);
-                    cmd.Parameters.AddWithValue("@Responsable", actividad.Responsable ?? "Sin Asignar");
-                    cmd.Parameters.AddWithValue("@GmailProfesor", actividad.GmailProfesor ?? "contacto@uisek.edu.ec");
+
+                    // Nuevo: FK del profesor
+                    cmd.Parameters.AddWithValue("@IdResponsable", actividad.IdResponsable);
 
                     cmd.Parameters.AddWithValue("@Latitud", actividad.Latitud);
                     cmd.Parameters.AddWithValue("@Longitud", actividad.Longitud);
-
                     cmd.Parameters.AddWithValue("@NombreEstado", actividad.Estado ?? "Activo");
                     cmd.Parameters.AddWithValue("@NombreDiscapacidad", actividad.TipoDiscapacidad ?? "Ninguna");
+
+                    // Nuevo: Auditoria
+                    cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuarioAuditoria);
 
                     cmd.ExecuteNonQuery();
                 }
             }
         }
 
-        // 4. ACTUALIZAR
-        public void Actualizar(Actividad actividad)
+        // ACTUALIZAR: Recibe ID Responsable y Auditoria
+        public void Actualizar(Actividad actividad, string idUsuarioAuditoria)
         {
             using (var conn = new SqlConnection(_connectionString))
             {
@@ -128,22 +125,25 @@ namespace SistemaWeb.Models
                     cmd.Parameters.AddWithValue("@Nombre", actividad.Nombre);
                     cmd.Parameters.AddWithValue("@FechaRealizacion", actividad.FechaRealizacion);
                     cmd.Parameters.AddWithValue("@Cupo", actividad.Cupo);
-                    cmd.Parameters.AddWithValue("@Responsable", actividad.Responsable ?? "Sin Asignar");
-                    cmd.Parameters.AddWithValue("@GmailProfesor", actividad.GmailProfesor ?? "contacto@uisek.edu.ec");
+
+                    // Nuevo
+                    cmd.Parameters.AddWithValue("@IdResponsable", actividad.IdResponsable);
 
                     cmd.Parameters.AddWithValue("@Latitud", actividad.Latitud);
                     cmd.Parameters.AddWithValue("@Longitud", actividad.Longitud);
-
                     cmd.Parameters.AddWithValue("@NombreEstado", actividad.Estado ?? "Activo");
                     cmd.Parameters.AddWithValue("@NombreDiscapacidad", actividad.TipoDiscapacidad ?? "Ninguna");
+
+                    // Nuevo
+                    cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuarioAuditoria);
 
                     cmd.ExecuteNonQuery();
                 }
             }
         }
 
-        // 5. ELIMINAR
-        public void Eliminar(string codigo)
+        // ELIMINAR: Recibe Auditoria
+        public void Eliminar(string codigo, string idUsuarioAuditoria)
         {
             using (var conn = new SqlConnection(_connectionString))
             {
@@ -152,21 +152,20 @@ namespace SistemaWeb.Models
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Codigo", codigo);
+                    cmd.Parameters.AddWithValue("@IdUsuarioAuditoria", idUsuarioAuditoria);
                     cmd.ExecuteNonQuery();
                 }
             }
         }
-        // 6. ESTADÍSTICAS GLOBALES
+
+        // ... (Mantener ObtenerEstadisticasGlobales igual) ...
         public dynamic ObtenerEstadisticasGlobales()
         {
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                // Total de Usuarios
                 var totalUsuarios = new SqlCommand("SELECT COUNT(*) FROM Usuarios", conn).ExecuteScalar();
-                // Total de Actividades
                 var totalActividades = new SqlCommand("SELECT COUNT(*) FROM Actividades", conn).ExecuteScalar();
-
                 return new { Usuarios = totalUsuarios, Actividades = totalActividades };
             }
         }

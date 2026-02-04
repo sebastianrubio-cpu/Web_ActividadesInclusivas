@@ -42,6 +42,8 @@ namespace SistemaWeb.Controllers
             {
                 var claims = new List<Claim>
                 {
+                    
+                    new Claim("IdUsuario", usuario.IdUsuario),
                     new Claim(ClaimTypes.Name, usuario.Nombre),
                     new Claim("Correo", usuario.Correo),
                     new Claim(ClaimTypes.Role, usuario.Rol)

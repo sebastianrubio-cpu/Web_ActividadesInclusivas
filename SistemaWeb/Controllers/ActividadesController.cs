@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SistemaWeb.Models;
 using SistemaWeb.Services;
 using System.Linq;
+using System.Security.Claims; // Necesario para obtener el ID del usuario
 using System.Threading.Tasks;
 
 namespace SistemaWeb.Controllers
@@ -21,9 +22,8 @@ namespace SistemaWeb.Controllers
             _usuarioRepo = usuarioRepo;
         }
 
-        // --- ZONA PÚBLICA / ESTUDIANTE ---
+        // --- MÉTODOS DE LECTURA (Sin cambios mayores) ---
 
-        // 1. LISTADO (Tabla clásica)
         [HttpGet]
         public IActionResult Index()
         {
@@ -31,18 +31,14 @@ namespace SistemaWeb.Controllers
             return View(actividades);
         }
 
-        // 2. NUEVA VISTA MINIMALISTA (Para Estudiantes)
         [Authorize(Roles = "Estudiante,Administrador,Profesor")]
         [HttpGet]
         public IActionResult VistaEstudiante()
         {
             var actividades = _service.ObtenerTodas();
-            // Opcional: Filtrar solo activas
-            // var activas = actividades.Where(a => a.Estado == "Activo").ToList();
             return View(actividades);
         }
 
-        // 3. VERIFICAR SISTEMA
         [HttpGet]
         public async Task<IActionResult> VerificarSistema()
         {
@@ -50,7 +46,6 @@ namespace SistemaWeb.Controllers
             return View(reporte);
         }
 
-        // 4. MAPA
         [HttpGet]
         public IActionResult Mapa()
         {
@@ -58,12 +53,14 @@ namespace SistemaWeb.Controllers
             return View(actividades);
         }
 
-        // --- ZONA PROTEGIDA (Administrador y Profesor) ---
+        // --- ZONA DE EDICIÓN (ADAPTADA A LA NUEVA DB) ---
 
         [Authorize(Roles = "Administrador,Profesor")]
         [HttpGet]
         public IActionResult Crear()
         {
+            // Cargamos la lista de profesores para el Dropdown en la vista
+            ViewBag.ListaProfesores = _usuarioRepo.ObtenerProfesores();
             return View();
         }
 
@@ -71,11 +68,17 @@ namespace SistemaWeb.Controllers
         [HttpPost]
         public IActionResult Crear(Actividad actividad)
         {
-            if (ModelState.IsValid)
+            // Obtenemos el ID del usuario actual para la Auditoría
+            string idAuditoria = User.FindFirstValue("IdUsuario");
+
+            // Validaciones básicas manuales si ModelState falla por campos opcionales
+            if (!string.IsNullOrEmpty(actividad.Codigo) && !string.IsNullOrEmpty(actividad.Nombre) && !string.IsNullOrEmpty(actividad.IdResponsable))
             {
-                _service.Agregar(actividad);
+                _service.Agregar(actividad, idAuditoria);
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.ListaProfesores = _usuarioRepo.ObtenerProfesores();
             return View(actividad);
         }
 
@@ -84,8 +87,24 @@ namespace SistemaWeb.Controllers
         public IActionResult Editar(string id)
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
+
             var actividad = _service.ObtenerPorId(id);
             if (actividad == null) return NotFound();
+
+            // TRUCO DE ADAPTACIÓN:
+            // El SP 'sp_ObtenerActividadPorId' NO devuelve el IdResponsable (devuelve el Nombre).
+            // Para que el dropdown de Editar funcione y marque al profesor correcto,
+            // buscamos al usuario por su correo (que sí viene del SP) para obtener su ID.
+            if (!string.IsNullOrEmpty(actividad.GmailProfesor))
+            {
+                var usuarioProfesor = _usuarioRepo.ObtenerUsuarioPorCorreo(actividad.GmailProfesor);
+                if (usuarioProfesor != null)
+                {
+                    actividad.IdResponsable = usuarioProfesor.IdUsuario;
+                }
+            }
+
+            ViewBag.ListaProfesores = _usuarioRepo.ObtenerProfesores();
             return View(actividad);
         }
 
@@ -93,11 +112,15 @@ namespace SistemaWeb.Controllers
         [HttpPost]
         public IActionResult Editar(Actividad actividad)
         {
-            if (ModelState.IsValid)
+            string idAuditoria = User.FindFirstValue("IdUsuario");
+
+            if (!string.IsNullOrEmpty(actividad.Codigo) && !string.IsNullOrEmpty(actividad.Nombre) && !string.IsNullOrEmpty(actividad.IdResponsable))
             {
-                _service.Actualizar(actividad);
+                _service.Actualizar(actividad, idAuditoria);
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.ListaProfesores = _usuarioRepo.ObtenerProfesores();
             return View(actividad);
         }
 
@@ -105,35 +128,27 @@ namespace SistemaWeb.Controllers
         [HttpPost]
         public IActionResult Eliminar(string id)
         {
+            string idAuditoria = User.FindFirstValue("IdUsuario");
             if (!string.IsNullOrEmpty(id))
             {
-                _service.Eliminar(id);
+                _service.Eliminar(id, idAuditoria);
             }
             return RedirectToAction(nameof(Index));
         }
 
-        // 5. ESTADÍSTICAS INTERACTIVAS
+        // ... (Estadísticas se mantiene igual, usando el método nuevo del Repo) ...
         [Authorize(Roles = "Administrador,Profesor")]
         public IActionResult Estadisticas()
         {
             var actividades = _service.ObtenerTodas();
-
-            // Preparar datos para gráficos
             var agrupado = actividades
                 .GroupBy(a => a.TipoDiscapacidad)
-                .Select(g => new {
-                    Label = string.IsNullOrEmpty(g.Key) ? "General" : g.Key,
-                    Cantidad = g.Count(),
-                    CupoTotal = g.Sum(x => x.Cupo)
-                })
-                .ToList();
+                .Select(g => new { Label = string.IsNullOrEmpty(g.Key) ? "General" : g.Key, Cantidad = g.Count(), CupoTotal = g.Sum(x => x.Cupo) }).ToList();
 
-            // Arrays para Chart.js
             ViewBag.Labels = agrupado.Select(x => x.Label).ToArray();
             ViewBag.DataCantidad = agrupado.Select(x => x.Cantidad).ToArray();
             ViewBag.DataCupos = agrupado.Select(x => x.CupoTotal).ToArray();
 
-            // Tarjetas KPI
             ViewBag.TotalActividades = actividades.Count;
             ViewBag.TotalCupos = actividades.Sum(a => a.Cupo);
             ViewBag.UsuarioTotal = _usuarioRepo.ContarUsuarios();
