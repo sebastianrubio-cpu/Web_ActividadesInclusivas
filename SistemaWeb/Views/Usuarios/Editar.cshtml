@@ -1,0 +1,76 @@
+﻿@model SistemaWeb.Models.Usuario
+@{
+    ViewData["Title"] = "Editar Usuario";
+}
+
+<div class="container mt-5" style="max-width: 600px;">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-warning text-dark bg-opacity-75">
+            <h4 class="mb-0 fw-bold"><i class="fas fa-user-edit me-2"></i>Editar Usuario</h4>
+        </div>
+        <div class="card-body bg-light">
+            <form asp-action="Editar">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <input type="hidden" asp-for="IdUsuario" />
+
+                <div class="form-floating mb-3">
+                    <input asp-for="IdUsuario" class="form-control" readonly style="background-color: #e9ecef; cursor: not-allowed;" />
+                    <label asp-for="IdUsuario">Cédula (No editable)</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Nombre" class="form-control" placeholder="Nombre Completo" required />
+                    <label asp-for="Nombre">Nombre Completo</label>
+                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Correo" class="form-control" placeholder="nombre@uisek.edu.ec" required />
+                    <label asp-for="Correo">Correo Institucional</label>
+                    <span asp-validation-for="Correo" class="text-danger"></span>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Clave" class="form-control" placeholder="Contraseña" required />
+                    <label asp-for="Clave">Contraseña</label>
+                    <span asp-validation-for="Clave" class="text-danger"></span>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-floating">
+                            <select asp-for="IdRol" class="form-select" asp-items="ViewBag.Roles" required>
+                                <option value="">-- Seleccionar --</option>
+                            </select>
+                            <label for="IdRol">Rol de Usuario</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-floating">
+                            <select asp-for="IdGenero" class="form-select" asp-items="ViewBag.Generos">
+                                <option value="">-- Opcional --</option>
+                            </select>
+                            <label for="IdGenero">Género</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-warning fw-bold text-dark">
+                        <i class="fas fa-save me-2"></i>Guardar Cambios
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

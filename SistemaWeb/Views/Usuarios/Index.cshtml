@@ -1,0 +1,67 @@
+﻿@model IEnumerable<SistemaWeb.Models.Usuario>
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-primary fw-bold">Gestión de Usuarios</h2>
+        <a asp-action="Crear" class="btn btn-primary rounded-pill shadow-sm">
+            <i class="fas fa-plus me-2"></i>Nuevo Usuario
+        </a>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-dark text-white">
+                    <tr>
+                        <th class="ps-3">Cédula</th>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Rol</th>
+                        <th class="text-end pe-3">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-3 fw-bold">@item.IdUsuario</td>
+                            <td>@item.Nombre</td>
+                            <td>@item.Correo</td>
+                            <td>
+                                @if (item.Rol == "Administrador")
+                                {
+                                    <span class="badge bg-danger">@item.Rol</span>
+                                }
+                                else if (item.Rol == "Profesor")
+                                {
+
+                                    <span class="badge bg-info text-dark">@item.Rol</span>
+                                }
+                                else
+                                {
+
+                                    <span class="badge bg-success">@item.Rol</span>
+                                }
+                            </td>
+                            <td class="text-end pe-3">
+                                <a asp-action="Editar" asp-route-id="@item.IdUsuario" class="btn btn-sm btn-outline-primary rounded-circle me-1" title="Editar">
+                                    <i class="fas fa-pen"></i>
+                                </a>
+
+                                <form asp-action="Eliminar" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar al usuario @item.Nombre?');">
+                                    <input type="hidden" name="id" value="@item.IdUsuario" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

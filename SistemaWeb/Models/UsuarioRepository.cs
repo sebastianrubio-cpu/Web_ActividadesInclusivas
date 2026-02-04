@@ -231,5 +231,174 @@ namespace SistemaWeb.Models
             }
             return lista;
         }
+
+        // 8. OBTENER TODOS LOS USUARIOS 
+        public List<Usuario> ObtenerTodos()
+        {
+            var lista = new List<Usuario>();
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string sql = @"
+                    SELECT U.IdUsuario, U.Nombre, U.Correo, U.IdRol, R.NombreRol, U.IdGenero 
+                    FROM Usuarios U
+                    INNER JOIN Cat_Roles R ON U.IdRol = R.IdRol";
+
+                using (var cmd = new SqlCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        lista.Add(new Usuario
+                        {
+                            IdUsuario = reader["IdUsuario"].ToString(),
+                            Nombre = reader["Nombre"].ToString(),
+                            Correo = reader["Correo"].ToString(),
+                            IdRol = Convert.ToInt32(reader["IdRol"]),
+                            Rol = reader["NombreRol"].ToString(), // Nombre del Rol
+                            IdGenero = reader["IdGenero"] != DBNull.Value ? Convert.ToInt32(reader["IdGenero"]) : null
+                        });
+                    }
+                }
+            }
+            return lista;
+        }
+
+        // 9. OBTENER LISTA DE ROLES 
+        public List<dynamic> ObtenerListaRoles()
+        {
+            var lista = new List<dynamic>();
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string sql = "SELECT IdRol, NombreRol FROM Cat_Roles";
+                using (var cmd = new SqlCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        lista.Add(new
+                        {
+                            IdRol = (int)reader["IdRol"],
+                            NombreRol = reader["NombreRol"].ToString()
+                        });
+                    }
+                }
+            }
+            return lista;
+        }
+
+        // 10. CREAR USUARIO ADMIN
+        public bool CrearUsuarioConRol(Usuario user)
+        {
+            try
+            {
+                using (var conn = new SqlConnection(_connectionString))
+                {
+                    conn.Open();
+                    string sql = @"INSERT INTO Usuarios (IdUsuario, Nombre, Correo, Clave, IdRol, IdGenero) 
+                                   VALUES (@IdUsuario, @Nombre, @Correo, @Clave, @IdRol, @IdGenero)";
+
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@IdUsuario", user.IdUsuario);
+                        cmd.Parameters.AddWithValue("@Nombre", user.Nombre);
+                        cmd.Parameters.AddWithValue("@Correo", user.Correo);
+                        cmd.Parameters.AddWithValue("@Clave", user.Clave);
+                        cmd.Parameters.AddWithValue("@IdRol", user.IdRol); // Rol seleccionado
+                        cmd.Parameters.AddWithValue("@IdGenero", (object)user.IdGenero ?? DBNull.Value);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        // 11. OBTENER USUARIO POR CÉDULA 
+        public Usuario ObtenerPorId(string idUsuario)
+        {
+            Usuario usuario = null;
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                string sql = @"SELECT * FROM Usuarios WHERE IdUsuario = @IdUsuario";
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@IdUsuario", idUsuario);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            usuario = new Usuario
+                            {
+                                IdUsuario = reader["IdUsuario"].ToString(),
+                                Nombre = reader["Nombre"].ToString(),
+                                Correo = reader["Correo"].ToString(),
+                                Clave = reader["Clave"].ToString(), // Necesaria para el modelo
+                                IdRol = Convert.ToInt32(reader["IdRol"]),
+                                IdGenero = reader["IdGenero"] != DBNull.Value ? Convert.ToInt32(reader["IdGenero"]) : null
+                            };
+                        }
+                    }
+                }
+            }
+            return usuario;
+        }
+
+        // 12. ACTUALIZAR USUARIO 
+        public bool Actualizar(Usuario user)
+        {
+            try
+            {
+                using (var conn = new SqlConnection(_connectionString))
+                {
+                    conn.Open();
+                    string sql = @"UPDATE Usuarios 
+                                   SET Nombre = @Nombre, 
+                                       Correo = @Correo, 
+                                       Clave = @Clave, 
+                                       IdRol = @IdRol, 
+                                       IdGenero = @IdGenero 
+                                   WHERE IdUsuario = @IdUsuario";
+
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Nombre", user.Nombre);
+                        cmd.Parameters.AddWithValue("@Correo", user.Correo);
+                        cmd.Parameters.AddWithValue("@Clave", user.Clave);
+                        cmd.Parameters.AddWithValue("@IdRol", user.IdRol);
+                        cmd.Parameters.AddWithValue("@IdGenero", (object)user.IdGenero ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@IdUsuario", user.IdUsuario);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return true;
+            }
+            catch { return false; }
+        }
+
+        // 13. ELIMINAR USUARIO
+        public bool Eliminar(string idUsuario)
+        {
+            try
+            {
+                using (var conn = new SqlConnection(_connectionString))
+                {
+                    conn.Open();
+                   
+                    string sql = "DELETE FROM Usuarios WHERE IdUsuario = @IdUsuario";
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@IdUsuario", idUsuario);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return true;
+            }
+            catch { return false; }
+        }
     }
 }

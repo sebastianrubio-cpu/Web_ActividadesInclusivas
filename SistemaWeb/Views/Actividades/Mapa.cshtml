@@ -13,7 +13,8 @@
         background-position: center center;
         background-size: cover;
         background-attachment: fixed;
-        
+        background-blend-mode: multiply;
+ 
     }
 
 </style>
@@ -33,69 +34,34 @@
         crossorigin=""></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-        // 1. Inicializar Mapa (Centrado en Ecuador)
-        var map = L.map('map').setView([-1.8312, -78.1834], 7); // Zoom más alejado para ver todo el país
+// Coordenadas iniciales (Quito)
+        var map = L.map('map').setView([-0.1807, -78.4678], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
+            attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        // 2. Obtener datos (Raw Data)
-        var actividades = @Json.Serialize(Model);
+        // --- SOLUCIÓN DE PUNTOS Y COMAS ---
+        // Usamos Json.Serialize para pasar los datos de C# a JS de forma segura.
+        // Esto evita el problema de la cultura (coma vs punto) automáticamente.
+        
+        var actividades = @Html.Raw(Json.Serialize(Model.Select(a => new {
+            nombre = a.Nombre,
+            lat = a.Latitud,
+            lng = a.Longitud,
+            responsable = a.Responsable,
+            cupo = a.Cupo
+        })));
 
-        // --- DEBUG: MIRA ESTO EN LA CONSOLA DEL NAVEGADOR (F12) ---
-        console.log("=== INICIO DE DEBUG MAPA ===");
-        console.log("Total actividades recuperadas:", actividades.length);
-        console.log("Datos crudos:", actividades);
-
-        var puntosDibujados = 0;
-
-        // 3. Iterar de forma segura
-        actividades.forEach(function (item, index) {
-
-            // TRUCO DE DEV: Intentamos leer la propiedad en Mayúscula O minúscula
-            // Esto arregla el error de serialización.
-            var lat = item.Latitud || item.latitud || 0;
-            var lng = item.Longitud || item.longitud || 0;
-            var nombre = item.Nombre || item.nombre || "Actividad sin nombre";
-            var resp = item.Responsable || item.responsable || "Sin responsable";
-            var tipo = item.TipoDiscapacidad || item.tipoDiscapacidad || "General";
-            var codigo = item.Codigo || item.codigo || "";
-
-            // Convertir a float por seguridad
-            lat = parseFloat(lat);
-            lng = parseFloat(lng);
-
-            // Log por cada fila para ver si detecta coordenadas
-            console.log(`Fila ${index}: ${nombre} -> Lat: ${lat}, Lng: ${lng}`);
-
-            // Solo dibujamos si las coordenadas son válidas (diferentes de 0)
-            if (lat !== 0 && lng !== 0) {
-
-                var marker = L.marker([lat, lng]).addTo(map);
-
-                var popupContent = `
-                    <div style="text-align:center;">
-                        <h6>${nombre}</h6>
-                        <p><b>Responsable:</b> ${resp}</p>
-                        <span class="badge bg-info text-dark">${tipo}</span>
-                        <br/><br/>
-                        <a href="/Actividades/Editar?id=${codigo}" class="btn btn-sm btn-primary">Ver Detalles</a>
-                    </div>
-                `;
-
-                marker.bindPopup(popupContent);
-                puntosDibujados++;
+        // Recorremos el array de objetos JSON limpio
+        actividades.forEach(function(act) {
+            // Validamos que las coordenadas no sean 0 (opcional)
+            if (act.lat !== 0 && act.lng !== 0) {
+                L.marker([act.lat, act.lng])
+                 .addTo(map)
+                 .bindPopup("<b>" + act.nombre + "</b><br>" + 
+                            "Responsable: " + act.responsable + "<br>" +
+                            "Cupos: " + act.cupo);
             }
         });
-
-        console.log("Total puntos dibujados en el mapa:", puntosDibujados);
-
-        if (puntosDibujados === 0) {
-            alert("Atención: El sistema no encontró coordenadas válidas para dibujar. Revisa la Consola (F12) para más detalles.");
-        }
-    });
 </script>
