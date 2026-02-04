@@ -1,20 +1,12 @@
--- 1. LIMPIEZA INICIAL (Para evitar conflictos si re-ejecutas)
-USE master;
-GO
-IF EXISTS (SELECT * FROM sys.databases WHERE name = 'SistemaInclusivoDB')
-BEGIN
-    ALTER DATABASE SistemaInclusivoDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-    DROP DATABASE SistemaInclusivoDB;
-END
-GO
 
--- 2. CREACIÓN DE LA BASE DE DATOS
+
+-- 1. CREACIÓN DE LA BASE DE DATOS
 CREATE DATABASE SistemaInclusivo;
 GO
 USE SistemaInclusivo;
 GO
 
--- 3. TABLAS CATÁLOGO
+-- 2. TABLAS CATÁLOGO
 
 -- Estados de Actividades
 CREATE TABLE Cat_Estados (
@@ -40,7 +32,7 @@ INSERT INTO Cat_Discapacidades (NombreDiscapacidad) VALUES ('Motriz'), ('Visual'
 INSERT INTO Cat_Generos (IdGenero, NombreGenero) VALUES (0, 'Masculino'), (1, 'Femenino'), (2, 'No Binario');
 GO
 
--- 4. TABLA USUARIOS (Padre)
+-- 3. TABLA USUARIOS (Padre)
 CREATE TABLE Usuarios (
     IdUsuario NVARCHAR(15) PRIMARY KEY, -- Esta es la Cédula
     Correo NVARCHAR(100) NOT NULL UNIQUE,
@@ -57,7 +49,7 @@ INSERT INTO Usuarios (IdUsuario, Correo, Clave, Nombre, Rol, IdGenero)
 VALUES ('1700000000', 'sebastian.rubio@uisek.edu.ec', '12345', 'Administrador Sistema', 'Administrador', 0);
 GO
 
--- 5. TABLA ACTIVIDADES 
+-- 4. TABLA ACTIVIDADES 
 CREATE TABLE Actividades (
     Codigo NVARCHAR(20) PRIMARY KEY,
     Nombre NVARCHAR(100) NOT NULL,
@@ -77,26 +69,20 @@ CREATE TABLE Actividades (
 );
 GO
 
--- 6. AUDITORÍA (Aquí está el cambio solicitado)
+-- 5. AUDITORÍA
 CREATE TABLE Auditoria_Actividades (
     IdAuditoria INT IDENTITY(1,1) PRIMARY KEY,
     CodigoActividad NVARCHAR(20),
     Accion NVARCHAR(10),
     FechaAccion DATETIME DEFAULT GETDATE(),
-    
     -- CAMBIO CLAVE: IdUsuario es Foreign Key a la tabla Usuarios
-    -- Debe ser del mismo tipo que en Usuarios (NVARCHAR(15))
     IdUsuario NVARCHAR(15) NULL, 
-    
     Detalle NVARCHAR(MAX),
-
-    -- RELACIÓN OBLIGATORIA (No hay tablas sueltas)
     CONSTRAINT FK_Auditoria_Usuarios FOREIGN KEY (IdUsuario) REFERENCES Usuarios(IdUsuario)
-    -- ON DELETE SET NULL -- (Opcional: Si borran al usuario, el registro queda con NULL en vez de borrarse)
 );
 GO
 
--- 7. TRIGGER DE AUDITORÍA
+-- 6. TRIGGER DE AUDITORÍA
 CREATE TRIGGER trg_Auditoria_Actividades
 ON Actividades
 AFTER INSERT, UPDATE, DELETE
@@ -132,7 +118,7 @@ BEGIN
 END;
 GO
 
--- 8. STORED PROCEDURES (SPs)
+-- 7. STORED PROCEDURES (SPs)
 
 -- SP: Obtener Todo
 CREATE PROCEDURE sp_ObtenerActividades
