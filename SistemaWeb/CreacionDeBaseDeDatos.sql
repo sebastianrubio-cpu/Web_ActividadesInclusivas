@@ -90,59 +90,93 @@ INSERT INTO Usuarios (IdUsuario, Correo, Clave, Nombre, Rol, IdGenero)
 VALUES ('1700000001', 'juan.perez@uisek.edu.ec', '12345', 'Juan Pérez', 'Profesor', 0);
 GO
 
--- 5. STORED PROCEDURES (CORREGIDOS)
+-- 5. STORED PROCEDURES
 
--- A) sp_ObtenerActividades
-IF OBJECT_ID('sp_ObtenerActividades', 'P') IS NOT NULL DROP PROCEDURE sp_ObtenerActividades;
-GO
-CREATE PROCEDURE sp_ObtenerActividades AS
-BEGIN
-    SET NOCOUNT ON;
-    SELECT 
-        A.Codigo, 
-        A.Nombre, 
-        A.FechaRealizacion, 
-        A.Cupo, 
-        U.Nombre AS Responsable, 
-        U.Correo AS GmailProfesor,
-        A.Latitud, 
-        A.Longitud,
-        E.NombreEstado AS Estado, 
-        D.NombreDiscapacidad AS TipoDiscapacidad 
-    FROM Actividades A
-    INNER JOIN Usuarios U ON A.IdResponsable = U.IdUsuario
-    INNER JOIN Cat_Estados E ON A.IdEstado = E.IdEstado
-    INNER JOIN Cat_Discapacidades D ON A.IdDiscapacidad = D.IdDiscapacidad;
-END;
-GO
-
--- B) sp_ObtenerActividadPorId
-IF OBJECT_ID('sp_ObtenerActividadPorId', 'P') IS NOT NULL DROP PROCEDURE sp_ObtenerActividadPorId;
-GO
-CREATE PROCEDURE sp_ObtenerActividadPorId 
-    @Codigo NVARCHAR(20) 
+-- =============================================
+--CREACIÓN DEL TRIGGER DE AUDITORÍA 
+-- =============================================
+CREATE OR ALTER TRIGGER trg_Auditoria_Actividades
+ON Actividades
+AFTER INSERT, UPDATE, DELETE
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT 
-        A.Codigo, A.Nombre, A.FechaRealizacion, A.Cupo, 
-        U.Nombre AS Responsable, 
-        U.Correo AS GmailProfesor, 
-        A.Latitud, A.Longitud,
-        E.NombreEstado AS Estado, 
-        D.NombreDiscapacidad AS TipoDiscapacidad
-    FROM Actividades A
-    INNER JOIN Usuarios U ON A.IdResponsable = U.IdUsuario
-    INNER JOIN Cat_Estados E ON A.IdEstado = E.IdEstado
-    INNER JOIN Cat_Discapacidades D ON A.IdDiscapacidad = D.IdDiscapacidad
-    WHERE A.Codigo = @Codigo;
+
+    DECLARE @Accion NVARCHAR(10);
+    DECLARE @Detalle NVARCHAR(MAX);
+    DECLARE @Codigo NVARCHAR(20);
+    DECLARE @UsuarioSistema NVARCHAR(50) = SYSTEM_USER; 
+
+    -- 1. DETECTAR LA ACCIÓN (Insert, Update, Delete)
+    IF EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted)
+    BEGIN
+        SET @Accion = 'UPDATE';
+        SELECT @Codigo = Codigo FROM inserted;
+        SET @Detalle = CONCAT('Actualización de actividad. Cupo anterior: ', (SELECT Cupo FROM deleted), '. Cupo nuevo: ', (SELECT Cupo FROM inserted));
+    END
+    ELSE IF EXISTS (SELECT * FROM inserted)
+    BEGIN
+        SET @Accion = 'INSERT';
+        SELECT @Codigo = Codigo FROM inserted;
+        SET @Detalle = CONCAT('Nueva actividad creada: ', (SELECT Nombre FROM inserted));
+    END
+    ELSE IF EXISTS (SELECT * FROM deleted)
+    BEGIN
+        SET @Accion = 'DELETE';
+        SELECT @Codigo = Codigo FROM deleted;
+        SET @Detalle = CONCAT('Actividad eliminada: ', (SELECT Nombre FROM deleted));
+    END
+    ELSE
+        RETURN; 
+
+    -- 2. INSERTAR EN LA TABLA DE AUDITORÍA
+    -- Nota: El trigger no recibe parámetros de la app (como IdUsuarioAuditoria),
+    -- así que registraremos 'SYSTEM' o ajustaremos según necesidad.
+    INSERT INTO Auditoria_Actividades (CodigoActividad, Accion, IdUsuario, Detalle)
+    VALUES (@Codigo, @Accion, 'AUTO-TRIGGER', @Detalle);
 END;
 GO
 
--- C) sp_InsertarActividad
-IF OBJECT_ID('sp_InsertarActividad', 'P') IS NOT NULL DROP PROCEDURE sp_InsertarActividad;
+-- ==========================================================
+-- ACTUALIZACION DE PROCEDURES (LIMPIOS)
+-- ==========================================================
+-- A) Insertar 
+CREATE OR ALTER PROCEDURE sp_InsertarActividad
+    @Codigo NVARCHAR(20),
+    @Nombre NVARCHAR(100),
+    @FechaRealizacion DATETIME,
+    @Cupo INT,
+    @IdResponsable NVARCHAR(15),
+    @Latitud FLOAT,
+    @Longitud FLOAT,
+    @NombreEstado NVARCHAR(50),
+    @NombreDiscapacidad NVARCHAR(100),
+    @IdUsuarioAuditoria NVARCHAR(15) -- Se mantiene por compatibilidad con C#, aunque el trigger use otro.
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        
+        DECLARE @IdEstado INT = (SELECT TOP 1 IdEstado FROM Cat_Estados WHERE NombreEstado = @NombreEstado);
+        DECLARE @IdDiscapacidad INT = (SELECT TOP 1 IdDiscapacidad FROM Cat_Discapacidades WHERE NombreDiscapacidad = @NombreDiscapacidad);
+        IF @IdEstado IS NULL SET @IdEstado = 1; IF @IdDiscapacidad IS NULL SET @IdDiscapacidad = 5; 
+
+        -- SOLO HACEMOS EL INSERT (El trigger salta automáticamente)
+        INSERT INTO Actividades (Codigo, Nombre, FechaRealizacion, Cupo, IdResponsable, Latitud, Longitud, IdEstado, IdDiscapacidad)
+        VALUES (@Codigo, @Nombre, @FechaRealizacion, @Cupo, @IdResponsable, @Latitud, @Longitud, @IdEstado, @IdDiscapacidad);
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
 GO
-CREATE PROCEDURE sp_InsertarActividad
+
+-- B) Actualizar 
+CREATE OR ALTER PROCEDURE sp_ActualizarActividad
     @Codigo NVARCHAR(20),
     @Nombre NVARCHAR(100),
     @FechaRealizacion DATETIME,
@@ -158,54 +192,11 @@ BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
         BEGIN TRANSACTION;
-        
-        DECLARE @IdEstado INT = (SELECT TOP 1 IdEstado FROM Cat_Estados WHERE NombreEstado = @NombreEstado);
-        DECLARE @IdDiscapacidad INT = (SELECT TOP 1 IdDiscapacidad FROM Cat_Discapacidades WHERE NombreDiscapacidad = @NombreDiscapacidad);
-        
-        -- Valores por defecto si no existen
-        IF @IdEstado IS NULL SET @IdEstado = 1; 
-        IF @IdDiscapacidad IS NULL SET @IdDiscapacidad = 5; 
-
-        INSERT INTO Actividades (Codigo, Nombre, FechaRealizacion, Cupo, IdResponsable, Latitud, Longitud, IdEstado, IdDiscapacidad)
-        VALUES (@Codigo, @Nombre, @FechaRealizacion, @Cupo, @IdResponsable, @Latitud, @Longitud, @IdEstado, @IdDiscapacidad);
-
-        -- Auditoría
-        DECLARE @NombreRespLog NVARCHAR(100) = (SELECT Nombre FROM Usuarios WHERE IdUsuario = @IdResponsable);
-        INSERT INTO Auditoria_Actividades (CodigoActividad, Accion, IdUsuario, Detalle)
-        VALUES (@Codigo, 'INSERT', @IdUsuarioAuditoria, CONCAT('Actividad creada: ', @Nombre, '. Asignada a: ', @NombreRespLog));
-
-        COMMIT TRANSACTION;
-    END TRY
-    BEGIN CATCH
-        ROLLBACK TRANSACTION;
-        THROW;
-    END CATCH
-END;
-GO
-
--- D) sp_ActualizarActividad
-IF OBJECT_ID('sp_ActualizarActividad', 'P') IS NOT NULL DROP PROCEDURE sp_ActualizarActividad;
-GO
-CREATE PROCEDURE sp_ActualizarActividad
-    @Codigo NVARCHAR(20),
-    @Nombre NVARCHAR(100),
-    @FechaRealizacion DATETIME,
-    @Cupo INT,
-    @IdResponsable NVARCHAR(15), 
-    @Latitud FLOAT,
-    @Longitud FLOAT,
-    @NombreEstado NVARCHAR(50),
-    @NombreDiscapacidad NVARCHAR(100),
-    @IdUsuarioAuditoria NVARCHAR(15)
-AS
-BEGIN
-    SET NOCOUNT ON;
-    BEGIN TRY
-        BEGIN TRANSACTION;
         DECLARE @IdEstado INT = (SELECT TOP 1 IdEstado FROM Cat_Estados WHERE NombreEstado = @NombreEstado);
         DECLARE @IdDiscapacidad INT = (SELECT TOP 1 IdDiscapacidad FROM Cat_Discapacidades WHERE NombreDiscapacidad = @NombreDiscapacidad);
         IF @IdEstado IS NULL SET @IdEstado = 1; IF @IdDiscapacidad IS NULL SET @IdDiscapacidad = 5;
 
+        -- SOLO EL UPDATE (El trigger salta automático)
         UPDATE Actividades
         SET Nombre = @Nombre, FechaRealizacion = @FechaRealizacion, Cupo = @Cupo,
             IdResponsable = @IdResponsable,
@@ -213,9 +204,6 @@ BEGIN
             IdEstado = @IdEstado, IdDiscapacidad = @IdDiscapacidad  
         WHERE Codigo = @Codigo;
 
-        INSERT INTO Auditoria_Actividades (CodigoActividad, Accion, IdUsuario, Detalle)
-        VALUES (@Codigo, 'UPDATE', @IdUsuarioAuditoria, CONCAT('Actividad actualizada: ', @Nombre));
-
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
@@ -225,10 +213,8 @@ BEGIN
 END;
 GO
 
--- E) sp_EliminarActividad (EL QUE DABA ERROR)
-IF OBJECT_ID('sp_EliminarActividad', 'P') IS NOT NULL DROP PROCEDURE sp_EliminarActividad;
-GO
-CREATE PROCEDURE sp_EliminarActividad
+-- C) Eliminar 
+CREATE OR ALTER PROCEDURE sp_EliminarActividad
     @Codigo NVARCHAR(20),
     @IdUsuarioAuditoria NVARCHAR(15)
 AS
@@ -237,14 +223,10 @@ BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
         
+        -- SOLO EL DELETE (El trigger salta automático)
         IF EXISTS (SELECT 1 FROM Actividades WHERE Codigo = @Codigo)
         BEGIN
-            DECLARE @NombreBorrado NVARCHAR(100) = (SELECT Nombre FROM Actividades WHERE Codigo = @Codigo);
-            
             DELETE FROM Actividades WHERE Codigo = @Codigo;
-
-            INSERT INTO Auditoria_Actividades (CodigoActividad, Accion, IdUsuario, Detalle)
-            VALUES (@Codigo, 'DELETE', @IdUsuarioAuditoria, CONCAT('ELIMINADA: ', @NombreBorrado));
         END
 
         COMMIT TRANSACTION;
