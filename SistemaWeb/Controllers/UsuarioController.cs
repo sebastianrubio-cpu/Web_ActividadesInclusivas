@@ -33,7 +33,6 @@ namespace SistemaWeb.Controllers
         [HttpPost]
         public IActionResult Crear(Usuario usuario)
         {
-            // Validamos lo básico manualmente para evitar problemas con ModelState
             if (!string.IsNullOrWhiteSpace(usuario.IdUsuario) &&
                 !string.IsNullOrWhiteSpace(usuario.Nombre) &&
                 !string.IsNullOrWhiteSpace(usuario.Clave))

@@ -4,19 +4,50 @@
     ViewData["Title"] = "Mapa de Actividades";
 }
 <style>
-
-
-    body {
-        background-color: var(--bg-body);
-        background-image: url(/img/br.jpg); /* Asegúrate de que esta imagen exista */
+/* 1. CONFIGURACIÓN DEL FONDO (PSEUDO-ELEMENTO) */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1; /* Detrás de todo */
+        
+        background-image: url('/img/br.jpg');
         background-repeat: no-repeat;
         background-position: center center;
         background-size: cover;
-        background-attachment: fixed;
-        background-blend-mode: multiply;
- 
+        
+        /* MODO CLARO (Por defecto) */
+        /* Brillo al 70% para que el texto negro se lea bien, Blur de 8px */
+        filter: blur(8px) brightness(0.7);
+        
+        /* Escala para evitar bordes blancos por el blur */
+        transform: scale(1.1); 
+        
+        /* ANIMACIÓN SUAVE al cambiar de tema */
+        transition: filter 0.8s ease; 
     }
 
+    /* 2. MODO OSCURO (Activado por el Layout) */
+    [data-theme="dark"]::before {
+        /* MODO OSCURO: Bajamos el brillo al 30% */
+        filter: blur(8px) brightness(0.3); 
+    }
+
+    /* 3. AJUSTES DE TEXTO PARA EL FONDO */
+    /* Título con sombra para leerse en cualquier modo */
+    .dashboard-title {
+        color: var(--uisek-blue); /* Usa el azul del layout */
+        text-shadow: 0 0 10px rgba(255,255,255,0.8); /* Resplandor blanco sutil */
+    }
+    
+    [data-theme="dark"] .dashboard-title {
+        color: white; /* Blanco en modo oscuro */
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    
+    }
 </style>
 <div class="container mt-4">
     <h2>📍 Mapa de Actividades Inclusivas</h2>

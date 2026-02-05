@@ -2,64 +2,164 @@
     ViewData["Title"] = "El Proyecto";
 }
 
-<div class="container py-5">
+<style>
+    /* =========================================
+           1. FONDO DIFUMINADO ADAPTATIVO
+           ========================================= */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background-image: url('/img/br.jpg');
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: cover;
+        filter: blur(8px) brightness(0.8);
+        transform: scale(1.1);
+        transition: filter 0.8s ease;
+    }
+
+    [data-theme="dark"]::before {
+        filter: blur(8px) brightness(0.3);
+    }
+
+    /* =========================================
+           2. TARJETA EFECTO VIDRIO (GLASSMORPHISM)
+           ========================================= */
+    .card-glass {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    [data-theme="dark"] .card-glass {
+        background: rgba(30, 30, 30, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* =========================================
+           3. TIPOGRAFÍA Y DETALLES
+           ========================================= */
+    .project-title {
+        color: var(--uisek-blue);
+        text-shadow: 0 2px 10px rgba(255,255,255,0.5);
+    }
+
+    [data-theme="dark"] .project-title {
+        color: white;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* NUEVA CLASE: Pastilla de contraste para el subtítulo */
+    .subtitle-pill {
+        background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco casi sólido */
+        color: var(--uisek-blue); /* Texto Azul UISEK fuerte */
+        padding: 8px 25px;
+        border-radius: 50px;
+        font-weight: 600;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* Sombra para levantar el texto */
+        backdrop-filter: blur(5px);
+    }
+
+    /* Adaptación para modo oscuro */
+    [data-theme="dark"] .subtitle-pill {
+        background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro */
+        color: #ffffff; /* Texto blanco */
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .icon-circle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 80px;
+        height: 80px;
+        background-color: var(--bg-body);
+        color: var(--uisek-blue);
+        border-radius: 50%;
+        font-size: 2.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="container py-5 animate__animated animate__fadeIn">
 
     <div class="row justify-content-center mb-5">
-        <div class="col-lg-8 text-center animate__animated animate__fadeInDown">
-            <h1 class="fw-bold display-5" style="color: var(--uisek-blue);">
+        <div class="col-lg-8 text-center">
+            <h1 class="fw-bold display-5 project-title">
                 <i class="fas fa-rocket me-2"></i>Proyecto Inclusivo
             </h1>
-            <p class="lead text-muted mt-3">
-                Plataforma de gestión y vinculación con la comunidad de la UISEK.
+
+            <p class="lead mt-4">
+                <span class="subtitle-pill">
+                    Plataforma integral de vinculación con la comunidad UISEK.
+                </span>
             </p>
-            <div style="height: 4px; width: 80px; background-color: var(--uisek-gold); margin: 20px auto; border-radius: 2px;"></div>
+
+            <div style="height: 4px; width: 80px; background-color: var(--uisek-gold); margin: 25px auto; border-radius: 2px;"></div>
         </div>
     </div>
 
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <div class="card shadow-lg border-0 animate__animated animate__fadeInUp" style="border-radius: 20px; overflow: hidden;">
+            <div class="card card-glass border-0">
                 <div class="card-body p-5 text-center">
 
                     <div class="mb-4">
-                        <span style="background-color: #eef2f7; padding: 20px; border-radius: 50%; color: var(--uisek-blue); font-size: 2.5rem;">
+                        <div class="icon-circle">
                             <i class="fas fa-hands-helping"></i>
-                        </span>
+                        </div>
                     </div>
 
-                    <h3 class="fw-bold mb-4" style="color: var(--text-main);">¿De qué trata este proyecto?</h3>
+                    <h3 class="fw-bold mb-4">¿De qué trata este proyecto?</h3>
 
-                    <p class="text-muted" style="font-size: 1.1rem; line-height: 1.8;">
+                    <p class="" style="font-size: 1.15rem; line-height: 1.8; opacity: 0.9;">
                         Este sistema permite gestionar de manera eficiente las
-                        <strong>actividades de vinculación</strong> y proyectos sociales de la universidad.
+                        <strong style="color: var(--uisek-blue);">actividades de vinculación</strong> y proyectos sociales de la universidad.
                         Facilita a los estudiantes la inscripción, seguimiento y validación de su participación,
-                        asegurando que el impacto en la comunidad sea medible y transparente.
+                        asegurando que el impacto en la comunidad sea medible, transparente y accesible para todos.
                     </p>
 
-                    <div class="row mt-5">
-                        <div class="col-md-4 mb-3">
-                            <h5 class="fw-bold" style="color: var(--uisek-blue);">
-                                <i class="fas fa-check-circle me-1"></i> Inclusión
-                            </h5>
-                            <p class="small text-muted">Accesible para todos los estudiantes.</p>
+                    <hr class="my-5 opacity-25">
+
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <h5 class="fw-bold" style="color: var(--uisek-blue);">
+                                    <i class="fas fa-universal-access me-2"></i>Inclusión
+                                </h5>
+                                <p class="small opacity-75">Diseñado para ser accesible por todos los miembros de la comunidad universitaria.</p>
+                            </div>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <h5 class="fw-bold" style="color: var(--uisek-blue);">
-                                <i class="fas fa-network-wired me-1"></i> Conectividad
-                            </h5>
-                            <p class="small text-muted">Integración con sistemas UISEK.</p>
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <h5 class="fw-bold" style="color: var(--uisek-blue);">
+                                    <i class="fas fa-network-wired me-2"></i>Conectividad
+                                </h5>
+                                <p class="small opacity-75">Integración total con los sistemas académicos y bases de datos de la UISEK.</p>
+                            </div>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <h5 class="fw-bold" style="color: var(--uisek-blue);">
-                                <i class="fas fa-chart-line me-1"></i> Impacto
-                            </h5>
-                            <p class="small text-muted">Resultados medibles en tiempo real.</p>
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <h5 class="fw-bold" style="color: var(--uisek-blue);">
+                                    <i class="fas fa-chart-pie me-2"></i>Transparencia
+                                </h5>
+                                <p class="small opacity-75">Resultados y cupos visibles en tiempo real para una gestión justa.</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="mt-4">
-                        <a asp-controller="Actividades" asp-action="Index" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm" style="background-color: var(--uisek-blue); border: none;">
-                            Ver Actividades Disponibles
+                    <div class="mt-5">
+                        <a asp-controller="Actividades" asp-action="Index" class="btn btn-primary btn-lg rounded-pill px-5 shadow-lg border-0" style="background-color: var(--uisek-blue);">
+                            <i class="fas fa-calendar-alt me-2"></i>Ver Actividades
                         </a>
                     </div>
 

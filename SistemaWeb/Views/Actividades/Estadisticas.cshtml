@@ -2,103 +2,147 @@
     ViewData["Title"] = "Métricas del Sistema";
 }
 
+<style>
+    /* 1. CONFIGURACIÓN DEL FONDO (PSEUDO-ELEMENTO) */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1; /* Detrás de todo */
+
+        background-image: url('/img/br.jpg');
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: cover;
+        /* MODO CLARO (Por defecto) */
+        /* Brillo al 70% para que el texto negro se lea bien, Blur de 8px */
+        filter: blur(8px) brightness(0.7);
+        /* Escala para evitar bordes blancos por el blur */
+        transform: scale(1.1);
+        /* ANIMACIÓN SUAVE al cambiar de tema */
+        transition: filter 0.8s ease;
+    }
+
+    /* 2. MODO OSCURO (Activado por el Layout) */
+    [data-theme="dark"]::before {
+        /* MODO OSCURO: Bajamos el brillo al 30% */
+        filter: blur(8px) brightness(0.3);
+    }
+
+    /* 3. AJUSTES DE TEXTO PARA EL FONDO */
+    /* Título con sombra para leerse en cualquier modo */
+    .dashboard-title {
+        color: var(--uisek-blue); /* Usa el azul del layout */
+        text-shadow: 0 0 10px rgba(255,255,255,0.8); /* Resplandor blanco sutil */
+    }
+
+    [data-theme="dark"] .dashboard-title {
+        color: white; /* Blanco en modo oscuro */
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+</style>
+
 <div class="container mt-4 animate__animated animate__fadeIn">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold" style="color: var(--uisek-blue);">
+        <h2 class="fw-bold dashboard-title">
             <i class="fas fa-chart-line me-2"></i>Dashboard de Impacto
         </h2>
-        <span class="badge bg-secondary p-2">Vista de Administrador</span>
+        <span class="badge bg-white text-dark shadow-sm p-2">
+            <i class="fas fa-user-shield me-1"></i> Vista de Administrador
+        </span>
     </div>
 
     <div class="row mb-5">
         <div class="col-md-4">
-            <div class="p-3 rounded-4 shadow-sm border-start border-5 border-primary bg-white">
-                <small class="text-muted text-uppercase fw-bold">Total Usuarios</small>
-                <h2 class="fw-bold mb-0">@ViewBag.UsuarioTotal</h2>
+            <div class="p-3 rounded-4 shadow border-start border-5 border-primary bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted text-uppercase fw-bold">Total Usuarios</small>
+                        <h2 class="fw-bold mb-0 text-dark">@ViewBag.UsuarioTotal</h2>
+                    </div>
+                    <i class="fas fa-users fa-2x text-primary opacity-25"></i>
+                </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="p-3 rounded-4 shadow-sm border-start border-5 border-info bg-white">
-                <small class="text-muted text-uppercase fw-bold">Actividades Creadas</small>
-                <h2 class="fw-bold mb-0">@ViewBag.TotalActividades</h2>
+            <div class="p-3 rounded-4 shadow border-start border-5 border-info bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted text-uppercase fw-bold">Actividades</small>
+                        <h2 class="fw-bold mb-0 text-dark">@ViewBag.TotalActividades</h2>
+                    </div>
+                    <i class="fas fa-calendar-check fa-2x text-info opacity-25"></i>
+                </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="p-3 rounded-4 shadow-sm border-start border-5 border-success bg-white">
-                <small class="text-muted text-uppercase fw-bold">Cupos Ofertados</small>
-                <h2 class="fw-bold mb-0">@ViewBag.TotalCupos</h2>
+            <div class="p-3 rounded-4 shadow border-start border-5 border-success bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted text-uppercase fw-bold">Cupos Ofertados</small>
+                        <h2 class="fw-bold mb-0 text-dark">@ViewBag.TotalCupos</h2>
+                    </div>
+                    <i class="fas fa-chair fa-2x text-success opacity-25"></i>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="row g-4">
-
         <div class="col-md-6">
-            <div class="card shadow-sm border-0 h-100 rounded-4">
-                <div class="card-header bg-transparent border-0 pt-4 px-4">
-                    <h5 class="fw-bold">Distribución por Discapacidad</h5>
+            <div class="card shadow border-0 h-100 rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-dark">Distribución por Discapacidad</h5>
                     <small class="text-muted">Proporción de actividades según enfoque.</small>
                 </div>
-                <div class="card-body d-flex justify-content-center align-items-center" style="position: relative; height: 300px;">
+                <div class="card-body d-flex justify-content-center align-items-center" style="position: relative; height: 320px;">
                     <canvas id="pieChart"></canvas>
                 </div>
             </div>
         </div>
 
         <div class="col-md-6">
-            <div class="card shadow-sm border-0 h-100 rounded-4">
-                <div class="card-header bg-transparent border-0 pt-4 px-4">
-                    <h5 class="fw-bold">Oferta de Cupos (Expectativa)</h5>
+            <div class="card shadow border-0 h-100 rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-dark">Oferta de Cupos</h5>
                     <small class="text-muted">Total de cupos abiertos por categoría.</small>
                 </div>
-                <div class="card-body" style="position: relative; height: 300px;">
+                <div class="card-body" style="position: relative; height: 320px;">
                     <canvas id="barChart"></canvas>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
-<style>
-
-
-    body {
-        background-color: var(--bg-body);
-        background-image: url(/img/br.jpg); /* Asegúrate de que esta imagen exista */
-        background-repeat: no-repeat;
-        background-position: center center;
-        background-size: cover;
-        background-attachment: fixed;
-        background-blend-mode: overlay;
-    }
-
-</style>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // 1. OBTENER DATOS DEL SERVIDOR (ViewBag)
-        // Usamos Html.Raw y Json.Serialize para convertir los arrays de C# a Arrays de JS
+        // 1. OBTENER DATOS
         const labelsJS = @Html.Raw(Json.Serialize(ViewBag.Labels));
         const dataCantidadJS = @Html.Raw(Json.Serialize(ViewBag.DataCantidad));
         const dataCuposJS = @Html.Raw(Json.Serialize(ViewBag.DataCupos));
 
-        // Colores UISEK para los gráficos
-        const colors = ['#002d5b', '#004a99', '#3b82f6', '#60a5fa', '#93c5fd'];
+        // Colores UISEK Institucionales
+        const colors = ['#002D72', '#004B8D', '#0069AA', '#4D82CB', '#99BCE6'];
 
-        // --- CONFIGURACIÓN GRÁFICO PASTEL ---
+        // --- GRÁFICO DONA ---
         const ctxPie = document.getElementById('pieChart').getContext('2d');
         new Chart(ctxPie, {
-            type: 'doughnut', // Tipo 'Donut' es más moderno que 'Pie' simple
+            type: 'doughnut',
             data: {
                 labels: labelsJS,
                 datasets: [{
                     data: dataCantidadJS,
                     backgroundColor: colors,
-                    borderWidth: 0,
-                    hoverOffset: 10
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 15
                 }]
             },
             options: {
@@ -109,27 +153,29 @@
                         position: 'bottom',
                         labels: {
                             usePointStyle: true,
-                            padding: 20
-                        },
-                        // INTERACTIVIDAD: Chart.js permite por defecto ocultar datos al dar click en la leyenda
-                        onClick: null // Mantiene el comportamiento default de filtrar
+                            padding: 20,
+                            font: { size: 12 }
+                        }
                     }
+                },
+                layout: {
+                    padding: 20
                 }
             }
         });
 
-        // --- CONFIGURACIÓN GRÁFICO BARRAS (EXPECTATIVA) ---
+        // --- GRÁFICO BARRAS ---
         const ctxBar = document.getElementById('barChart').getContext('2d');
         new Chart(ctxBar, {
             type: 'bar',
             data: {
                 labels: labelsJS,
                 datasets: [{
-                    label: 'Cupos Totales (Expectativa)',
+                    label: 'Cupos Disponibles',
                     data: dataCuposJS,
-                    backgroundColor: '#002d5b',
-                    borderRadius: 5,
-                    barPercentage: 0.6
+                    backgroundColor: '#002D72',
+                    borderRadius: 6,
+                    barPercentage: 0.5
                 }]
             },
             options: {
@@ -138,14 +184,16 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: { display: true, color: '#f0f0f0' }
+                        grid: { display: true, color: '#f0f0f0', drawBorder: false },
+                        ticks: { font: { size: 11 } }
                     },
                     x: {
-                        grid: { display: false }
+                        grid: { display: false },
+                        ticks: { font: { size: 11 } }
                     }
                 },
                 plugins: {
-                    legend: { display: false } // Ocultamos leyenda en barras si es una sola serie
+                    legend: { display: false }
                 }
             }
         });

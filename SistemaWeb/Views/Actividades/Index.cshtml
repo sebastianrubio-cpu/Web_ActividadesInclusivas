@@ -5,193 +5,360 @@
 }
 
 <style>
-    body {
-        background-color: var(--bg-body);
-        background-image: url(/img/br.jpg); /* Asegúrate de que esta imagen exista */
-        background-repeat: no-repeat;
-        background-position: center center;
+    /* =========================================
+           1. FONDO Y ESTRUCTURA GENERAL
+           ========================================= */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/img/br.jpg');
         background-size: cover;
         background-attachment: fixed;
-        background-blend-mode: multiply;
- 
+        z-index: -1;
+        filter: blur(8px) brightness(0.85);
+        transform: scale(1.1);
     }
-    /* 1. Quitamos los iconos por defecto de DataTables */
-    table.dataTable thead .sorting,
-    table.dataTable thead .sorting_asc,
-    table.dataTable thead .sorting_desc {
-        
-        position: relative;
+
+    [data-theme="dark"]::before {
+        filter: blur(8px) brightness(0.3);
+    }
+
+    .main-container {
+        max-width: 70%;
+        margin: 40px auto;
+    }
+
+    /* =========================================
+           2. TÍTULO Y SUBTÍTULO (DISEÑO UISEK)
+           ========================================= */
+    .uisek-title {
+        color: #002D72; /* Azul UISEK */
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: 800;
+        text-shadow: 2px 2px 0px #ffffff, 0 0 20px rgba(255,255,255,0.8);
+    }
+
+    /* AQUÍ ESTÁ EL CAMBIO SOLICITADO */
+    .uisek-subtitle {
+        background-color: #ffffff; /* Fondo BLANCO SÓLIDO (No transparente) */
+        color: #002D72; /* Texto Azul para contraste perfecto */
+        font-weight: 600;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+        padding: 8px 30px;
+        border-radius: 50px;
+        display: inline-block;
+        border: 2px solid #FDB913; /* Borde Amarillo UISEK */
+        box-shadow: 0 6px 15px rgba(0, 45, 114, 0.15); /* Sombra elegante */
+    }
+
+    /* Modo Oscuro: Adaptamos para que no brille tanto */
+    [data-theme="dark"] .uisek-title {
+        color: #ffffff;
+        text-shadow: 0 0 10px #002D72;
+    }
+
+    [data-theme="dark"] .uisek-subtitle {
+        background-color: #1e1e1e;
+        color: #FDB913; /* Texto amarillo en fondo oscuro */
+        border-color: #FDB913;
+    }
+
+    /* =========================================
+           3. TARJETA DE LA TABLA
+           ========================================= */
+    .card-table {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        border: none;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    [data-theme="dark"] .card-table {
+        background: rgba(30, 30, 30, 0.95);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    /* =========================================
+           4. ESTILOS DE TABLA
+           ========================================= */
+    .table thead th {
+        background-color: #002D72; /* Azul UISEK */
+        color: white;
+        padding: 18px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        border: none;
         cursor: pointer;
-        padding-right: 20px !important;
     }
 
-    /* 2. Flechas personalizadas */
-    table.dataTable thead th::before,
-    table.dataTable thead th::after {
-        font-family: "Font Awesome 6 Free";
-        font-weight: 900;
-        position: absolute;
-        right: 10px;
-        font-size: 0.8rem;
-        transition: color 0.2s;
+    .table thead {
+        border-bottom: 4px solid #FDB913; /* Línea Amarilla */
     }
 
-    /* Flecha Arriba */
-    table.dataTable thead th::before {
-        content: "\f0d8";
-        top: 30%;
-        color: #ccc;
+    .table tbody td {
+        padding: 16px;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        color: #444;
+        font-size: 0.95rem;
     }
 
-    /* Flecha Abajo */
-    table.dataTable thead th::after {
-        content: "\f0d7";
-        top: 45%;
-        color: #ccc;
+    [data-theme="dark"] .table tbody td {
+        color: #e0e0e0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* Estados Activos */
-    table.dataTable thead th.sorting_asc::before {
-        color: black !important;
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 45, 114, 0.05) !important;
     }
 
-    table.dataTable thead th.sorting_desc::after {
-        color: black !important;
+    [data-theme="dark"] .table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05) !important;
     }
 
-    /* Hover */
-    table.dataTable thead th:hover::before,
-    table.dataTable thead th:hover::after {
-        color: #999;
+    /* =========================================
+           5. BARRA DE BÚSQUEDA Y BOTONES
+           ========================================= */
+    .search-container {
+        position: relative;
+        display: flex;
+        align-items: center;
     }
 
-    table.dataTable thead th.sorting_asc:hover::before {
-        color: black !important;
+    .search-input {
+        width: 0;
+        padding: 10px 0;
+        border: none;
+        outline: none;
+        background: transparent;
+        transition: all 0.4s ease;
+        font-size: 1rem;
+        color: #333;
+        border-bottom: 2px solid #002D72;
+        opacity: 0;
     }
 
-    table.dataTable thead th.sorting_desc:hover::after {
-        color: black !important;
+    [data-theme="dark"] .search-input {
+        color: #fff;
+        border-bottom-color: #FDB913;
     }
 
-    /* Ocultar flechas en la última columna (Si es Acciones) */
-    table.dataTable thead th:last-child::before,
-    table.dataTable thead th:last-child::after {
-        display: none !important;
-        content: none !important;
+    .search-icon {
+        width: 45px;
+        height: 45px;
+        background-color: white;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #002D72;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        cursor: pointer;
+        z-index: 2;
+        transition: all 0.3s;
     }
 
-    table.dataTable thead th:last-child {
-        padding-right: 8px !important;
+    [data-theme="dark"] .search-icon {
+        background-color: #444;
+        color: #FDB913;
+    }
+
+    .search-container:hover .search-input,
+    .search-input:focus {
+        width: 250px;
+        padding: 10px 15px;
+        opacity: 1;
+        margin-right: 10px;
+        background: rgba(255,255,255,0.8);
+        border-radius: 5px 5px 0 0;
+    }
+
+    /* Botones Mate */
+    .btn-nice {
+        border: none;
+        border-radius: 12px;
+        padding: 8px 16px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+        .btn-nice:hover {
+            transform: translateY(-2px);
+        }
+
+    .btn-excel {
+        background-color: #217346;
+        color: white;
+    }
+
+    .btn-voice {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn-system {
+        background-color: #fff;
+        color: #555;
+        border: 1px solid #ddd;
+    }
+
+        .btn-system:hover {
+            border-color: #002D72;
+            color: #002D72;
+        }
+
+    .btn-create {
+        background-color: #002D72;
+        color: white;
+    }
+
+        .btn-create:hover {
+            background-color: #001a4d;
+            color: #FDB913;
+            box-shadow: 0 6px 12px rgba(0, 45, 114, 0.4);
+        }
+
+    .dataTables_filter {
+        display: none;
     }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-4 mt-4">
-    <h2 class="fw-bold" style="color: var(--uisek-blue);">
-        <i class="fas fa-tasks me-2"></i>Listado de Actividades
-    </h2>
+<div class="main-container animate__animated animate__fadeIn">
 
-    <div class="d-flex gap-2">
+    <div class="text-center mb-5">
+        <h1 class="uisek-title display-4 mb-3">
+            <i class="fas fa-calendar-check me-2"></i>Actividades
+        </h1>
+
+        <div class="uisek-subtitle">
+            Gestión y control de eventos
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-center align-items-center mb-4 gap-3">
+
+        <div class="search-container">
+            <input type="text" id="customSearch" class="search-input" placeholder="Buscar actividad...">
+            <div class="search-icon" title="Buscar">
+                <i class="fas fa-search"></i>
+            </div>
+        </div>
 
         @if (User.IsInRole("Estudiante"))
         {
-            <a asp-controller="Estudiante" asp-action="ActualizarPerfil"
-               class="btn btn-outline-primary rounded-pill shadow-sm"
-               style="border-color: var(--uisek-blue); color: var(--uisek-blue);"
-               title="Actualizar mis datos personales">
-                <i class="fas fa-user-cog me-2"></i>Mis Datos
+            <a asp-controller="Estudiante" asp-action="ActualizarPerfil" class="btn-nice btn-system">
+                <i class="fas fa-user-cog"></i> Mis Datos
             </a>
         }
 
         @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
         {
-            <a asp-action="VerificarSistema" class="btn btn-light text-muted border shadow-sm rounded-pill" title="Verificar estado del servidor">
-                <i class="fas fa-server"></i> <span class="d-none d-md-inline">Sistema</span>
+            <a asp-action="VerificarSistema" class="btn-nice btn-system" title="Estado Servidor">
+                <i class="fas fa-server"></i>
             </a>
         }
 
-        <button onclick="exportarExcel()" class="btn btn-outline-success rounded-pill shadow-sm" title="Descargar reporte">
-            <i class="fas fa-file-excel me-2"></i>Exportar
+        <button onclick="exportarExcel()" class="btn-nice btn-excel" title="Excel">
+            <i class="fas fa-file-excel"></i> Excel
         </button>
 
-        <button onclick="leerTabla()" class="btn btn-outline-primary rounded-pill shadow-sm" style="border-color: var(--uisek-blue); color: var(--uisek-blue);" title="Leer contenido en voz alta">
-            <i class="fas fa-volume-up me-2"></i>Voz
+        <button onclick="leerTabla()" class="btn-nice btn-voice" title="Voz">
+            <i class="fas fa-volume-up"></i>
         </button>
 
         @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
         {
-            <a asp-action="Crear" class="btn btn-primary rounded-pill shadow-sm px-4" style="background-color: var(--uisek-blue); border-color: var(--uisek-blue);">
-                <i class="fas fa-plus me-2"></i>Nueva
+            <a asp-action="Crear" class="btn-nice btn-create px-4">
+                <i class="fas fa-plus"></i> Nueva
             </a>
         }
     </div>
-</div>
 
-<div class="card shadow-sm border-0">
-    <div class="card-body">
-        <div class="table-container animate__animated animate__fadeIn">
-            <table class="table table-hover table-elegant" id="tablaActividades">
-                <thead class="table-light">
-                    <tr>
-                        <th>Código</th>
-                        <th>Actividad</th>
-                        <th>Fecha</th>
-                        <th>Cupo</th>
-                        <th>Responsable</th>
-                        <th>Estado</th>
-
-                        @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
-                        {
-                            <th class="text-end">Acciones</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
+    <div class="card card-table">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 w-100" id="tablaActividades">
+                    <thead>
                         <tr>
-                            <td class="fw-bold text-muted">@item.Codigo</td>
-                            <td>
-                                <div class="fw-bold text-dark">@item.Nombre</div>
-                                <small class="text-muted">@item.TipoDiscapacidad</small>
-                            </td>
-                            <td>@item.FechaRealizacion.ToShortDateString()</td>
-
-                            <td>
-                                <span class="badge bg-light text-dark border">
-                                    <i class="fas fa-users me-1"></i>@item.Cupo
-                                </span>
-                            </td>
-                            <td>@item.Responsable</td>
-                            <td>
-                                @if (item.Estado == "Activo")
-                                {
-                                    <span class="badge bg-success rounded-pill">Activo</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary rounded-pill">@item.Estado</span>
-                                }
-                            </td>
-
+                            <th class="ps-4">Código</th>
+                            <th>Actividad</th>
+                            <th>Fecha</th>
+                            <th>Cupo</th>
+                            <th>Responsable</th>
+                            <th>Estado</th>
                             @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
                             {
-                                <td class="text-end">
-                                    <a asp-action="Editar" asp-route-id="@item.Codigo" class="btn btn-sm btn-outline-primary rounded-circle" title="Editar">
-                                        <i class="fas fa-pen"></i>
-                                    </a>
-
-                                    <form asp-action="Eliminar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar la actividad @item.Nombre?');">
-                                        <input type="hidden" name="id" value="@item.Codigo" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
+                                <th class="text-end pe-4">Acciones</th>
                             }
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold opacity-75">@item.Codigo</td>
+                                <td>
+                                    <div class="fw-bold">@item.Nombre</div>
+                                    <small class="opacity-75">@item.TipoDiscapacidad</small>
+                                </td>
+                                <td>@item.FechaRealizacion.ToShortDateString()</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        <i class="fas fa-users me-1"></i> @item.Cupo
+                                    </span>
+                                </td>
+                                <td>@item.Responsable</td>
+                                <td>
+                                    @if (item.Estado == "Activo")
+                                    {
+                                        <span class="badge bg-success bg-opacity-75 rounded-pill">Activo</span>
+                                    }
+                                    else if (item.Estado == "Lleno")
+                                    {
+                                        <span class="badge bg-warning text-dark rounded-pill">Lleno</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary rounded-pill">@item.Estado</span>
+                                    }
+                                </td>
+
+                                @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
+                                {
+                                    <td class="text-end pe-4">
+                                        <a asp-action="Editar" asp-route-id="@item.Codigo"
+                                           class="btn btn-sm btn-outline-primary rounded-circle border-0 me-1" title="Editar">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+
+                                        <form asp-action="Eliminar" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar @item.Nombre?');">
+                                            <input type="hidden" name="id" value="@item.Codigo" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle border-0" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -206,22 +373,25 @@
         $(document).ready(function() {
             var table = $('#tablaActividades').DataTable({
                 "pageLength": 10,
-                "lengthChange": true,
+                "lengthChange": false,
                 "ordering": true,
                 "order": [[ 2, "desc" ]],
                 "columnDefs": [
-                    // Solo si es Admin/Profe deshabilitamos orden en la columna 6 (Acciones)
                     @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
                     {
-                                <text>{ "orderable": false, "targets": 6 }</text>
+                            <text>{ "orderable": false, "targets": 6 }</text>
                     }
                 ],
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
                 },
-                "dom": "<'row mb-3'<'col-md-6'f><'col-md-6 text-end'>>" +
-                       "<'row'<'col-sm-12'tr>>" +
-                       "<'row mt-3'<'col-md-5'i><'col-md-7'p>>"
+                "dom": "<'row'<'col-sm-12'tr>>" +
+                       "<'row px-4 py-3'<'col-md-5 small opacity-50'i><'col-md-7'p>>"
+            });
+
+            // Buscador personalizado
+            $('#customSearch').on('keyup', function () {
+                table.search(this.value).draw();
             });
         });
 
@@ -235,21 +405,20 @@
             window.speechSynthesis.cancel();
             var mensaje = new SpeechSynthesisUtterance();
             mensaje.lang = 'es-LA';
-            mensaje.rate = 1;
 
             var visibleRows = document.querySelectorAll('#tablaActividades tbody tr');
-            var texto = "Iniciando lectura de actividades. ";
+            var texto = "Leyendo actividades. ";
 
-            if (visibleRows.length === 0) {
-                texto = "No hay actividades visibles.";
+            if (visibleRows.length === 0 || visibleRows[0].innerText.includes("Ningún dato")) {
+                texto = "No hay datos visibles.";
             } else {
                 var limite = Math.min(5, visibleRows.length);
                 for(var i=0; i < limite; i++) {
                     var celdas = visibleRows[i].getElementsByTagName('td');
                     if(celdas.length > 1) {
                         var nombre = celdas[1].innerText.replace(/(\r\n|\n|\r)/gm, " ");
-                        var responsable = celdas[4].innerText;
-                        texto += "Actividad: " + nombre + ", responsable: " + responsable + ". ";
+                        var fecha = celdas[2].innerText;
+                        texto += nombre + " el " + fecha + ". ";
                     }
                 }
             }
