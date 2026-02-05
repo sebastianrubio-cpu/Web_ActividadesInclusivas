@@ -1,10 +1,13 @@
 ﻿@model IEnumerable<SistemaWeb.Models.Usuario>
+
 @{
     ViewData["Title"] = "Gestión de Usuarios";
 }
 
 <style>
-    /* 1. CONFIGURACIÓN DEL FONDO (PSEUDO-ELEMENTO) */
+    /* =========================================
+           1. FONDO Y ESTRUCTURA GENERAL
+           ========================================= */
     body::before {
         content: "";
         position: fixed;
@@ -12,137 +15,306 @@
         left: 0;
         width: 100%;
         height: 100%;
-        z-index: -1; /* Detrás de todo */
-
         background-image: url('/img/br.jpg');
-        background-repeat: no-repeat;
-        background-position: center center;
         background-size: cover;
-        /* MODO CLARO (Por defecto) */
-        /* Brillo al 70% para que el texto negro se lea bien, Blur de 8px */
-        filter: blur(8px) brightness(0.7);
-        /* Escala para evitar bordes blancos por el blur */
+        background-attachment: fixed;
+        z-index: -1;
+        filter: blur(8px) brightness(0.85);
         transform: scale(1.1);
-        /* ANIMACIÓN SUAVE al cambiar de tema */
-        transition: filter 0.8s ease;
     }
 
-    /* 2. MODO OSCURO (Activado por el Layout) */
     [data-theme="dark"]::before {
-        /* MODO OSCURO: Bajamos el brillo al 30% */
         filter: blur(8px) brightness(0.3);
     }
 
-    /* 3. AJUSTES DE TEXTO PARA EL FONDO */
-    /* Título con sombra para leerse en cualquier modo */
-    .dashboard-title {
-        color: var(--uisek-blue); /* Usa el azul del layout */
-        text-shadow: 0 0 10px rgba(255,255,255,0.8); /* Resplandor blanco sutil */
+    .main-container {
+        max-width: 95%;
+        margin: 40px auto;
     }
 
-    [data-theme="dark"] .dashboard-title {
-        color: white; /* Blanco en modo oscuro */
-        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    }
-    /* Colores UISEK para esta vista */
-    .uisek-header {
-        background-color: #002D72 !important; /* Azul UISEK */
-        color: white;
+    /* =========================================
+           2. TÍTULO Y SUBTÍTULO (DISEÑO UISEK)
+           ========================================= */
+    .uisek-title {
+        color: #002D72; /* Azul UISEK */
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: 800;
+        text-shadow: 2px 2px 0px #ffffff, 0 0 20px rgba(255,255,255,0.8);
     }
 
-    .btn-uisek {
-        background-color: #002D72;
-        color: white;
+    .uisek-subtitle {
+        background-color: #ffffff; /* Fondo BLANCO SÓLIDO */
+        color: #002D72; /* Texto Azul */
+        font-weight: 600;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+        padding: 8px 30px;
+        border-radius: 50px;
+        display: inline-block;
+        border: 2px solid #FDB913; /* Borde Amarillo UISEK */
+        box-shadow: 0 6px 15px rgba(0, 45, 114, 0.15);
+    }
+
+    [data-theme="dark"] .uisek-title {
+        color: #ffffff;
+        text-shadow: 0 0 10px #002D72;
+    }
+
+    [data-theme="dark"] .uisek-subtitle {
+        background-color: #1e1e1e;
+        color: #FDB913;
+        border-color: #FDB913;
+    }
+
+    /* =========================================
+           3. TARJETA DE LA TABLA
+           ========================================= */
+    .card-table {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         border: none;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
     }
 
-        .btn-uisek:hover {
-            background-color: #0040a0;
-            color: white;
-        }
+    [data-theme="dark"] .card-table {
+        background: rgba(30, 30, 30, 0.95);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
 
-    /* Adaptación Modo Oscuro */
-    [data-theme="dark"] .table {
+    /* =========================================
+           4. ESTILOS DE TABLA
+           ========================================= */
+    .table thead th {
+        background-color: #002D72; /* Azul UISEK */
+        color: white;
+        padding: 18px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .table thead {
+        border-bottom: 4px solid #FDB913; /* Línea Amarilla */
+    }
+
+    .table tbody td {
+        padding: 16px;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        color: #444;
+        font-size: 0.95rem;
+    }
+
+    [data-theme="dark"] .table tbody td {
         color: #e0e0e0;
-        border-color: #333;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 45, 114, 0.05) !important;
     }
 
     [data-theme="dark"] .table-hover tbody tr:hover {
-        background-color: rgba(255,255,255,0.05);
+        background-color: rgba(255, 255, 255, 0.05) !important;
     }
 
-    [data-theme="dark"] .fw-bold.text-dark {
-        color: #fff !important; /* Corrige nombres negros en modo oscuro */
+    /* =========================================
+           5. BARRA DE BÚSQUEDA Y BOTONES
+           ========================================= */
+    .search-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-input {
+        width: 0;
+        padding: 10px 0;
+        border: none;
+        outline: none;
+        background: transparent;
+        transition: all 0.4s ease;
+        font-size: 1rem;
+        color: #333;
+        border-bottom: 2px solid #002D72;
+        opacity: 0;
+    }
+
+    [data-theme="dark"] .search-input {
+        color: #fff;
+        border-bottom-color: #FDB913;
+    }
+
+    .search-icon {
+        width: 45px;
+        height: 45px;
+        background-color: white;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #002D72;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        cursor: pointer;
+        z-index: 2;
+        transition: all 0.3s;
+    }
+
+    [data-theme="dark"] .search-icon {
+        background-color: #444;
+        color: #FDB913;
+    }
+
+    .search-container:hover .search-input,
+    .search-input:focus {
+        width: 250px;
+        padding: 10px 15px;
+        opacity: 1;
+        margin-right: 10px;
+        background: rgba(255,255,255,0.8);
+        border-radius: 5px 5px 0 0;
+    }
+
+    /* Botones Mate */
+    .btn-nice {
+        border: none;
+        border-radius: 12px;
+        padding: 8px 16px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+        .btn-nice:hover {
+            transform: translateY(-2px);
+        }
+
+    .btn-excel {
+        background-color: #217346;
+        color: white;
+    }
+
+    .btn-voice {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn-create {
+        background-color: #002D72;
+        color: white;
+    }
+
+        .btn-create:hover {
+            background-color: #001a4d;
+            color: #FDB913;
+            box-shadow: 0 6px 12px rgba(0, 45, 114, 0.4);
+        }
+
+    .dataTables_filter {
+        display: none;
     }
 </style>
 
-<div class="container-fluid px-4 mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0" style="color: var(--uisek-blue);">
-                <i class="fas fa-users-cog me-2"></i>Gestión de Usuarios
-            </h2>
-            <p class="text-muted small mb-0">Administración de docentes y estudiantes</p>
+<div class="main-container animate__animated animate__fadeIn">
+
+    <div class="text-center mb-5">
+        <h1 class="uisek-title display-4 mb-3">
+            <i class="fas fa-users-cog me-2"></i>Usuarios
+        </h1>
+
+        <div class="uisek-subtitle">
+            Administración de cuentas y roles
         </div>
-        <a asp-action="Crear" class="btn btn-uisek rounded-pill px-4 shadow-sm">
-            <i class="fas fa-plus me-2"></i>Nuevo Usuario
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-center align-items-center mb-4 gap-3">
+
+        <div class="search-container">
+            <input type="text" id="customSearch" class="search-input" placeholder="Buscar usuario...">
+            <div class="search-icon" title="Buscar">
+                <i class="fas fa-search"></i>
+            </div>
+        </div>
+
+        <button onclick="exportarExcel()" class="btn-nice btn-excel" title="Excel">
+            <i class="fas fa-file-excel"></i> Excel
+        </button>
+
+        <button onclick="leerTabla()" class="btn-nice btn-voice" title="Voz">
+            <i class="fas fa-volume-up"></i>
+        </button>
+
+        <a asp-action="Crear" class="btn-nice btn-create px-4">
+            <i class="fas fa-plus"></i> Nuevo Usuario
         </a>
     </div>
 
-    <div class="card shadow-sm border-0 animate__animated animate__fadeInUp">
+    <div class="card card-table">
         <div class="card-body p-0">
-            <table class="table table-hover mb-0 align-middle" id="tablaUsuarios">
-                <thead class="uisek-header">
-                    <tr>
-                        <th class="ps-4 py-3">Cédula</th>
-                        <th>Nombre</th>
-                        <th>Correo Institucional</th>
-                        <th>Rol</th>
-                        <th class="text-end pe-4">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 w-100" id="tablaUsuarios">
+                    <thead>
                         <tr>
-                            <td class="ps-4 fw-bold opacity-75">
-                                <i class="far fa-id-card me-2"></i>@item.IdUsuario
-                            </td>
-                            <td>
-                                <span class="fw-bold text-dark">@item.Nombre</span>
-                            </td>
-                            <td>@item.Correo</td>
-                            <td>
-                                @if (item.Rol == "Administrador")
-                                {
-                                    <span class="badge bg-danger rounded-pill">Admin</span>
-                                }
-                                else if (item.Rol == "Profesor")
-                                {
-                                    <span class="badge bg-info text-dark rounded-pill">Profesor</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-success rounded-pill">Estudiante</span>
-                                }
-                            </td>
-                            <td class="text-end pe-4">
-                                <a asp-action="Editar" asp-route-id="@item.IdUsuario"
-                                   class="btn btn-sm btn-outline-primary rounded-circle me-1" title="Editar">
-                                    <i class="fas fa-pen"></i>
-                                </a>
-
-                                <form asp-action="Eliminar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar a @item.Nombre?');">
-                                    <input type="hidden" name="id" value="@item.IdUsuario" />
-                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
-                            </td>
+                            <th class="ps-4">Cédula</th>
+                            <th>Nombre</th>
+                            <th>Correo Institucional</th>
+                            <th>Rol</th>
+                            <th class="text-end pe-4">Acciones</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold opacity-75">
+                                    <i class="far fa-id-card me-2"></i>@item.IdUsuario
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@item.Nombre</div>
+                                </td>
+                                <td>@item.Correo</td>
+                                <td>
+                                    @if (item.Rol == "Administrador")
+                                    {
+                                        <span class="badge bg-danger rounded-pill">Admin</span>
+                                    }
+                                    else if (item.Rol == "Profesor")
+                                    {
+                                        <span class="badge bg-info text-dark rounded-pill">Profesor</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success rounded-pill">Estudiante</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a asp-action="Editar" asp-route-id="@item.IdUsuario"
+                                       class="btn btn-sm btn-outline-primary rounded-circle border-0 me-1" title="Editar">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+
+                                    <form asp-action="Eliminar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar al usuario @item.Nombre?');">
+                                        <input type="hidden" name="id" value="@item.IdUsuario" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle border-0" title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -151,16 +323,59 @@
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <script>
         $(document).ready(function() {
-            $('#tablaUsuarios').DataTable({
-                "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
-                "dom": "<'row m-3'<'col-md-6'f><'col-md-6 text-end'>>" +
-                       "<'row'<'col-sm-12'tr>>" +
-                       "<'row m-3'<'col-md-5'i><'col-md-7'p>>",
-                "columnDefs": [{ "orderable": false, "targets": 4 }]
+            var table = $('#tablaUsuarios').DataTable({
+                "pageLength": 10,
+                "lengthChange": false,
+                "ordering": true,
+                "columnDefs": [
+                    { "orderable": false, "targets": 4 } // Desactivar orden en columna Acciones
+                ],
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+                },
+                "dom": "<'row'<'col-sm-12'tr>>" +
+                       "<'row px-4 py-3'<'col-md-5 small opacity-50'i><'col-md-7'p>>"
+            });
+
+            // Buscador personalizado
+            $('#customSearch').on('keyup', function () {
+                table.search(this.value).draw();
             });
         });
+
+        function exportarExcel() {
+            var tabla = document.getElementById("tablaUsuarios");
+            var wb = XLSX.utils.table_to_book(tabla, {sheet: "Usuarios"});
+            XLSX.writeFile(wb, 'Reporte_Usuarios.xlsx');
+        }
+
+        function leerTabla() {
+            window.speechSynthesis.cancel();
+            var mensaje = new SpeechSynthesisUtterance();
+            mensaje.lang = 'es-LA';
+
+            var visibleRows = document.querySelectorAll('#tablaUsuarios tbody tr');
+            var texto = "Leyendo lista de usuarios. ";
+
+            if (visibleRows.length === 0 || visibleRows[0].innerText.includes("Ningún dato")) {
+                texto = "No hay usuarios visibles.";
+            } else {
+                var limite = Math.min(5, visibleRows.length);
+                for(var i=0; i < limite; i++) {
+                    var celdas = visibleRows[i].getElementsByTagName('td');
+                    if(celdas.length > 1) {
+                        var nombre = celdas[1].innerText.replace(/(\r\n|\n|\r)/gm, " ");
+                        var rol = celdas[3].innerText;
+                        texto += "Usuario " + nombre + ", Rol " + rol + ". ";
+                    }
+                }
+            }
+            mensaje.text = texto;
+            window.speechSynthesis.speak(mensaje);
+        }
     </script>
 }
