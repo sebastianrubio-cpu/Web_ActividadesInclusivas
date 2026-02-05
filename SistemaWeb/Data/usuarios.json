@@ -1,0 +1,20 @@
+[
+  {
+    "IdUsuario": "1700000000",
+    "Correo": "admin@uisek.edu.ec",
+    "Clave": "12345",
+    "Nombre": "Admin",
+    "IdRol": 1,
+    "Rol": "Administrador",
+    "IdGenero": 1
+  },
+  {
+    "IdUsuario": "1799999999",
+    "Correo": "profe@uisek.edu.ec",
+    "Clave": "12345",
+    "Nombre": "Profesor",
+    "IdRol": 2,
+    "Rol": "Profesor",
+    "IdGenero": 2
+  }
+]

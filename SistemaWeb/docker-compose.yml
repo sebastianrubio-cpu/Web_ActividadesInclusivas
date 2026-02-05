@@ -1,0 +1,10 @@
+services:
+  sistemaweb:
+    build: .
+    container_name: sistemaweb_json
+    ports:
+      - "7199:8080"  # Mapeamos el puerto 8080 del contenedor al 7199 de tu PC
+    volumes:
+      - ./Data:/app/Data # Aquí ocurre la magia: Los JSON se guardan en tu PC en la carpeta "Data"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development

@@ -1,5 +1,4 @@
-
-using Microsoft.AspNetCore.Authentication.Cookies; // <--- IMPORTANTE
+using Microsoft.AspNetCore.Authentication.Cookies;
 using SistemaWeb.Models;
 using SistemaWeb.Services;
 
@@ -12,16 +11,20 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient<EstudiantesClient>();
 builder.Services.AddScoped<ActividadRepository>();
 builder.Services.AddScoped<ActividadService>();
-builder.Services.AddScoped<UsuarioRepository>(); // <--- NUEVO REPO
+builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddSingleton<ILogService, LogService>();
 builder.Services.AddScoped<CorreoService>();
 
 // 2. CONFIGURAR SEGURIDAD (COOKIES)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(option => {
-        option.LoginPath = "/Acceso/Login"; // Si no estás logueado, te manda aquí
+        option.LoginPath = "/Acceso/Login";
         option.ExpireTimeSpan = TimeSpan.FromMinutes(20);
     });
+
+// --- AGREGA ESTA LÍNEA PARA CORREGIR EL ERROR ---
+builder.Services.AddAuthorization();
+// -----------------------------------------------
 
 var app = builder.Build();
 
@@ -38,11 +41,11 @@ app.UseStaticFiles();
 app.UseRouting();
 
 // 3. ACTIVAR SEGURIDAD
-app.UseAuthentication(); // <--- IMPORTANTE: ¿Quién eres?
-app.UseAuthorization();  // <--- IMPORTANTE: ¿Qué puedes hacer?
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Acceso}/{action=Login}/{id?}"); // Cambiamos para que arranque en Login
+    pattern: "{controller=Acceso}/{action=Login}/{id?}");
 
 app.Run();

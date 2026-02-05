@@ -13,6 +13,7 @@ namespace SistemaWeb.Controllers
     {
         private readonly UsuarioRepository _usuarioRepo;
 
+        // Solo debe haber UN parámetro aquí, y debe estar registrado en Program.cs
         public AccesoController(UsuarioRepository usuarioRepo)
         {
             _usuarioRepo = usuarioRepo;

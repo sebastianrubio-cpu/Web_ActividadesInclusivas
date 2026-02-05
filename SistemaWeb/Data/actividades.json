@@ -1,0 +1,15 @@
+[
+  {
+    "Codigo": "A001",
+    "Nombre": "Taller de Inclusi\u00F3n #3",
+    "FechaRealizacion": "2026-03-07T15:17:00",
+    "IdResponsable": "1799999999",
+    "Responsable": null,
+    "GmailProfesor": null,
+    "Cupo": 10,
+    "Estado": "Activo",
+    "TipoDiscapacidad": "Motriz",
+    "Latitud": -0.09140617873589534,
+    "Longitud": -78.4840387474237
+  }
+]
