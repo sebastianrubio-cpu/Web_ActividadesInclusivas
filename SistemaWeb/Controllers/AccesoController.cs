@@ -6,16 +6,19 @@ using SistemaWeb.Models;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using SistemaWeb.Services; // Asegúrate de tener este using
 
 namespace SistemaWeb.Controllers
 {
     public class AccesoController : Controller
     {
         private readonly UsuarioRepository _usuarioRepo;
+        private readonly CorreoService _correoService;
 
-        public AccesoController(UsuarioRepository usuarioRepo)
+        public AccesoController(UsuarioRepository usuarioRepo, CorreoService correoService)
         {
             _usuarioRepo = usuarioRepo;
+            _correoService = correoService;
         }
 
         [HttpGet]
@@ -25,7 +28,6 @@ namespace SistemaWeb.Controllers
             {
                 return RedirectToAction(User.IsInRole("Estudiante") ? "VistaEstudiante" : "Index", "Actividades");
             }
-            ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
             return View();
         }
 
@@ -38,11 +40,9 @@ namespace SistemaWeb.Controllers
             {
                 var claims = new List<Claim>
                 {
-                    // CRÍTICO: Guardar ID Usuario para la Auditoría
                     new Claim("IdUsuario", usuario.IdUsuario),
                     new Claim(ClaimTypes.Name, usuario.Nombre),
                     new Claim("Correo", usuario.Correo),
-                    // Usamos usuario.Rol que viene lleno con el nombre ("Administrador", etc.)
                     new Claim(ClaimTypes.Role, usuario.Rol)
                 };
 
@@ -53,23 +53,22 @@ namespace SistemaWeb.Controllers
             }
 
             ViewData["Error"] = "Correo o contraseña incorrectos";
-            ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
+            // No activamos MostrarRegistro aquí porque el error fue en el Login
             return View();
         }
 
         [HttpPost]
         public IActionResult Registrar(Usuario usuario)
         {
-            // El rol se asigna en BD (IdRol = 3), limpiamos validación
+            // Limpiamos validaciones de rol porque se asigna por defecto
             ModelState.Remove("Rol");
             ModelState.Remove("IdRol");
 
             if (!EsClaveSegura(usuario.Clave))
             {
                 ViewData["ErrorRegistro"] = "La contraseña debe tener 8 caracteres, una mayúscula y un signo especial.";
-                ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
-                ViewData["MostrarRegistro"] = true;
-                return View("Login", usuario);
+                ViewData["MostrarRegistro"] = true; // <--- ESTO MANTIENE EL PANEL ABIERTO
+                return View("Login");
             }
 
             if (ModelState.IsValid)
@@ -78,7 +77,7 @@ namespace SistemaWeb.Controllers
                 if (resultado)
                 {
                     ViewData["Exito"] = "Cuenta creada correctamente. Inicie sesión.";
-                    ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
+                    // Aquí NO ponemos MostrarRegistro=true para que el usuario vea el panel de Login
                     return View("Login");
                 }
                 else
@@ -91,9 +90,71 @@ namespace SistemaWeb.Controllers
                 ViewData["ErrorRegistro"] = "Por favor complete todos los campos obligatorios.";
             }
 
-            ViewData["Generos"] = _usuarioRepo.ObtenerGeneros();
-            ViewData["MostrarRegistro"] = true;
+            ViewData["MostrarRegistro"] = true; // Si falló algo, mantenemos el panel de registro visible
             return View("Login", usuario);
+        }
+
+        [HttpPost]
+        public IActionResult RecuperarClave(string correoRecuperacion)
+        {
+            var usuario = _usuarioRepo.ObtenerUsuarioPorCorreo(correoRecuperacion);
+
+            // Validamos usuario y Rol (2=Profesor, 3=Estudiante)
+            if (usuario != null && (usuario.IdRol == 2 || usuario.IdRol == 3))
+            {
+                string asunto = "UISEK - Recuperación de Credenciales";
+
+                // Mensaje HTML Profesional
+                string mensaje = $@"
+                    <html>
+                    <head>
+                        <style>
+                            .container {{ font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; color: #333; }}
+                            .header {{ background-color: #002d5b; padding: 20px; text-align: center; color: white; }}
+                            .content {{ padding: 20px; background-color: #f9f9f9; border: 1px solid #ddd; }}
+                            .pass-box {{ background-color: #e3f2fd; padding: 15px; border-left: 5px solid #004a99; margin: 20px 0; font-family: monospace; font-size: 18px; }}
+                            .footer {{ font-size: 12px; color: #777; margin-top: 20px; text-align: center; border-top: 1px solid #eee; padding-top: 10px; }}
+                            .warning {{ color: #d32f2f; font-weight: bold; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='container'>
+                            <div class='header'>
+                                <h2>Recuperación de Contraseña</h2>
+                            </div>
+                            <div class='content'>
+                                <p>Estimado usuario,</p>
+                                <p>Usted ha solicitado su contraseña debido a la pérdida de la misma.</p>
+                                
+                                <p>A continuación se detallan sus credenciales actuales:</p>
+                                <div class='pass-box'>
+                                    {usuario.Clave}
+                                </div>
+                                
+                                <p class='warning'>Importante:</p>
+                                <p>Le recomendamos solicitar el cambio de esta contraseña en el departamento de Administración para garantizar la seguridad de su cuenta.</p>
+                            </div>
+                            <div class='footer'>
+                                <p>Si usted no realizó esta solicitud, por favor contáctese inmediatamente con administración vía 
+                                <a href='mailto:admin@uisek.edu.ec'>admin@uisek.edu.ec</a> o acérquese a nuestras oficinas.</p>
+                                <p>Universidad Internacional SEK</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>";
+
+                _correoService.EnviarCorreo(usuario.Correo, asunto, mensaje);
+
+                // Usamos la clave EXACTA que pusiste en la vista
+                TempData["ExitoRecuperacion"] = "Se han enviado las instrucciones a su correo.";
+            }
+            else
+            {
+                // Mensaje de error si no existe o no tiene permisos
+                TempData["ErrorRecuperacion"] = "No pudimos procesar su solicitud. Verifique el correo o contacte a soporte.";
+            }
+
+            return RedirectToAction("Login");
         }
 
         public async Task<IActionResult> Salir()

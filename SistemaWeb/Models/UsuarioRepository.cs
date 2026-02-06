@@ -117,11 +117,12 @@ namespace SistemaWeb.Models
             using (var conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
+                // 1. AGREGAMOS U.Clave AL SELECT
                 string sql = @"
-                    SELECT U.IdUsuario, U.Nombre, U.Correo, U.IdGenero, U.IdRol, R.NombreRol 
-                    FROM Usuarios U
-                    INNER JOIN Cat_Roles R ON U.IdRol = R.IdRol
-                    WHERE U.Correo = @Correo";
+            SELECT U.IdUsuario, U.Nombre, U.Correo, U.Clave, U.IdGenero, U.IdRol, R.NombreRol 
+            FROM Usuarios U
+            INNER JOIN Cat_Roles R ON U.IdRol = R.IdRol
+            WHERE U.Correo = @Correo";
 
                 using (var cmd = new SqlCommand(sql, conn))
                 {
@@ -137,6 +138,8 @@ namespace SistemaWeb.Models
                                 IdRol = Convert.ToInt32(reader["IdRol"]),
                                 Rol = reader["NombreRol"].ToString(),
                                 Correo = reader["Correo"].ToString(),
+                                // 2. MAPEA LA CLAVE
+                                Clave = reader["Clave"].ToString(),
                                 IdGenero = reader["IdGenero"] != DBNull.Value ? Convert.ToInt32(reader["IdGenero"]) : null
                             };
                         }
