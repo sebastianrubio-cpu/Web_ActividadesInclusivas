@@ -8,7 +8,7 @@ namespace SistemaWeb.Services
         // NOTA: Para que esto funcione con Gmail, debes usar una "Contraseña de Aplicación".
         // Ve a tu cuenta Google -> Seguridad -> Verificación en 2 pasos -> Contraseñas de aplicaciones.
         private readonly string _correoOrigen = "foxgamer205@gmail.com"; // <--- PON TU CORREO AQUÍ
-        private readonly string _claveOrigen = "niwt nkje jngx uuqs\r\n"; // <--- PON TU CLAVE DE APLICACIÓN AQUÍ
+        private readonly string _claveOrigen = "clave_aqui\r\n"; // <--- PON TU CLAVE DE APLICACIÓN AQUÍ
 
         public bool EnviarCorreo(string correoDestino, string asunto, string mensajeHtml)
         {
